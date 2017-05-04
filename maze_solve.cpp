@@ -55,7 +55,6 @@ int main() {
 
 	while (true) { //迷路解く
 	
-		//cout << y << "," << x<<endl;
 		
 
 		if (grid[y - 1][x] != '*' && flag[y - 1][x]) {
