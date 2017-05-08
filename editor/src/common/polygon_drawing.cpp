@@ -22,8 +22,6 @@ void PolygonDrawing::setVisibleCurrentVertex(bool flag) {
     current_line->setVisible(flag);
 }
 
-void PolygonDrawing::updateCurrentVertex(const QPointF &pos) {}
-
 void PolygonDrawing::move(const QPointF &pos) {
     if (!vertexes.isEmpty()) {
         auto start = vertexes.last().first->rect().center();

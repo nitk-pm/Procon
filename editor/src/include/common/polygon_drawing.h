@@ -15,7 +15,6 @@ public:
     ~PolygonDrawing();
 
     void setVisibleCurrentVertex(bool flag);
-    void updateCurrentVertex(const QPointF &pos);
     void move(const QPointF &pos);
     void push(const QPointF &pos);
     void pop();
