@@ -18,8 +18,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->action_redo, SIGNAL(triggered()), Command::stack, SLOT(redo()));
     connect(Command::stack, SIGNAL(canUndoChanged(bool)), ui->action_undo, SLOT(setEnabled(bool)));
     connect(Command::stack, SIGNAL(canRedoChanged(bool)), ui->action_redo, SLOT(setEnabled(bool)));
-    connect(ui->action_mode_moving, SIGNAL(triggered()), ui->view, SLOT(changeModeMoving()));
-    connect(ui->action_mode_edit_piece, SIGNAL(triggered()), ui->view, SLOT(changeModeEditPiece()));
 
     mode = new QActionGroup(this);
     mode->setExclusive(true);
@@ -36,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 MainWindow::~MainWindow() {
+    delete mode;
     delete ui;
 }
 

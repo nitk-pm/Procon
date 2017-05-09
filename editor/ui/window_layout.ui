@@ -427,6 +427,10 @@
    <class>SceneView</class>
    <extends>QGraphicsView</extends>
    <header>common/scene_view.h</header>
+   <slots>
+    <slot>changeModeMoving()</slot>
+    <slot>changeModeEditPiece()</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources>
@@ -446,6 +450,38 @@
     <hint type="destinationlabel">
      <x>599</x>
      <y>399</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_mode_moving</sender>
+   <signal>triggered()</signal>
+   <receiver>view</receiver>
+   <slot>changeModeMoving()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>601</x>
+     <y>439</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_mode_edit_piece</sender>
+   <signal>triggered()</signal>
+   <receiver>view</receiver>
+   <slot>changeModeEditPiece()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>601</x>
+     <y>439</y>
     </hint>
    </hints>
   </connection>

@@ -34,7 +34,7 @@ void Scene::createBackground(int width, int height) {
     background->setPos(image_size.left(), image_size.top());
     setSceneRect(scene_size);
     addItem(background);
-    
+
     drawing = new PolygonDrawing(background);
 }
 
@@ -45,6 +45,4 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     auto command = new AddVertexCommand(drawing, event->scenePos());
     Command::stack->push(command);
-    // drawing->push(event->scenePos());
-    qDebug() << drawing->get();
 }
