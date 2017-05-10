@@ -76,7 +76,7 @@ void Scene::deselectVertex(const QPointF &pos) {
         removeItem(line_list.back());
         line_list.pop_back();
     }
-    
+
     select_vertex_list.pop_back();
 }
 
@@ -92,7 +92,9 @@ void Scene::removeVertex(const QPointF &pos) {
         qWarning("not exist vertex");
         return;
     }
-    removeItem(vertex_map[convertPosToIndex(pos)]);
+    int index = convertPosToIndex(pos);
+    removeItem(vertex_map[index]);
+    vertex_map.remove(index);
 }
 
 void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
