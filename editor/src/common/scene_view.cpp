@@ -83,11 +83,11 @@ void SceneView::animFinished() {
 void SceneView::changeModeMoving() {
     qDebug() << "change mode moving";
     setMouseTracking(false);
-    static_cast<Scene*>(scene())->setVisibleCurrentVertex(false);
+    // static_cast<Scene*>(scene())->setVisibleCurrentLine(false);
 }
 
 void SceneView::changeModeEditPiece() {
     qDebug() << "change mode edit piece";
     setMouseTracking(true);
-    static_cast<Scene*>(scene())->setVisibleCurrentVertex(true);
+    // static_cast<Scene*>(scene())->setVisibleCurrentLine(true);
 }

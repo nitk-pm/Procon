@@ -1,5 +1,4 @@
 #include "common/scene.h"
-#include "common/polygon_drawing.h"
 #include "command/add_vertex_command.h"
 #include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QGraphicsPixmapItem>
@@ -10,10 +9,6 @@
 #include <QtGui/QTransform>
 
 Scene::Scene(QObject *parent) : QGraphicsScene(parent) {
-}
-
-void Scene::setVisibleCurrentVertex(bool flag) {
-    drawing->setVisibleCurrentVertex(flag);
 }
 
 void Scene::createBackground(int width, int height) {
@@ -34,15 +29,22 @@ void Scene::createBackground(int width, int height) {
     background->setPos(image_size.left(), image_size.top());
     setSceneRect(scene_size);
     addItem(background);
+}
 
-    drawing = new PolygonDrawing(background);
+QPointF Scene::modifyPos(const QPointF &pos) {
+    QPointF pf = background->mapFromScene(pos) / Scene::BASE_SIZE;
+    QPoint p = QPoint(pf.x(), pf.y()) * Scene::BASE_SIZE + QPoint(Scene::BASE_SIZE, Scene::BASE_SIZE) / 2;
+    return std::move(background->mapToScene(p));
 }
 
 void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-    drawing->move(event->scenePos());
 }
 
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-    auto command = new AddVertexCommand(drawing, event->scenePos());
-    Command::stack->push(command);
+    QPointF pos = modifyPos(event->scenePos());
+    auto item = itemAt(pos, QTransform());
+    if (item == background) {
+        auto command = new AddVertexCommand(this, pos);
+        Command::stack->push(command);
+    }
 }

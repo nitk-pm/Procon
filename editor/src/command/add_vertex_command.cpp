@@ -1,18 +1,19 @@
 #include "command/add_vertex_command.h"
-#include "common/polygon_drawing.h"
-#include <QtWidgets/QGraphicsItem>
-#include <QtWidgets/QGraphicsScene>
+#include "common/scene.h"
+#include <QtWidgets/QGraphicsEllipseItem>
 #include <QtCore/QDebug>
 
 
-AddVertexCommand::AddVertexCommand(PolygonDrawing *drawing, const QPointF &pos, QUndoCommand *parent) : Command(parent), drawing(drawing), pos(pos) {
+AddVertexCommand::AddVertexCommand(Scene *scene, const QPointF &pos, QUndoCommand *parent) : Command(parent), scene(scene), modified_pos(pos) {
 
 }
 
 void AddVertexCommand::undo() {
-    drawing->pop();
+    scene->removeItem(item);
 }
 
 void AddVertexCommand::redo() {
-    drawing->push(pos);
+    QRectF rect = QRectF(modified_pos - QPointF(Scene::RECT_SIZE, Scene::RECT_SIZE) / 2, QSizeF(Scene::RECT_SIZE, Scene::RECT_SIZE));
+    item = scene->addEllipse(rect, QPen(Qt::red));
+    item->setZValue(2);
 }

@@ -2,10 +2,9 @@
 #define SCENE_H
 
 #include <QtWidgets/QGraphicsScene>
+#include <QtCore/QVector>
 
 class QGraphicsSceneMouseEvent;
-class QGraphicsPixmapItem;
-class PolygonDrawing;
 
 class Scene : public QGraphicsScene {
     Q_OBJECT
@@ -17,16 +16,20 @@ public:
 
 public:
     explicit Scene(QObject *parent = 0);
-    void setVisibleCurrentVertex(bool flag);
     void createBackground(int width, int height);
+    QPointF modifyPos(const QPointF &pos);
+    void selectVertex(const QPointF &pos);
+    void deselectVertex(const QPointF &pos);
+    void addVertex(const QPointF &pos);
+    void removeVertex(const QPointF &pos);
 
 protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
 
 private:
-    PolygonDrawing *drawing;
     QGraphicsPixmapItem *background;
+    QVector<QGraphicsEllipseItem*> select_vertex_list;
 };
 
 #endif // SCENE_H

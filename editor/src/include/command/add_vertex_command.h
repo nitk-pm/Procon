@@ -4,17 +4,19 @@
 #include "command/command.h"
 #include <QtCore/QPointF>
 
-class PolygonDrawing;
+class Scene;
+class QGraphicsItem;
 
 class AddVertexCommand : public Command {
 public:
-    AddVertexCommand(PolygonDrawing *drawing, const QPointF &pos, QUndoCommand *parent = 0);
+    AddVertexCommand(Scene *scene, const QPointF &pos, QUndoCommand *parent = 0);
     virtual void undo();
     virtual void redo();
 
 private:
-    PolygonDrawing *drawing;
-    QPointF pos;
+    Scene *scene;
+    QGraphicsItem *item;
+    QPointF modified_pos;
 };
 
 #endif // ADD_VERTEX_COMMAND__H

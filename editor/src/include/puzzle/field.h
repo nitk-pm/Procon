@@ -9,7 +9,8 @@ class Field : public QObject {
 
 public:
     static const int NONE = 0;
-    static const int FRAME = 1;
+    static const int VERTEX = 1;
+    static const int SELECT_VERTEX = 2;
 
 public:
     Field(int width, int height, QObject *parent = 0);
