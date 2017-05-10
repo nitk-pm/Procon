@@ -1,5 +1,4 @@
 #include "common/scene.h"
-#include "command/add_vertex_command.h"
 #include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QGraphicsPixmapItem>
 #include <QtWidgets/QGraphicsSceneMouseEvent>
@@ -7,6 +6,9 @@
 #include <QtGui/QPixmap>
 #include <QtCore/QDebug>
 #include <QtGui/QTransform>
+
+#include "command/add_vertex_command.h"
+#include "command/select_vertex_command.h"
 
 Scene::Scene(QObject *parent) : QGraphicsScene(parent) {
 }
@@ -24,6 +26,8 @@ void Scene::createBackground(int width, int height) {
         }
     }
 
+    background_size = QSize(width, height);
+
     QPixmap pixmap = QPixmap::fromImage(image);
     background = new QGraphicsPixmapItem(pixmap);
     background->setPos(image_size.left(), image_size.top());
@@ -37,13 +41,73 @@ QPointF Scene::modifyPos(const QPointF &pos) {
     return std::move(background->mapToScene(p));
 }
 
+int Scene::convertPosToIndex(const QPointF &pos) {
+    return int(pos.x()) + int(pos.y()) * background_size.width();
+}
+
+void Scene::selectVertex(const QPointF &pos) {
+    if (!vertex_map.contains(convertPosToIndex(pos))) {
+        qWarning("not exist vertex");
+        return;
+    }
+    auto item = vertex_map[convertPosToIndex(pos)];
+    item->setPen(QPen(Qt::blue));
+    item->setData(0, QVariant(true));
+
+    if (!select_vertex_list.empty()) {
+        auto prev_vertex = select_vertex_list.back();
+        auto line = addLine(QLineF(item->rect().center(), prev_vertex->rect().center()));
+        line_list.append(line);
+    }
+
+    select_vertex_list.append(item);
+}
+
+void Scene::deselectVertex(const QPointF &pos) {
+    if (!vertex_map.contains(convertPosToIndex(pos))) {
+        qWarning("not exist vertex");
+        return;
+    }
+    auto item = vertex_map[convertPosToIndex(pos)];
+    item->setPen(QPen(Qt::red));
+    item->setData(0, QVariant(false));
+
+    if (!line_list.empty()) {
+        removeItem(line_list.back());
+        line_list.pop_back();
+    }
+    
+    select_vertex_list.pop_back();
+}
+
+void Scene::addVertex(const QPointF &pos) {
+    QRectF rect = QRectF(pos - QPointF(Scene::RECT_SIZE, Scene::RECT_SIZE) / 2, QSizeF(Scene::RECT_SIZE, Scene::RECT_SIZE));
+    auto item = addEllipse(rect, QPen(Qt::red));
+    item->setData(0, QVariant(false));
+    vertex_map.insert(convertPosToIndex(pos), item);
+}
+
+void Scene::removeVertex(const QPointF &pos) {
+    if (!vertex_map.contains(convertPosToIndex(pos))) {
+        qWarning("not exist vertex");
+        return;
+    }
+    removeItem(vertex_map[convertPosToIndex(pos)]);
+}
+
 void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
 }
 
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     QPointF pos = modifyPos(event->scenePos());
-    auto item = itemAt(pos, QTransform());
-    if (item == background) {
+    int index = convertPosToIndex(pos);
+    if (vertex_map.contains(index)) {
+        if (!vertex_map[index]->data(0).toBool()) {
+            auto command = new SelectVertexCommand(this, pos);
+            Command::stack->push(command);
+        }
+    }
+    else {
         auto command = new AddVertexCommand(this, pos);
         Command::stack->push(command);
     }

@@ -1,8 +1,9 @@
-#ifndef SCENE_H
-#define SCENE_H
+#ifndef SCENE__H
+#define SCENE__H
 
 #include <QtWidgets/QGraphicsScene>
 #include <QtCore/QVector>
+#include <QtCore/QMap>
 
 class QGraphicsSceneMouseEvent;
 
@@ -18,6 +19,7 @@ public:
     explicit Scene(QObject *parent = 0);
     void createBackground(int width, int height);
     QPointF modifyPos(const QPointF &pos);
+    int convertPosToIndex(const QPointF &pos);
     void selectVertex(const QPointF &pos);
     void deselectVertex(const QPointF &pos);
     void addVertex(const QPointF &pos);
@@ -28,8 +30,11 @@ protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
 
 private:
+    QSize background_size;
     QGraphicsPixmapItem *background;
+    QMap<int, QGraphicsEllipseItem*> vertex_map;
     QVector<QGraphicsEllipseItem*> select_vertex_list;
+    QVector<QGraphicsLineItem*> line_list;
 };
 
-#endif // SCENE_H
+#endif // SCENE__H

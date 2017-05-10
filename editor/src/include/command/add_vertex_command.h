@@ -5,7 +5,6 @@
 #include <QtCore/QPointF>
 
 class Scene;
-class QGraphicsItem;
 
 class AddVertexCommand : public Command {
 public:
@@ -15,8 +14,7 @@ public:
 
 private:
     Scene *scene;
-    QGraphicsItem *item;
-    QPointF modified_pos;
+    QPointF pos;
 };
 
 #endif // ADD_VERTEX_COMMAND__H
