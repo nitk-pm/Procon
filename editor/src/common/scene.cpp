@@ -65,13 +65,8 @@ void Scene::selectVertex(const QPointF &pos) {
     select_vertex_list.append(item);
 }
 
-void Scene::deselectVertex(const QPointF &pos) {
-    int index = convertPosToIndex(pos);
-    if (!vertex_map.contains(index)) {
-        qWarning("not exist vertex");
-        return;
-    }
-    auto item = vertex_map[index];
+void Scene::deselectVertex() {
+    auto item = select_vertex_list.back();
     item->setPen(QPen(Qt::red));
     item->setData(0, QVariant(false));
 
@@ -107,11 +102,11 @@ int Scene::createPolygon() {
         polygon.append(it->rect().center());
     }
 
-    auto polygon_item = addPolygon(polygon, QPen(Qt::black), QBrush(Qt::blue));
+    auto polygon_item = addPolygon(polygon, QPen(Qt::black), QBrush(Qt::gray));
     polygon_list.append(polygon_item);
 
     while (!select_vertex_list.empty()) {
-        deselectVertex(select_vertex_list.back()->rect().center());
+        deselectVertex();
     }
     return polygon_list.length() - 1;
 }

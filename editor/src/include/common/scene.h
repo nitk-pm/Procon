@@ -21,7 +21,7 @@ public:
     QPointF modifyPos(const QPointF &pos);
     int  convertPosToIndex(const QPointF &pos);
     void selectVertex(const QPointF &pos);
-    void deselectVertex(const QPointF &pos);
+    void deselectVertex();
     void addVertex(const QPointF &pos);
     void removeVertex(const QPointF &pos);
     int  createPolygon();
