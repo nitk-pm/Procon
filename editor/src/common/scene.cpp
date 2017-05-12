@@ -9,6 +9,7 @@
 
 #include "command/add_vertex_command.h"
 #include "command/select_vertex_command.h"
+#include "command/create_polygon_command.h"
 
 Scene::Scene(QObject *parent) : QGraphicsScene(parent) {
 }
@@ -46,11 +47,12 @@ int Scene::convertPosToIndex(const QPointF &pos) {
 }
 
 void Scene::selectVertex(const QPointF &pos) {
-    if (!vertex_map.contains(convertPosToIndex(pos))) {
+    int index = convertPosToIndex(pos);
+    if (!vertex_map.contains(index)) {
         qWarning("not exist vertex");
         return;
     }
-    auto item = vertex_map[convertPosToIndex(pos)];
+    auto item = vertex_map[index];
     item->setPen(QPen(Qt::blue));
     item->setData(0, QVariant(true));
 
@@ -64,11 +66,12 @@ void Scene::selectVertex(const QPointF &pos) {
 }
 
 void Scene::deselectVertex(const QPointF &pos) {
-    if (!vertex_map.contains(convertPosToIndex(pos))) {
+    int index = convertPosToIndex(pos);
+    if (!vertex_map.contains(index)) {
         qWarning("not exist vertex");
         return;
     }
-    auto item = vertex_map[convertPosToIndex(pos)];
+    auto item = vertex_map[index];
     item->setPen(QPen(Qt::red));
     item->setData(0, QVariant(false));
 
@@ -84,17 +87,43 @@ void Scene::addVertex(const QPointF &pos) {
     QRectF rect = QRectF(pos - QPointF(Scene::RECT_SIZE, Scene::RECT_SIZE) / 2, QSizeF(Scene::RECT_SIZE, Scene::RECT_SIZE));
     auto item = addEllipse(rect, QPen(Qt::red));
     item->setData(0, QVariant(false));
+    item->setZValue(1);
     vertex_map.insert(convertPosToIndex(pos), item);
 }
 
 void Scene::removeVertex(const QPointF &pos) {
-    if (!vertex_map.contains(convertPosToIndex(pos))) {
+    int index = convertPosToIndex(pos);
+    if (!vertex_map.contains(index)) {
         qWarning("not exist vertex");
         return;
     }
-    int index = convertPosToIndex(pos);
     removeItem(vertex_map[index]);
     vertex_map.remove(index);
+}
+
+int Scene::createPolygon() {
+    QPolygonF polygon;
+    for (auto it : select_vertex_list) {
+        polygon.append(it->rect().center());
+    }
+
+    auto polygon_item = addPolygon(polygon, QPen(Qt::black), QBrush(Qt::blue));
+    polygon_list.append(polygon_item);
+
+    while (!select_vertex_list.empty()) {
+        deselectVertex(select_vertex_list.back()->rect().center());
+    }
+    return polygon_list.length() - 1;
+}
+
+void Scene::destroyPolygon(int index) {
+    auto polygon_item = polygon_list[index];
+    auto polygon = polygon_item->polygon();
+
+    removeItem(polygon_item);
+    for (auto it : polygon) {
+        selectVertex(it);
+    }
 }
 
 void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
@@ -106,6 +135,10 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     if (vertex_map.contains(index)) {
         if (!vertex_map[index]->data(0).toBool()) {
             auto command = new SelectVertexCommand(this, pos);
+            Command::stack->push(command);
+        }
+        else if (select_vertex_list.front()->rect().center() == pos) {
+            auto command = new CreatePolygonCommand(this);
             Command::stack->push(command);
         }
     }

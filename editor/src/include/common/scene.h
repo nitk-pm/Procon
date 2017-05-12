@@ -19,11 +19,13 @@ public:
     explicit Scene(QObject *parent = 0);
     void createBackground(int width, int height);
     QPointF modifyPos(const QPointF &pos);
-    int convertPosToIndex(const QPointF &pos);
+    int  convertPosToIndex(const QPointF &pos);
     void selectVertex(const QPointF &pos);
     void deselectVertex(const QPointF &pos);
     void addVertex(const QPointF &pos);
     void removeVertex(const QPointF &pos);
+    int  createPolygon();
+    void destroyPolygon(int index);
 
 protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
@@ -35,6 +37,7 @@ private:
     QMap<int, QGraphicsEllipseItem*> vertex_map;
     QVector<QGraphicsEllipseItem*> select_vertex_list;
     QVector<QGraphicsLineItem*> line_list;
+    QVector<QGraphicsPolygonItem*> polygon_list;
 };
 
 #endif // SCENE__H
