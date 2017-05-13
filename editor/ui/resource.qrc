@@ -1,0 +1,18 @@
+<RCC>
+  <qresource prefix="action_icon">
+    <file>action_icon/create_polygon.png</file>
+    <file>action_icon/add_vertex.png</file>
+    <file>action_icon/cut.png</file>
+    <file>action_icon/paste.png</file>
+    <file>action_icon/copy.png</file>
+    <file>action_icon/delete.png</file>
+    <file>action_icon/redo.png</file>
+    <file>action_icon/undo.png</file>
+    <file>action_icon/mode_edit_frame.png</file>
+    <file>action_icon/mode_edit_piece.png</file>
+    <file>action_icon/mode_moving.png</file>
+    <file>action_icon/new_file.png</file>
+    <file>action_icon/open_file.png</file>
+    <file>action_icon/save_file.png</file>
+  </qresource>
+</RCC>
