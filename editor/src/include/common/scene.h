@@ -20,12 +20,16 @@ public:
     void createBackground(int width, int height);
     QPointF modifyPos(const QPointF &pos);
     int  convertPosToIndex(const QPointF &pos);
-    void selectVertex(const QPointF &pos);
-    void deselectVertex();
     void addVertex(const QPointF &pos);
     void removeVertex(const QPointF &pos);
+    void pushSelectVertex(const QPointF &pos);
+    void popSelectVertex();
     int  createPolygon();
     void destroyPolygon(int index);
+
+    const QVector<QPointF>& selectVartexes() const;
+    QGraphicsPolygonItem* polygonItem(int id) const;
+
 
 protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
@@ -35,9 +39,9 @@ private:
     QSize background_size;
     QGraphicsPixmapItem *background;
     QMap<int, QGraphicsEllipseItem*> vertex_map;
-    QVector<QGraphicsEllipseItem*> select_vertex_list;
-    QVector<QGraphicsLineItem*> line_list;
-    QVector<QGraphicsPolygonItem*> polygon_list;
+    QVector<QPointF> select_vertexes;
+    QVector<QGraphicsLineItem*> edge_list;
+    QMap<int, QGraphicsPolygonItem*> polygon_list;
 };
 
 #endif // SCENE__H

@@ -5,7 +5,7 @@
 #include <QtGui/QImage>
 #include <QtGui/QPixmap>
 #include <QtCore/QDebug>
-#include <QtGui/QTransform>
+#include <QtCore/QtGlobal>
 
 #include "command/add_vertex_command.h"
 #include "command/select_vertex_command.h"
@@ -46,79 +46,99 @@ int Scene::convertPosToIndex(const QPointF &pos) {
     return int(pos.x()) + int(pos.y()) * background_size.width();
 }
 
-void Scene::selectVertex(const QPointF &pos) {
+void Scene::addVertex(const QPointF &pos) {
     int index = convertPosToIndex(pos);
-    if (!vertex_map.contains(index)) {
-        qWarning("not exist vertex");
+    if (vertex_map.contains(index)) {
+        qWarning("already exists vertex");
         return;
     }
-    auto item = vertex_map[index];
-    item->setPen(QPen(Qt::blue));
-    item->setData(0, QVariant(true));
-
-    if (!select_vertex_list.empty()) {
-        auto prev_vertex = select_vertex_list.back();
-        auto line = addLine(QLineF(item->rect().center(), prev_vertex->rect().center()));
-        line_list.append(line);
-    }
-
-    select_vertex_list.append(item);
-}
-
-void Scene::deselectVertex() {
-    auto item = select_vertex_list.back();
-    item->setPen(QPen(Qt::red));
-    item->setData(0, QVariant(false));
-
-    if (!line_list.empty()) {
-        removeItem(line_list.back());
-        line_list.pop_back();
-    }
-
-    select_vertex_list.pop_back();
-}
-
-void Scene::addVertex(const QPointF &pos) {
     QRectF rect = QRectF(pos - QPointF(Scene::RECT_SIZE, Scene::RECT_SIZE) / 2, QSizeF(Scene::RECT_SIZE, Scene::RECT_SIZE));
     auto item = addEllipse(rect, QPen(Qt::red));
     item->setData(0, QVariant(false));
     item->setZValue(1);
-    vertex_map.insert(convertPosToIndex(pos), item);
+    vertex_map.insert(index, item);
 }
 
 void Scene::removeVertex(const QPointF &pos) {
     int index = convertPosToIndex(pos);
     if (!vertex_map.contains(index)) {
-        qWarning("not exist vertex");
+        qWarning("not exists vertex");
         return;
     }
     removeItem(vertex_map[index]);
     vertex_map.remove(index);
 }
 
-int Scene::createPolygon() {
-    QPolygonF polygon;
-    for (auto it : select_vertex_list) {
-        polygon.append(it->rect().center());
+void Scene::pushSelectVertex(const QPointF &pos) {
+    int index = convertPosToIndex(pos);
+    if (!vertex_map.contains(index)) {
+        qWarning("not exists vertex");
+        return;
+    }
+    auto item = vertex_map[index];
+    item->setPen(QPen(Qt::blue));
+    item->setData(0, QVariant(true));
+
+    if (!select_vertexes.empty()) {
+        auto edge = addLine(QLineF(pos, select_vertexes.back()));
+        edge_list.append(edge);
     }
 
-    auto polygon_item = addPolygon(polygon, QPen(Qt::black), QBrush(Qt::gray));
-    polygon_list.append(polygon_item);
-
-    while (!select_vertex_list.empty()) {
-        deselectVertex();
-    }
-    return polygon_list.length() - 1;
+    select_vertexes.append(pos);
 }
 
-void Scene::destroyPolygon(int index) {
-    auto polygon_item = polygon_list[index];
-    auto polygon = polygon_item->polygon();
-
-    removeItem(polygon_item);
-    for (auto it : polygon) {
-        selectVertex(it);
+void Scene::popSelectVertex() {
+    if (select_vertexes.empty()) {
+        qWarning("has not select any vertex");
+        return;
     }
+    auto item = vertex_map[convertPosToIndex(select_vertexes.back())];
+    item->setPen(QPen(Qt::red));
+    item->setData(0, QVariant(false));
+
+    if (!edge_list.empty()) {
+        removeItem(edge_list.back());
+        edge_list.pop_back();
+    }
+
+    select_vertexes.pop_back();
+}
+
+int Scene::createPolygon() {
+    QPolygonF polygon;
+    for (auto pos : select_vertexes) {
+        polygon.append(pos);
+    }
+
+    int id = qrand();
+    auto polygon_item = addPolygon(polygon, QPen(Qt::black), QBrush(Qt::gray));
+    polygon_list.insert(id, polygon_item);
+
+    while (!select_vertexes.empty()) {
+        popSelectVertex();
+    }
+    return id;
+}
+
+void Scene::destroyPolygon(int id) {
+    if (!polygon_list.contains(id)) {
+        qWarning("not exists polygon");
+        return;
+    }
+    removeItem(polygon_list.value(id));
+    polygon_list.remove(id);
+}
+
+const QVector<QPointF>& Scene::selectVartexes() const {
+    return select_vertexes;
+}
+
+QGraphicsPolygonItem* Scene::polygonItem(int id) const {
+    if (!polygon_list.contains(id)) {
+        qWarning("not exists polygon");
+        return nullptr;
+    }
+    return polygon_list.value(id);
 }
 
 void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
@@ -129,16 +149,13 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     int index = convertPosToIndex(pos);
     if (vertex_map.contains(index)) {
         if (!vertex_map[index]->data(0).toBool()) {
-            auto command = new SelectVertexCommand(this, pos);
-            Command::stack->push(command);
+            Command::stack->push(new SelectVertexCommand(this, pos));
         }
-        else if (select_vertex_list.front()->rect().center() == pos) {
-            auto command = new CreatePolygonCommand(this);
-            Command::stack->push(command);
+        else if (select_vertexes.front() == pos) {
+            Command::stack->push(new CreatePolygonCommand(this));
         }
     }
     else {
-        auto command = new AddVertexCommand(this, pos);
-        Command::stack->push(command);
+        Command::stack->push(new AddVertexCommand(this, pos));
     }
 }

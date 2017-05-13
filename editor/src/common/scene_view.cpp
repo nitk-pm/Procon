@@ -1,12 +1,16 @@
 #include "common/scene_view.h"
 #include "common/scene.h"
+#include <QtWidgets/QScrollBar>
 #include <QtGui/QWheelEvent>
 #include <QtGui/QMouseEvent>
+#include <QtGui/QKeyEvent>
 #include <QtCore/QTimeLine>
 #include <QtCore/QTimer>
 #include <QtCore/QDebug>
 
 SceneView::SceneView(QWidget *parent) : QGraphicsView(parent), scheduled_scalings(0), translate_scalings(1.0) {
+    QTimer::singleShot(0, [&]() {
+    });
 }
 
 SceneView::~SceneView() {
@@ -48,18 +52,36 @@ void SceneView::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void SceneView::wheelEvent(QWheelEvent *event) {
-    int degrees = event->delta() / 8;
-    int steps = degrees / 15;
-    scheduled_scalings += steps;
-    if (scheduled_scalings * steps < 0) {
-        scheduled_scalings = steps;
-    }
 
-    QTimeLine *anim = new QTimeLine(350, this);
-    anim->setUpdateInterval(20);
-    connect(anim, SIGNAL (valueChanged(qreal)), SLOT (scalingTime(qreal)));
-    connect(anim, SIGNAL (finished()), SLOT (animFinished()));
-    anim->start();
+    if (event->modifiers() & Qt::ControlModifier) {
+        int degrees = event->delta() / 8;
+        int steps = degrees / 15;
+        scheduled_scalings += steps;
+        if (scheduled_scalings * steps < 0) {
+            scheduled_scalings = steps;
+        }
+
+        QTimeLine *anim = new QTimeLine(350, this);
+        anim->setUpdateInterval(20);
+        connect(anim, SIGNAL (valueChanged(qreal)), SLOT (scalingTime(qreal)));
+        connect(anim, SIGNAL (finished()), SLOT (animFinished()));
+        anim->start();
+    }
+    else if (event->modifiers() & Qt::ShiftModifier) {
+        horizontalScrollBar()->setValue(horizontalScrollBar()->value() - event->delta());
+    }
+    else QGraphicsView::wheelEvent(event);
+}
+
+void SceneView::keyPressEvent(QKeyEvent *event) {
+    key_press_value = event->key();
+
+    QGraphicsView::keyPressEvent(event);
+}
+void SceneView::keyReleaseEvent(QKeyEvent *event) {
+    key_press_value = -1;
+
+    QGraphicsView::keyReleaseEvent(event);
 }
 
 void SceneView::scalingTime(qreal x) {
