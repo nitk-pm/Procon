@@ -19,12 +19,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(Command::stack, SIGNAL(canUndoChanged(bool)), ui->action_undo, SLOT(setEnabled(bool)));
     connect(Command::stack, SIGNAL(canRedoChanged(bool)), ui->action_redo, SLOT(setEnabled(bool)));
 
-    mode = new QActionGroup(this);
-    mode->setExclusive(true);
-    mode->addAction(ui->action_mode_edit_piece);
-    mode->addAction(ui->action_mode_edit_frame);
-    mode->addAction(ui->action_mode_moving);
-
     QTimer::singleShot(0, [&]() {
         QSettings settings("setting.ini", QSettings::IniFormat);
         settings.setIniCodec("UTF-8");
@@ -34,7 +28,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 MainWindow::~MainWindow() {
-    delete mode;
     delete ui;
 }
 

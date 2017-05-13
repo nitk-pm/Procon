@@ -141,9 +141,6 @@ QGraphicsPolygonItem* Scene::polygonItem(int id) const {
     return polygon_list.value(id);
 }
 
-void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-}
-
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     QPointF pos = modifyPos(event->scenePos());
     int index = convertPosToIndex(pos);

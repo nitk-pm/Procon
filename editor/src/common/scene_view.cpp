@@ -3,14 +3,12 @@
 #include <QtWidgets/QScrollBar>
 #include <QtGui/QWheelEvent>
 #include <QtGui/QMouseEvent>
-#include <QtGui/QKeyEvent>
 #include <QtCore/QTimeLine>
 #include <QtCore/QTimer>
 #include <QtCore/QDebug>
 
-SceneView::SceneView(QWidget *parent) : QGraphicsView(parent), scheduled_scalings(0), translate_scalings(1.0) {
-    QTimer::singleShot(0, [&]() {
-    });
+SceneView::SceneView(QWidget *parent) : QGraphicsView(parent) {
+    scheduled_scalings = 0;
 }
 
 SceneView::~SceneView() {
@@ -24,31 +22,6 @@ void SceneView::setScene(Scene *scene) {
         qreal y = this->geometry().height() - this->scene()->height();
         this->translate(x / 2, y / 2);
     });
-    scene->installEventFilter(this);
-}
-
-bool SceneView::eventFilter(QObject *watched, QEvent *event) {
-    if (watched == scene()) {
-        if (event->type() == QEvent::GraphicsSceneMouseMove || event->type() == QEvent::GraphicsSceneMousePress) {
-            return !hasMouseTracking();
-        }
-    }
-    return QGraphicsView::eventFilter(watched, event);
-}
-
-void SceneView::mousePressEvent(QMouseEvent *event) {
-    old_mouse_pos = event->pos();
-    QGraphicsView::mousePressEvent(event);
-}
-
-void SceneView::mouseMoveEvent(QMouseEvent *event) {
-    QPointF new_mouse_pos = event->pos();
-    QPointF delta = new_mouse_pos - old_mouse_pos;
-    old_mouse_pos = new_mouse_pos;
-    if (!hasMouseTracking()) {
-        translate(delta.x() / translate_scalings, delta.y() / translate_scalings);
-    }
-    QGraphicsView::mouseMoveEvent(event);
 }
 
 void SceneView::wheelEvent(QWheelEvent *event) {
@@ -73,20 +46,8 @@ void SceneView::wheelEvent(QWheelEvent *event) {
     else QGraphicsView::wheelEvent(event);
 }
 
-void SceneView::keyPressEvent(QKeyEvent *event) {
-    key_press_value = event->key();
-
-    QGraphicsView::keyPressEvent(event);
-}
-void SceneView::keyReleaseEvent(QKeyEvent *event) {
-    key_press_value = -1;
-
-    QGraphicsView::keyReleaseEvent(event);
-}
-
 void SceneView::scalingTime(qreal x) {
     const qreal factor = 1.0 + qreal(scheduled_scalings) / 300.0;
-    translate_scalings *= 1.0 + qreal(scheduled_scalings) / 300.0;
     QPointF old_pos = mapToScene(geometry().center());
 
     scale(factor, factor);
@@ -100,16 +61,4 @@ void SceneView::animFinished() {
     if (scheduled_scalings > 0) scheduled_scalings--;
     else scheduled_scalings++;
     sender()->~QObject();
-}
-
-void SceneView::changeModeMoving() {
-    qDebug() << "change mode moving";
-    setMouseTracking(false);
-    // static_cast<Scene*>(scene())->setVisibleCurrentLine(false);
-}
-
-void SceneView::changeModeEditPiece() {
-    qDebug() << "change mode edit piece";
-    setMouseTracking(true);
-    // static_cast<Scene*>(scene())->setVisibleCurrentLine(true);
 }

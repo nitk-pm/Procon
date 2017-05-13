@@ -57,7 +57,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>24</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -84,9 +84,6 @@
     <addaction name="action_paste"/>
     <addaction name="action_delete"/>
     <addaction name="separator"/>
-    <addaction name="action_mode_moving"/>
-    <addaction name="action_mode_edit_piece"/>
-    <addaction name="action_mode_edit_frame"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -171,7 +168,7 @@
   </widget>
   <widget class="QToolBar" name="toolBar_4">
    <property name="windowTitle">
-    <string>toolBar_4</string>
+    <string>toolBar_5</string>
    </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextUnderIcon</enum>
@@ -182,9 +179,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_mode_moving"/>
-   <addaction name="action_mode_edit_piece"/>
-   <addaction name="action_mode_edit_frame"/>
+   <addaction name="action_add_vertex"/>
+   <addaction name="action_create_polygon"/>
   </widget>
   <action name="action_end_application">
    <property name="text">
@@ -421,6 +417,24 @@
     <string>Ctrl+X</string>
    </property>
   </action>
+  <action name="action_add_vertex">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/action_icon/action_icon/add_vertex.png</normaloff>:/action_icon/action_icon/add_vertex.png</iconset>
+   </property>
+   <property name="text">
+    <string>頂点をプロット</string>
+   </property>
+  </action>
+  <action name="action_create_polygon">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/action_icon/action_icon/create_polygon.png</normaloff>:/action_icon/action_icon/create_polygon.png</iconset>
+   </property>
+   <property name="text">
+    <string>ポリゴン作成</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -450,38 +464,6 @@
     <hint type="destinationlabel">
      <x>599</x>
      <y>399</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>action_mode_moving</sender>
-   <signal>triggered()</signal>
-   <receiver>view</receiver>
-   <slot>changeModeMoving()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>601</x>
-     <y>439</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>action_mode_edit_piece</sender>
-   <signal>triggered()</signal>
-   <receiver>view</receiver>
-   <slot>changeModeEditPiece()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>601</x>
-     <y>439</y>
     </hint>
    </hints>
   </connection>

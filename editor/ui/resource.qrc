@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="action_icon">
+    <file>action_icon/create_polygon.png</file>
+    <file>action_icon/add_vertex.png</file>
     <file>action_icon/cut.png</file>
     <file>action_icon/paste.png</file>
     <file>action_icon/copy.png</file>
