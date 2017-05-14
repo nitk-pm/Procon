@@ -19,6 +19,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(Command::stack, SIGNAL(canUndoChanged(bool)), ui->action_undo, SLOT(setEnabled(bool)));
     connect(Command::stack, SIGNAL(canRedoChanged(bool)), ui->action_redo, SLOT(setEnabled(bool)));
 
+    operation = new QActionGroup(this);
+    operation->setExclusive(true);
+    operation->addAction(ui->action_select);
+    operation->addAction(ui->action_add_vertex);
+    operation->addAction(ui->action_create_polygon);
+
+
     QTimer::singleShot(0, [&]() {
         QSettings settings("setting.ini", QSettings::IniFormat);
         settings.setIniCodec("UTF-8");
