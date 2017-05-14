@@ -6,6 +6,7 @@
 #include <QtCore/QMap>
 
 class QGraphicsSceneMouseEvent;
+class QAction;
 
 class Scene : public QGraphicsScene {
     Q_OBJECT
@@ -28,18 +29,22 @@ public:
     void    destroyPolygon(int index);
 
     const QVector<QPointF>& selectVartexes() const;
-    QGraphicsPolygonItem*   polygonItem(int id) const;
+    QGraphicsPolygonItem  * polygonItem(int id) const;
 
+public slots:
+    void changeMode(QAction *action);
 
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
 
 private:
-    QSize background_size;
-    QGraphicsPixmapItem* background;
+    QSize                            background_size;
+    QGraphicsPixmapItem             *background;
     QMap<int, QGraphicsEllipseItem*> vertex_map;
-    QVector<QPointF> select_vertexes;
-    QVector<QGraphicsLineItem*> edge_list;
+    QObject                         *current_mode;
+
+    QVector<QPointF>                 select_vertexes;
+    QVector<QGraphicsLineItem*>      edge_list;
     QMap<int, QGraphicsPolygonItem*> polygon_list;
 };
 

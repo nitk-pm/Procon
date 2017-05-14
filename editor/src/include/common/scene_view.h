@@ -15,6 +15,9 @@ public:
     ~SceneView();
     virtual void setScene(Scene *scene);
 
+private:
+    void zoom(int delta);
+
 protected:
     virtual void wheelEvent(QWheelEvent *event);
 

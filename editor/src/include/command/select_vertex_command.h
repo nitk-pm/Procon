@@ -13,7 +13,7 @@ public:
     virtual void redo();
 
 private:
-    Scene *scene;
+    Scene  *scene;
     QPointF pos;
 };
 

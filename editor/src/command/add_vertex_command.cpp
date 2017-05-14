@@ -2,8 +2,9 @@
 #include "common/scene.h"
 
 
-AddVertexCommand::AddVertexCommand(Scene *scene, const QPointF &pos, QUndoCommand *parent) : Command(parent), scene(scene), pos(pos) {
-
+AddVertexCommand::AddVertexCommand(Scene *scene, const QPointF &pos, QUndoCommand *parent) : Command(parent) {
+    this->scene = scene;
+    this->pos   = pos;
 }
 
 void AddVertexCommand::undo() {

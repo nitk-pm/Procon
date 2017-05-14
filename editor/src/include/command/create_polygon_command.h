@@ -15,7 +15,7 @@ public:
 
 private:
     Scene *scene;
-    int id;
+    int    id;
 };
 
 #endif // CREATE_POLYGON_COMMAND__H

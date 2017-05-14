@@ -22,7 +22,7 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-    QActionGroup *operation;
+    QActionGroup   *operation;
 };
 
 #endif // MAINWINDOW_H

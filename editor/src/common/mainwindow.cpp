@@ -2,6 +2,7 @@
 #include "ui_window_layout.h"
 #include "common/scene.h"
 #include "command/command.h"
+
 #include <QtCore/QSettings>
 #include <QtGui/QCloseEvent>
 #include <QtCore/QTimer>
@@ -24,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     operation->addAction(ui->action_select);
     operation->addAction(ui->action_add_vertex);
     operation->addAction(ui->action_create_polygon);
-
+    connect(operation, SIGNAL(triggered(QAction*)), scene, SLOT(changeMode(QAction*)));
 
     QTimer::singleShot(0, [&]() {
         QSettings settings("setting.ini", QSettings::IniFormat);
@@ -35,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 MainWindow::~MainWindow() {
+    delete operation;
     delete ui;
 }
 

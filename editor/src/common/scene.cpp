@@ -2,6 +2,7 @@
 #include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QGraphicsPixmapItem>
 #include <QtWidgets/QGraphicsSceneMouseEvent>
+#include <QtWidgets/QAction>
 #include <QtGui/QImage>
 #include <QtGui/QPixmap>
 #include <QtCore/QDebug>
@@ -139,6 +140,12 @@ QGraphicsPolygonItem* Scene::polygonItem(int id) const {
         return nullptr;
     }
     return polygon_list.value(id);
+}
+
+void Scene::changeMode(QAction *action) {
+    removeEventFilter(current_mode);
+    current_mode = action->data().value<QObject*>();
+    installEventFilter(current_mode);
 }
 
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event) {
