@@ -25,16 +25,16 @@ int slidepoint(int p[(N + 2)*(N + 2)]) {//動かせる座標を探す。
 constexpr int fact(int n) {return ((n > 1) ? n*fact(n - 1) : n);}//中三女子
 
 template<typename T>
-class queue{ //キューを自作
+class queue { //キューを自作
 
 private:
-	T data[fact(N*N)*4];//定数式なのでなんと要素数にぶち込める。サイズはクソ適当なのでNがデカいと壊れる可能性は非常に高い。
+	T data[fact(N*N) * 4];//定数式なのでなんと要素数にぶち込める。サイズはクソ適当なのでNがデカいと壊れる可能性は非常に高い。
 	T* head = &data[0];
 	T* tail = &data[0];
 
 public:
 	void push(T a) { data[tail++] = a; }
-	void pop(T a) { head++; }
+	void pop() { head++; }
 	T front{ return data[head]; }
 };
 
@@ -131,13 +131,24 @@ int main() {
 			}
 
 		}
+		que.pop();
 	}
-	vector<Node*> restore;
+	vector<Node> restore;
 		{
-			Node* res_tmp = que.front.parent;// !?
-			while (restore.back.parent != -1)
+			Node res_tmp = que.front;
+
+			while (res_tmp.oparetion != -1)
 			restore.push_back(res_tmp);
+			res_tmp = *res_tmp.parent;
 		}
 
-		reverse(restore.begin(),restore.end());
+		//reverse(restore.begin(),restore.end());
+		for (auto itr = restore.rbegin(); itr != restore.rend(); ++itr)
+			switch (itr->oparetion) {
+			case 0:cout << "↑" << endl; break;
+			case 1:cout << "→" << endl; break;
+			case 2:cout << "↓" << endl; break;
+			case 3:cout << "←" << endl; break;
+			default: break;
+			}
 	}
