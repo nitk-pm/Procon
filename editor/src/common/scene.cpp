@@ -144,22 +144,24 @@ QGraphicsPolygonItem* Scene::polygonItem(int id) const {
 
 void Scene::changeMode(QAction *action) {
     removeEventFilter(current_mode);
+    qDebug("check point");
     current_mode = action->data().value<QObject*>();
+    qDebug("check point 2");
     installEventFilter(current_mode);
 }
 
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-    QPointF pos = modifyPos(event->scenePos());
-    int index = convertPosToIndex(pos);
-    if (vertex_map.contains(index)) {
-        if (!vertex_map[index]->data(0).toBool()) {
-            Command::stack->push(new SelectVertexCommand(this, pos));
-        }
-        else if (select_vertexes.front() == pos) {
-            Command::stack->push(new CreatePolygonCommand(this));
-        }
-    }
-    else {
-        Command::stack->push(new AddVertexCommand(this, pos));
-    }
+    // QPointF pos = modifyPos(event->scenePos());
+    // int index = convertPosToIndex(pos);
+    // if (vertex_map.contains(index)) {
+    //     if (!vertex_map[index]->data(0).toBool()) {
+    //         Command::stack->push(new SelectVertexCommand(this, pos));
+    //     }
+    //     else if (select_vertexes.front() == pos) {
+    //         Command::stack->push(new CreatePolygonCommand(this));
+    //     }
+    // }
+    // else {
+    //     Command::stack->push(new AddVertexCommand(this, pos));
+    // }
 }

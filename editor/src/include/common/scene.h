@@ -13,7 +13,6 @@ class Scene : public QGraphicsScene {
 
 public:
     static const int BASE_SIZE = 10;
-    static const int OFFSET    = BASE_SIZE * 0.3;
     static const int RECT_SIZE = BASE_SIZE * 0.4;
 
 public:
@@ -29,7 +28,7 @@ public:
     void    destroyPolygon(int index);
 
     const QVector<QPointF>& selectVartexes() const;
-    QGraphicsPolygonItem  * polygonItem(int id) const;
+    QGraphicsPolygonItem*   polygonItem(int id) const;
 
 public slots:
     void changeMode(QAction *action);

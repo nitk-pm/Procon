@@ -9,6 +9,7 @@ class MainWindow;
 
 class QCloseEvent;
 class QActionGroup;
+class DataContainer;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -23,6 +24,7 @@ protected:
 private:
     Ui::MainWindow *ui;
     QActionGroup   *operation;
+    DataContainer  *container;
 };
 
 #endif // MAINWINDOW_H
