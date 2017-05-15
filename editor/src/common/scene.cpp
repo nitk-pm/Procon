@@ -47,6 +47,12 @@ int Scene::convertPosToIndex(const QPointF &pos) {
     return int(pos.x()) + int(pos.y()) * background_size.width();
 }
 
+QGraphicsItem* Scene::getItem(const QPointF &pos) {
+    auto item = itemAt(pos, QTransform());
+    if (item != background) return item;
+    return nullptr;
+}
+
 void Scene::addVertex(const QPointF &pos) {
     int index = convertPosToIndex(pos);
     if (vertex_map.contains(index)) {
@@ -144,9 +150,9 @@ QGraphicsPolygonItem* Scene::polygonItem(int id) const {
 
 void Scene::changeMode(QAction *action) {
     removeEventFilter(current_mode);
-    qDebug("check point");
+    // qDebug("check point");
     current_mode = action->data().value<QObject*>();
-    qDebug("check point 2");
+    // qDebug("check point 2");
     installEventFilter(current_mode);
 }
 

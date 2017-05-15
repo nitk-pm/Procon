@@ -53,7 +53,7 @@ QGraphicsEllipseItem* DataContainer::addVertex(const QPointF &pos) {
     }
 
     QRectF rect = QRectF(pos - QPointF(Scene::RECT_SIZE, Scene::RECT_SIZE) / 2, QSizeF(Scene::RECT_SIZE, Scene::RECT_SIZE));
-    auto   item = _scene->addEllipse(rect, QPen(Qt::black));
+    auto   item = _scene->addEllipse(rect, QPen(Qt::red));
     vertex_map.insert(index, item);
 
     return item;

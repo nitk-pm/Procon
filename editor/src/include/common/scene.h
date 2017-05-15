@@ -17,9 +17,10 @@ public:
 
 public:
     explicit Scene(QObject *parent = 0);
-    void    createBackground(int width, int height);
-    QPointF modifyPos(const QPointF &pos);
-    int     convertPosToIndex(const QPointF &pos);
+    void           createBackground(int width, int height);
+    QPointF        modifyPos(const QPointF &pos);
+    int            convertPosToIndex(const QPointF &pos);
+    QGraphicsItem* getItem(const QPointF &pos);
     void    addVertex(const QPointF &pos);
     void    removeVertex(const QPointF &pos);
     void    pushSelectVertex(const QPointF &pos);
