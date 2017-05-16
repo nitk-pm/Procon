@@ -37,13 +37,18 @@ void MainWindow::initData() {
 
     container = new DataContainer(scene, 101, 65);
 
-    QVariant select_mode;
-    select_mode.setValue(new SelectMode(container));
-    QVariant plotting_mode;
-    plotting_mode.setValue(new PlottingMode(container));
+    QVariant select_mode_variant;
+    auto select_mode = new SelectMode(container);
+    select_mode_variant.setValue(select_mode);
 
-    ui->action_select->setData(select_mode);
-    ui->action_add_vertex->setData(plotting_mode);
+    QVariant plotting_mode_variant;
+    auto plotting_mode = new PlottingMode(container);
+    plotting_mode_variant.setValue(plotting_mode);
+
+    ui->action_select->setData(select_mode_variant);
+    ui->action_add_vertex->setData(plotting_mode_variant);
+
+    connect(select_mode, SIGNAL(setDeleteActionFlag(bool)), ui->action_delete, SLOT(setEnabled(bool)));
 }
 
 void MainWindow::initUndoRedo() {

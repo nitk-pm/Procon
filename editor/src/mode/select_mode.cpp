@@ -70,6 +70,7 @@ void SelectMode::select(QGraphicsItem *item) {
     select_item->setData(1, select_item->pos());
     select_item->setPen(QPen(Qt::blue));
     select_items.append(select_item);
+    setDeleteActionFlag(true);
 }
 
 void SelectMode::deselect() {
@@ -77,6 +78,7 @@ void SelectMode::deselect() {
         item->setPen(item->data(0).value<QPen>());
     }
     select_items.clear();
+    setDeleteActionFlag(false);
 }
 
 void SelectMode::reselect(QGraphicsItem *item) {
