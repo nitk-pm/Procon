@@ -20,14 +20,16 @@ public:
     void moveStartEvent(QGraphicsSceneMouseEvent *event);
     void moveEvent(QGraphicsSceneMouseEvent *event);
 
+
     void select(QGraphicsItem *item);
     void deselect();
+    void reselect(QGraphicsItem *item);
 
 private:
-    DataContainer *container;
+    DataContainer                       *container;
     QVector<QAbstractGraphicsShapeItem*> select_items;
-    QPointF prev_pos;
-    bool can_move_item;
+    QPointF                              prev_pos;
+    bool                                 can_move_item;
 };
 
 #endif /* end of include guard: SELECT_MODE__H */

@@ -1,3 +1,3 @@
-cd ui
+cd ../ui
 designer window_layout.ui
-cd ../
+cd ../win_batch

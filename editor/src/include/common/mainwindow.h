@@ -18,13 +18,18 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private:
+    void initData();
+    void initUndoRedo();
+    void initSettings();
+
 protected:
     void closeEvent(QCloseEvent *event);
 
 private:
-    Ui::MainWindow *ui;
-    QActionGroup   *operation;
     DataContainer  *container;
+    Ui::MainWindow *ui;
+    QActionGroup   *mode;
 };
 
 #endif // MAINWINDOW_H

@@ -8,11 +8,10 @@
 
 SelectMode::SelectMode(DataContainer *container, QObject *parent) : QObject(parent) {
     this->container = container;
-    can_move_item = false;
+    can_move_item   = false;
 }
 
 bool SelectMode::eventFilter(QObject *watched, QEvent *event) {
-    qDebug() << event->type();
     if (event->type() == QEvent::GraphicsSceneMousePress) {
         QGraphicsSceneMouseEvent *mouse_event = static_cast<QGraphicsSceneMouseEvent*>(event);
         moveStartEvent(mouse_event);
@@ -30,32 +29,25 @@ bool SelectMode::eventFilter(QObject *watched, QEvent *event) {
 
 void SelectMode::selectEvent(QGraphicsSceneMouseEvent *event) {
     if (!can_move_item) {
-        QPointF pos = container->scene()->modifyPos(event->scenePos());
-        auto item = container->scene()->getItem(pos);
+        QPointF pos  = container->scene()->modifyPos(event->scenePos());
+        auto    item = container->scene()->getItem(pos);
         if (item) {
-            if (!select_items.empty() && event->modifiers() != Qt::ControlModifier) {
-                deselect();
-                select(item);
-            }
-            else {
-                select(item);
-            }
+            if (!select_items.empty() && event->modifiers() != Qt::ControlModifier) reselect(item);
+            else select(item);
         }
-        else {
-            deselect();
-        }
+        else deselect();
     }
     can_move_item = false;
 }
 
 void SelectMode::moveStartEvent(QGraphicsSceneMouseEvent *event) {
-    QPointF pos = container->scene()->modifyPos(event->scenePos());
-    auto item = container->scene()->getItem(pos);
+    QPointF pos  = container->scene()->modifyPos(event->scenePos());
+    auto    item = container->scene()->getItem(pos);
 
     if (item) {
         auto select_item = static_cast<QAbstractGraphicsShapeItem*>(item);
         if (select_item->pen().color() == Qt::blue) {
-            prev_pos = pos;
+            prev_pos      = pos;
             can_move_item = true;
         }
     }
@@ -63,7 +55,7 @@ void SelectMode::moveStartEvent(QGraphicsSceneMouseEvent *event) {
 
 void SelectMode::moveEvent(QGraphicsSceneMouseEvent *event) {
     QPointF now_pos = container->scene()->modifyPos(event->scenePos());
-    QPointF d = now_pos - prev_pos;
+    QPointF d       = now_pos - prev_pos;
     prev_pos = now_pos;
 
     for (auto item : select_items) {
@@ -75,6 +67,7 @@ void SelectMode::moveEvent(QGraphicsSceneMouseEvent *event) {
 void SelectMode::select(QGraphicsItem *item) {
     auto select_item = static_cast<QAbstractGraphicsShapeItem*>(item);
     select_item->setData(0, select_item->pen());
+    select_item->setData(1, select_item->pos());
     select_item->setPen(QPen(Qt::blue));
     select_items.append(select_item);
 }
@@ -84,4 +77,9 @@ void SelectMode::deselect() {
         item->setPen(item->data(0).value<QPen>());
     }
     select_items.clear();
+}
+
+void SelectMode::reselect(QGraphicsItem *item) {
+    deselect();
+    select(item);
 }

@@ -21,15 +21,16 @@ public:
     QPointF        modifyPos(const QPointF &pos);
     int            convertPosToIndex(const QPointF &pos);
     QGraphicsItem* getItem(const QPointF &pos);
-    void    addVertex(const QPointF &pos);
-    void    removeVertex(const QPointF &pos);
-    void    pushSelectVertex(const QPointF &pos);
-    void    popSelectVertex();
-    int     createPolygon();
-    void    destroyPolygon(int index);
+    void           addVertex(const QPointF &pos);
+    void           removeVertex(const QPointF &pos);
+    void           pushSelectVertex(const QPointF &pos);
+    void           popSelectVertex();
+    int            createPolygon();
+    void           destroyPolygon(int index);
 
     const QVector<QPointF>& selectVartexes() const;
-    QGraphicsPolygonItem*   polygonItem(int id) const;
+    
+    QGraphicsPolygonItem* polygonItem(int id) const;
 
 public slots:
     void changeMode(QAction *action);

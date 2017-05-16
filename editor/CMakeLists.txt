@@ -12,15 +12,13 @@ set(CMAKE_BUILD_TYPE Release)
 #Qtを使用するために必要な処理
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
-
-#Qt5Core
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 
-set(UI_SOURCE ui/window_layout.ui)
+set(UI_SOURCE form/window_layout.ui)
 qt5_wrap_ui(UI_HEADER ${UI_SOURCE})
-qt5_add_resources(RESOURCES ui/resource.qrc)
+qt5_add_resources(UI_RESOURCES form/resource.qrc)
 
 file(GLOB SOURCE_FILE src/*/*cpp src/include/*/*.h)
 
@@ -29,7 +27,7 @@ add_executable(
     ${SOURCE_FILE}
     ${UI_SOURCE}
     ${UI_HEADER}
-    ${RESOURCES}
+    ${UI_RESOURCES}
 )
 
 target_include_directories(editor PRIVATE src/include)
