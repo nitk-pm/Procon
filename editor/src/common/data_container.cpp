@@ -38,15 +38,14 @@ QPoint DataContainer::convertRealPosToVirtualPos(const QPointF &pos) {
 }
 
 QPointF DataContainer::convertVirtualPosToRealPos(const QPoint &pos) {
-    QPoint p = pos * BASE_SIZE;
     return std::move(_background->mapToScene(pos * BASE_SIZE));
 }
 
 QPointF DataContainer::convertVirtualPosToRealPosCenter(const QPoint &pos) {
-    return std::move(convertVirtualPosToRealPos(pos + QPoint(BASE_SIZE, BASE_SIZE) / 2));
+    return std::move(convertVirtualPosToRealPos(pos) + QPointF(BASE_SIZE, BASE_SIZE) / 2);
 }
 
-QPointF DataContainer::modifiyPosCenter(const QPointF &pos) {
+QPointF DataContainer::modifyPosCenter(const QPointF &pos) {
     QPoint p = convertRealPosToVirtualPos(pos);
     return convertVirtualPosToRealPosCenter(p);
 }
@@ -69,7 +68,7 @@ QGraphicsEllipseItem* DataContainer::addVertex(const QPoint &pos) {
 
     QRectF rect = QRectF(0, 0, RECT_SIZE, RECT_SIZE);
     auto   item = _scene->addEllipse(rect, QPen(Qt::red));
-    item->setPos(convertVirtualPosToRealPos(pos));
+    item->setPos(convertVirtualPosToRealPosCenter(pos) - QPoint(RECT_SIZE, RECT_SIZE) / 2);
     item->setData(0, pos);
     vertex_map.insert(pos, item);
 

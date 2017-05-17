@@ -25,29 +25,28 @@ public:
 
 /* 基本メソッド */
 public:
-    void               set(Scene *scene, int width, int height);
-    Scene*             scene() const;
+    void                 set(Scene *scene, int width, int height);
+    Scene*               scene() const;
     QGraphicsPixmapItem* background() const;
-    int                width() const;
-    int                height() const;
+    int                  width() const;
+    int                  height() const;
 
     QPoint  convertRealPosToVirtualPos(const QPointF &pos);
     QPointF convertVirtualPosToRealPos(const QPoint &pos);
     QPointF convertVirtualPosToRealPosCenter(const QPoint &pos);
-    QPointF modifiyPosCenter(const QPointF &pos);
+    QPointF modifyPosCenter(const QPointF &pos);
 
 private:
-    Scene             *_scene;
+    Scene               *_scene;
     QGraphicsPixmapItem *_background;
-    int                _width;
-    int                _height;
+    int                  _width;
+    int                  _height;
 
 /* プロットされた頂点の情報 */
 public:
     QGraphicsEllipseItem* getVertex(const QPoint &pos) const;
     QGraphicsEllipseItem* addVertex(const QPoint &pos);
     void                  removeVertex(const QPoint &pos);
-    void                  moveVertex(const QPoint &pos);
     bool                  containsVertex(const QPoint &pos) const;
 
 private:

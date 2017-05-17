@@ -14,6 +14,7 @@
 #include "command/create_polygon_command.h"
 
 Scene::Scene(QObject *parent) : QGraphicsScene(parent) {
+    setItemIndexMethod(QGraphicsScene::BspTreeIndex);
 }
 
 QGraphicsPixmapItem* Scene::createBackground(int width, int height) {
@@ -32,7 +33,7 @@ QGraphicsPixmapItem* Scene::createBackground(int width, int height) {
 
     QPixmap pixmap = QPixmap::fromImage(image);
     auto background = new QGraphicsPixmapItem(pixmap);
-    // background->setPos(image_size.left(), image_size.top());
+    background->setPos(image_size.left(), image_size.top());
     setSceneRect(scene_size);
     addItem(background);
     return background;
