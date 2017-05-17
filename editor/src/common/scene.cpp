@@ -1,4 +1,5 @@
 #include "common/scene.h"
+#include "common/data_container.h"
 #include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QGraphicsPixmapItem>
 #include <QtWidgets/QGraphicsSceneMouseEvent>
@@ -15,14 +16,15 @@
 Scene::Scene(QObject *parent) : QGraphicsScene(parent) {
 }
 
-QGraphicsRectItem* Scene::createBackground(int width, int height) {
-    QRect scene_size = QRect(0, 0, width * BASE_SIZE * 2, height * BASE_SIZE * 2);
-    QRect image_size = QRect(width * BASE_SIZE / 2, height * BASE_SIZE / 2, width * BASE_SIZE, height * BASE_SIZE);
+QGraphicsPixmapItem* Scene::createBackground(int width, int height) {
+    int base_size = DataContainer::BASE_SIZE;
+    QRect scene_size = QRect(0, 0, width * base_size * 2, height * base_size * 2);
+    QRect image_size = QRect(width * base_size / 2, height * base_size / 2, width * base_size, height * base_size);
     QImage image = QImage(image_size.width(), image_size.height(), QImage::Format_RGB32);
-    int center = BASE_SIZE / 2;
+    int center = base_size / 2;
     for (int h = 0; h < image.height(); h++) {
         for (int w = 0; w < image.width(); w++) {
-            int _w = w % BASE_SIZE, _h = h % BASE_SIZE;
+            int _w = w % base_size, _h = h % base_size;
             if (_w >= center - 1 && _w <= center && _h >= center - 1 && _h <= center) image.setPixelColor(w, h, Qt::gray);
             else image.setPixelColor(w, h, Qt::white);
         }

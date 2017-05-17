@@ -7,9 +7,9 @@ SelectVertexCommand::SelectVertexCommand(Scene *scene, const QPointF &pos, QUndo
 }
 
 void SelectVertexCommand::undo() {
-    scene->popSelectVertex();
+    // scene->popSelectVertex();
 }
 
 void SelectVertexCommand::redo() {
-    scene->pushSelectVertex(pos);
+    // scene->pushSelectVertex(pos);
 }

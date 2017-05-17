@@ -8,9 +8,9 @@ AddVertexCommand::AddVertexCommand(Scene *scene, const QPointF &pos, QUndoComman
 }
 
 void AddVertexCommand::undo() {
-    scene->removeVertex(pos);
+    // scene->removeVertex(pos);
 }
 
 void AddVertexCommand::redo() {
-    scene->addVertex(pos);
+    // scene->addVertex(pos);
 }

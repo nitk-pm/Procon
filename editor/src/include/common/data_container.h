@@ -7,7 +7,7 @@
 #include <QtCore/QPointF>
 #include <QtGui/QPolygonF>
 
-// class QGraphicsRectItem;
+// class QGraphicsPixmapItem;
 // class QGraphicsEllipseItem;
 // class QGraphicsPolygonItem;
 
@@ -27,7 +27,7 @@ public:
 public:
     void               set(Scene *scene, int width, int height);
     Scene*             scene() const;
-    QGraphicsRectItem* background() const;
+    QGraphicsPixmapItem* background() const;
     int                width() const;
     int                height() const;
 
@@ -38,7 +38,7 @@ public:
 
 private:
     Scene             *_scene;
-    QGraphicsRectItem *_background;
+    QGraphicsPixmapItem *_background;
     int                _width;
     int                _height;
 
@@ -47,6 +47,7 @@ public:
     QGraphicsEllipseItem* getVertex(const QPoint &pos) const;
     QGraphicsEllipseItem* addVertex(const QPoint &pos);
     void                  removeVertex(const QPoint &pos);
+    void                  moveVertex(const QPoint &pos);
     bool                  containsVertex(const QPoint &pos) const;
 
 private:
