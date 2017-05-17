@@ -29,8 +29,8 @@ bool SelectMode::eventFilter(QObject *watched, QEvent *event) {
 
 void SelectMode::selectEvent(QGraphicsSceneMouseEvent *event) {
     if (!can_move_item) {
-        QPointF pos  = container->scene()->modifyPos(event->scenePos());
-        auto    item = container->scene()->getItem(pos);
+        QPoint pos = container->modifiyPosCenter(event->scenePos());
+        QPoin
         if (item) {
             if (!select_items.empty() && event->modifiers() != Qt::ControlModifier) reselect(item);
             else select(item);

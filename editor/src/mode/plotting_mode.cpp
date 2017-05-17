@@ -18,6 +18,6 @@ bool PlottingMode::eventFilter(QObject *watched, QEvent *event) {
 }
 
 void PlottingMode::plotting(QGraphicsSceneMouseEvent *event) {
-    QPointF pos = container->scene()->modifyPos(event->scenePos());
+    QPoint pos = container->convertRealPosToVirtualPos(event->scenePos());
     container->addVertex(pos);
 }

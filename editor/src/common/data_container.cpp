@@ -10,15 +10,18 @@ DataContainer::DataContainer(Scene *scene, int width, int height) {
 }
 
 void DataContainer::set(Scene *scene, int width, int height) {
-    _scene  = scene;
-    _width  = width;
-    _height = height;
-
-    _scene->createBackground(_width, _height);
+    _scene      = scene;
+    _width      = width;
+    _height     = height;
+    _background = _scene->createBackground(_width, _height);
 }
 
 Scene* DataContainer::scene() const {
     return _scene;
+}
+
+QGraphicsRectItem* DataContainer::background() const {
+    return _background;
 }
 
 int DataContainer::width() const {
@@ -29,51 +32,62 @@ int DataContainer::height() const {
     return _height;
 }
 
-int DataContainer::convertPosToIndex(const QPointF &pos) const {
-    return pos.y() * _width + pos.x();
+QPoint DataContainer::convertRealPosToVirtualPos(const QPointF &pos) {
+    QPointF p = _background->mapFromScene(pos) / BASE_SIZE;
+    return std::move(QPoint(p.x(), p.y()));
 }
 
-QGraphicsEllipseItem* DataContainer::getVertex(const QPointF &pos) const {
-    QGraphicsEllipseItem *item  = 0;
-    int                   index = convertPosToIndex(pos);
+QPointF DataContainer::convertVirtualPosToRealPos(const QPoint &pos) {
+    QPoint p = pos * BASE_SIZE;
+    return std::move(_background->mapToScene(pos * BASE_SIZE));
+}
 
-    if (vertex_map.contains(index)) {
-        item = vertex_map[index];
+QPointF DataContainer::convertVirtualPosToRealPosCenter(const QPoint &pos) {
+    return std::move(convertVirtualPosToRealPos(pos + QPoint(BASE_SIZE, BASE_ZISE) / 2));
+}
+
+QPointF DataContainer::modifiyPosCenter(const QPointF &pos) {
+    QPoint p = convertRealPosToVirtualPos(pos);
+    return convertVirtualPosToRealPosCenter(p);
+}
+
+QGraphicsEllipseItem* DataContainer::getVertex(const QPoint &pos) const {
+    QGraphicsEllipseItem *item  = 0;
+
+    if (vertex_map.contains(pos)) {
+        item = vertex_map[pos];
     }
 
     return item;
 }
 
-QGraphicsEllipseItem* DataContainer::addVertex(const QPointF &pos) {
-    int index = convertPosToIndex(pos);
-
-    if (vertex_map.contains(index)) {
+QGraphicsEllipseItem* DataContainer::addVertex(const QPoint &pos) {
+    if (vertex_map.contains(pos)) {
         qWarning("this position has already vertex");
         return 0;
     }
 
-    QRectF rect = QRectF(pos - QPointF(Scene::RECT_SIZE, Scene::RECT_SIZE) / 2, QSizeF(Scene::RECT_SIZE, Scene::RECT_SIZE));
+    QRectF rect = QRectF(0, 0, RECT_SIZE, RECT_SIZE);
     auto   item = _scene->addEllipse(rect, QPen(Qt::red));
+    item->setPos(convertVirtualPosToRealPos(pos));
     vertex_map.insert(index, item);
 
     return item;
 }
 
-void DataContainer::removeVertex(const QPointF &pos) {
-    int index = convertPosToIndex(pos);
-
-    if (!vertex_map.contains(index)) {
+void DataContainer::removeVertex(const QPoint &pos) {
+    if (!vertex_map.contains(pos)) {
         qWarning("this position has not exist vertex");
         return;
     }
 
-    auto item = vertex_map[index];
+    auto item = vertex_map[pos];
     _scene->removeItem(item);
-    vertex_map.remove(index);
+    vertex_map.remove(pos);
 }
 
-bool DataContainer::containsVertex(const QPointF &pos) const {
-    return vertex_map.contains(convertPosToIndex(pos));
+bool DataContainer::containsVertex(const QPoint &pos) const {
+    return vertex_map.contains(pos);
 }
 
 QGraphicsPolygonItem* DataContainer::getPolygon(int id) const {

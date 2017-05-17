@@ -1,43 +1,56 @@
 #ifndef DATA_CONTAINER__H
 #define DATA_CONTAINER__H
 
-#include <QtCore/QMap>
+#include "common/scene.h"
+
+#include <QtCore/QHash>
 #include <QtCore/QPointF>
 #include <QtGui/QPolygonF>
 
-class Scene;
-class QGraphicsEllipseItem;
-class QGraphicsPolygonItem;
+// class QGraphicsRectItem;
+// class QGraphicsEllipseItem;
+// class QGraphicsPolygonItem;
 
 class DataContainer {
+
+/* 定数 */
+public:
+    static const int BASE_SIZE = 10;
+    static const int RECT_SIZE = BASE_SIZE * 0.4;
 
 /* コンストラクター */
 public:
     DataContainer() {}
     DataContainer(Scene *scene, int width, int height);
 
-/* 基本設定 */
+/* 基本メソッド */
 public:
-    void   set(Scene *scene, int width, int height);
-    Scene* scene() const;
-    int    width() const;
-    int    height() const;
-    int    convertPosToIndex(const QPointF &pos) const;
+    void               set(Scene *scene, int width, int height);
+    Scene*             scene() const;
+    QGraphicsRectItem* background() const;
+    int                width() const;
+    int                height() const;
+
+    QPoint  convertRealPosToVirtualPos(const QPointF &pos);
+    QPointF convertVirtualPosToRealPos(const QPoint &pos);
+    QPointF convertVirtualPosToRealPosCenter(const QPoint &pos);
+    QPointF modifiyPosCenter(const QPointF &pos);
 
 private:
-    Scene *_scene;
-    int    _width;
-    int    _height;
+    Scene             *_scene;
+    QGraphicsRectItem *_background;
+    int                _width;
+    int                _height;
 
 /* プロットされた頂点の情報 */
 public:
-    QGraphicsEllipseItem* getVertex(const QPointF &pos) const;
-    QGraphicsEllipseItem* addVertex(const QPointF &pos);
-    void                  removeVertex(const QPointF &pos);
-    bool                  containsVertex(const QPointF &pos) const;
+    QGraphicsEllipseItem* getVertex(const QPoint &pos) const;
+    QGraphicsEllipseItem* addVertex(const QPoint &pos);
+    void                  removeVertex(const QPoint &pos);
+    bool                  containsVertex(const QPoint &pos) const;
 
 private:
-    QMap<int, QGraphicsEllipseItem*> vertex_map;
+    QHash<QPoint, QGraphicsEllipseItem*> vertex_map;
 
 /* 作成されたポリゴンの情報 */
 public:
@@ -46,7 +59,11 @@ public:
     void                  removePolygon(int id);
 
 private:
-    QMap<int, QGraphicsPolygonItem*> polygon_list;
+    QHash<int, QGraphicsPolygonItem*> polygon_list;
 };
+
+inline uint qHash(const QPoint &key) {
+    return qHash(static_cast<qint64>(key.x() << 32 | key.y()));
+}
 
 #endif /* end of include guard: DATA_CONTAINER__H */
