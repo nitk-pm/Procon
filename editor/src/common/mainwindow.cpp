@@ -26,6 +26,7 @@ MainWindow::~MainWindow() {
 
 void MainWindow::initData() {
     Scene *scene = new Scene();
+    container = new DataContainer(scene, 101, 65);
     ui->view->setScene(scene);
 
     mode = new QActionGroup(this);
@@ -35,7 +36,6 @@ void MainWindow::initData() {
     mode->addAction(ui->action_create_polygon);
     connect(mode, SIGNAL(triggered(QAction*)), scene, SLOT(changeMode(QAction*)));
 
-    container = new DataContainer(scene, 101, 65);
 
     QVariant select_mode_variant;
     auto select_mode = new SelectMode(container);

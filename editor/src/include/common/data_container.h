@@ -9,7 +9,7 @@
 
 // class QGraphicsPixmapItem;
 // class QGraphicsEllipseItem;
-// class QGraphicsPolygonItem;
+class QGraphicsItemGroup;
 
 class DataContainer {
 
@@ -44,26 +44,19 @@ private:
 
 /* プロットされた頂点の情報 */
 public:
-    QGraphicsEllipseItem* getVertex(const QPoint &pos) const;
+    // QGraphicsEllipseItem* getVertex(const QPoint &pos) const;
     QGraphicsEllipseItem* addVertex(const QPoint &pos);
-    void                  removeVertex(const QPoint &pos);
-    bool                  containsVertex(const QPoint &pos) const;
 
 private:
-    QHash<QPoint, QGraphicsEllipseItem*> vertex_map;
+    QGraphicsItemGroup *vertex_group;
 
 /* 作成されたポリゴンの情報 */
 public:
-    QGraphicsPolygonItem* getPolygon(int id) const;
-    int                   addPolygon(const QPolygonF &polygon);
-    void                  removePolygon(int id);
+    // QGraphicsPolygonItem* getPolygon(const QPoint &pos) const;
+    QGraphicsPolygonItem* addPolygon(const QPolygonF &polygon);
 
 private:
-    QHash<int, QGraphicsPolygonItem*> polygon_list;
+    QGraphicsItemGroup *polygon_group;
 };
-
-inline uint qHash(const QPoint &key) {
-    return qHash(static_cast<qint64>(key.x() << 32 | key.y()));
-}
 
 #endif /* end of include guard: DATA_CONTAINER__H */

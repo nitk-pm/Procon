@@ -14,7 +14,7 @@ SceneView::~SceneView() {}
 
 void SceneView::setScene(Scene *scene) {
     QGraphicsView::setScene(scene);
-    QTimer::singleShot(0, [&]() {
+    QTimer::singleShot(100, [&]() {
         qreal w = this->rect().width() - this->scene()->width() - this->verticalScrollBar()->rect().width();
         qreal h = this->rect().height() - this->scene()->height() - this->horizontalScrollBar()->rect().height();
         this->translate(w / 2, h / 2);
