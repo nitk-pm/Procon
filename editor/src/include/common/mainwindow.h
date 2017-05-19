@@ -10,6 +10,8 @@ class MainWindow;
 class QCloseEvent;
 class QActionGroup;
 class DataContainer;
+class SelectMode;
+class PlottingMode;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -30,6 +32,8 @@ private:
     DataContainer  *container;
     Ui::MainWindow *ui;
     QActionGroup   *mode;
+    SelectMode     *select_mode;
+    PlottingMode   *plotting_mode;
 };
 
 #endif // MAINWINDOW_H

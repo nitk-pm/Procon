@@ -12,6 +12,7 @@ SelectMode::SelectMode(DataContainer *container, QObject *parent) : QObject(pare
 }
 
 bool SelectMode::eventFilter(QObject *watched, QEvent *event) {
+    if (!container) return QObject::eventFilter(watched, event);
     if (event->type() == QEvent::GraphicsSceneMousePress) {
         QGraphicsSceneMouseEvent *mouse_event = static_cast<QGraphicsSceneMouseEvent*>(event);
         moveStartEvent(mouse_event);
@@ -29,9 +30,9 @@ bool SelectMode::eventFilter(QObject *watched, QEvent *event) {
 
 void SelectMode::selectEvent(QGraphicsSceneMouseEvent *event) {
     if (!can_move_item) {
-        QPointF pos = container->modifyPosCenter(event->scenePos());
-        auto item = container->scene()->itemAt(pos, QTransform());
-        if (item && item != container->background()) {
+        QPoint pos  = container->convertRealPosToVirtualPos(event->scenePos());
+        auto   item = container->getItem(pos);
+        if (item) {
             if (!select_items.empty() && event->modifiers() != Qt::ControlModifier) reselect(item);
             else select(item);
         }
@@ -41,13 +42,12 @@ void SelectMode::selectEvent(QGraphicsSceneMouseEvent *event) {
 }
 
 void SelectMode::moveStartEvent(QGraphicsSceneMouseEvent *event) {
-    QPointF pos  = container->modifyPosCenter(event->scenePos());
-    auto    item = container->scene()->itemAt(pos, QTransform());
-
-    if (item && item != container->background()) {
+    QPoint pos  = container->convertRealPosToVirtualPos(event->scenePos());
+    auto   item = container->getItem(pos);
+    if (item) {
         auto select_item = static_cast<QAbstractGraphicsShapeItem*>(item);
         if (select_item->pen().color() == Qt::blue) {
-            prev_pos      = pos;
+            prev_pos      = container->convertVirtualPosToRealPos(pos);
             can_move_item = true;
         }
     }

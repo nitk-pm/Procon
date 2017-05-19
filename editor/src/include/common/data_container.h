@@ -7,10 +7,6 @@
 #include <QtCore/QPointF>
 #include <QtGui/QPolygonF>
 
-// class QGraphicsPixmapItem;
-// class QGraphicsEllipseItem;
-class QGraphicsItemGroup;
-
 class DataContainer {
 
 /* 定数 */
@@ -18,10 +14,11 @@ public:
     static const int BASE_SIZE = 10;
     static const int RECT_SIZE = BASE_SIZE * 0.4;
 
-/* コンストラクター */
+/* コンストラクタ・デストラクタ */
 public:
     DataContainer() {}
     DataContainer(Scene *scene, int width, int height);
+    ~DataContainer();
 
 /* 基本メソッド */
 public:
@@ -33,7 +30,6 @@ public:
 
     QPoint  convertRealPosToVirtualPos(const QPointF &pos);
     QPointF convertVirtualPosToRealPos(const QPoint &pos);
-    QPointF convertVirtualPosToRealPosCenter(const QPoint &pos);
     QPointF modifyPosCenter(const QPointF &pos);
 
 private:
@@ -42,21 +38,12 @@ private:
     int                  _width;
     int                  _height;
 
-/* プロットされた頂点の情報 */
+/* 頂点及びポリゴンの追加と取得 */
 public:
-    // QGraphicsEllipseItem* getVertex(const QPoint &pos) const;
     QGraphicsEllipseItem* addVertex(const QPoint &pos);
-
-private:
-    QGraphicsItemGroup *vertex_group;
-
-/* 作成されたポリゴンの情報 */
-public:
-    // QGraphicsPolygonItem* getPolygon(const QPoint &pos) const;
     QGraphicsPolygonItem* addPolygon(const QPolygonF &polygon);
 
-private:
-    QGraphicsItemGroup *polygon_group;
+    QGraphicsItem* getItem(const QPoint &pos);
 };
 
 #endif /* end of include guard: DATA_CONTAINER__H */

@@ -10,6 +10,7 @@ PlottingMode::PlottingMode(DataContainer *container, QObject *parent) : QObject(
 }
 
 bool PlottingMode::eventFilter(QObject *watched, QEvent *event) {
+    if (!container) return QObject::eventFilter(watched, event);
     if (event->type() == QEvent::GraphicsSceneMousePress) {
         QGraphicsSceneMouseEvent *mouse_event = static_cast<QGraphicsSceneMouseEvent*>(event);
         plotting(mouse_event);

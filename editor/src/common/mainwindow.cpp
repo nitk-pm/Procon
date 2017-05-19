@@ -19,13 +19,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 MainWindow::~MainWindow() {
+    delete select_mode;
+    delete plotting_mode;
     delete container;
     delete mode;
     delete ui;
 }
 
 void MainWindow::initData() {
-    Scene *scene = new Scene();
+    auto scene = new Scene();
     container = new DataContainer(scene, 101, 65);
     ui->view->setScene(scene);
 
@@ -36,16 +38,14 @@ void MainWindow::initData() {
     mode->addAction(ui->action_create_polygon);
     connect(mode, SIGNAL(triggered(QAction*)), scene, SLOT(changeMode(QAction*)));
 
-
     QVariant select_mode_variant;
-    auto select_mode = new SelectMode(container);
+    select_mode = new SelectMode(container);
     select_mode_variant.setValue(select_mode);
+    ui->action_select->setData(select_mode_variant);
 
     QVariant plotting_mode_variant;
-    auto plotting_mode = new PlottingMode(container);
+    plotting_mode = new PlottingMode(container);
     plotting_mode_variant.setValue(plotting_mode);
-
-    ui->action_select->setData(select_mode_variant);
     ui->action_add_vertex->setData(plotting_mode_variant);
 
     connect(select_mode, SIGNAL(setDeleteActionFlag(bool)), ui->action_delete, SLOT(setEnabled(bool)));
