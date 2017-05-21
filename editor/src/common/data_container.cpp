@@ -17,6 +17,10 @@ void DataContainer::set(Scene *scene, int width, int height) {
     _width      = width;
     _height     = height;
     _background = _scene->createBackground(_width, _height);
+
+    vertex_list = new QGraphicsItemGroup();
+    vertex_list->setSelected(true);
+    // _scene->addItem(vertex_list);
 }
 
 Scene* DataContainer::scene() const {
@@ -53,6 +57,7 @@ QPointF DataContainer::modifyPosCenter(const QPointF &pos) {
 QGraphicsEllipseItem* DataContainer::addVertex(const QPoint &pos) {
     constexpr QPoint OFFSET = QPoint(RECT_SIZE, RECT_SIZE) / 2;
     QPointF p = convertVirtualPosToRealPos(pos);
+
     qDebug() << _scene->itemAt(p, QTransform());
 
     if (_scene->itemAt(p, QTransform()) != _background) {

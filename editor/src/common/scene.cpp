@@ -41,8 +41,6 @@ QGraphicsPixmapItem* Scene::createBackground(int width, int height) {
 
 void Scene::changeMode(QAction *action) {
     removeEventFilter(current_mode);
-    // qDebug("check point");
     current_mode = action->data().value<QObject*>();
-    // qDebug("check point 2");
     installEventFilter(current_mode);
 }
