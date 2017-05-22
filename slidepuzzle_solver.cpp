@@ -1,7 +1,3 @@
-/*************|
-|*  CAUTION  *|
-|* UNFINISHED*|
-|*************/
 
 #include <iostream>
 #include <algorithm>
@@ -10,145 +6,168 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <set>
 
 #define rep(i,n) for (int i=0 ; i<n;i++)
 #define N 3//(N^2)-1パズル
 using namespace std;
 
-int slidepoint(int p[(N + 2)*(N + 2)]) {//動かせる座標を探す。
-	for (int i = 1; i < N; i++)
-		for (int j = 1; j < N; j++)
-			if (p[i*(N + 2) + j] == 0)
-				return i*(N+2) + j;
+typedef unsigned long long uint64;
+
+constexpr int fact(int n) { return ((n > 1) ? n*fact(n - 1) : n); }//中三女子
+constexpr int sq(int n) { return n*n; }
+
+int slidepoint(int p[sq(N)]) {//動かせる座標を探す。
+	rep(i, sq(N))
+		if (p[i] == 0)
+			return i;
+	return -1;
 }
-
-constexpr int fact(int n) {return ((n > 1) ? n*fact(n - 1) : n);}//中三女子
-
 template<typename T>
-class queue { //キューを自作
+class queue { //キュー
 
 private:
-	T data[fact(N*N) * 4];//定数式なのでなんと要素数にぶち込める。サイズはクソ適当なのでNがデカいと壊れる可能性は非常に高い。
-	T* head = &data[0];
-	T* tail = &data[0];
+	T data[fact(sq(N))/4];
+	int head = 0;
+	int tail = 0;
+	
+	~queue() {
+		delete [] data;
+	}
 
 public:
 	void push(T a) { data[tail++] = a; }
 	void pop() { head++; }
-	T front{ return data[head]; }
+	T front(){ return data[head]; }
+	bool empty(){ return head == tail ? true : false; }
+	
 };
 
 struct Node {
-	char oparetion; //どういう操作で今の状態になったか
-	Node* parent; //操作前の状態
-	int puzzle[(N + 2)*(N + 2)]; //現在の盤面
-	int sp;//動かせる座標
+	char operation;
+	int parentIndex;
 };
+uint64 tohash(int b[]) {
+	uint64 tmp=0;
+	rep(i, sq(N))
+		tmp |= b[i] << (i*4);
+	return tmp;
+}
+
+int direction(char c) {
+	switch (c) {
+
+	/*
+	0：→
+	1：↓
+	2：←
+	3：↑
+	*/
+
+	case 0: return 1;
+	case 1: return 3;
+	case 2: return -1;
+	case 3: return -3;
+	default:return 0;
+	
+	
+	}
+}
+void printBoard(int b[]) {
+	rep(i, sq(N)) {
+		cout << b[i];
+		if (i % 3 == 2)cout << endl;
+	}
+	cout << endl;
+}
 
 int main() {
-	bool isSolved;
-	Node initial;
-	rep(i, N + 2) {
-		rep(j, N + 2) {
-			if (i == 0 || j == 0 || i == N - 1 || j == N - 1)
-				initial.puzzle[i*(N + 2) + j] = -1;//番兵埋め
-			else cin >> initial.puzzle[i*(N + 2) + j];//入力
-		}
-	}
-
-	initial.oparetion = -1;
-	initial.sp = slidepoint(initial.puzzle);
-
-	int ans[(N + 2)*(N + 2)];
-	rep(i, N + 2) {//答えを作成
-		int cnt=1;
-		rep(j, N + 2) {
-			if (i == 0 || j == 0 || i == N - 1 || j == N - 1)
-				ans[i*(N + 2) + j] = -1;
-			else if (cnt == N*N)ans[i*(N + 2) + j] = 0;
-			else ans[i*(N + 2) + j] = cnt++;
-		}
-	}
-
+	
+	int initial_board[] = { 2,5,3,0,1,6,4,7,8 };//2,5,3,0,1,6,4,7,8
+	int answer_board[] = { 1,2,3,4,5,6,7,8,0 };
+	uint64 answer_hash = tohash(answer_board);
+	Node answer;
+	int initial_sp=slidepoint(initial_board);
+	Node initial={ -1,-1};
+	set<uint64>visited;
+	vector<Node>usednode;
 	queue<Node> que;
-
-	int sp;
 	que.push(initial);
-	while (true) {
 
-		isSolved = true;//答えと比較
-		for (int i = 1; i < N; i++)
-			for (int j = 1; j < N; j++)
-				if (que.front.puzzle[i*(N + 2) + j] != ans[i*(N + 2) + j])
-					isSolved = false;
-		if (isSolved)
-			break;
-
-
-		sp = que.front.sp;
-		int y = sp / (N + 2), x = sp - y*(N + 2);
-
-		/*
-		0:↑
-		1:→
-		2:↓
-		3:←
-		*/
-
-		{
-			Node tmp;
-			tmp.parent = &que.front;
-			rep(i, N + 2)
-				rep(j, N + 2)
-				tmp.puzzle[i*(N + 2) + j] = que.front.puzzle[i*(N + 2) + j];
-
-			if (que.front.puzzle[(y - 1)*(N + 2) + (x)] != -1 || que.front.oparetion == 2) {
-				tmp.oparetion = 0;
-				swap(tmp.puzzle[(y - 1)*(N + 2) + (x)], tmp.puzzle[y*(N + 2) + x]);//シュッ
-				que.push(tmp);
-				swap(tmp.puzzle[(y - 1)*(N + 2) + (x)], tmp.puzzle[y*(N + 2) + x]);//元に戻して再利用
-			}
-
-			if (que.front.puzzle[(y)*(N + 2) + (x + 1)] != -1 || que.front.oparetion == 3) {
-				tmp.oparetion = 1;
-				swap(tmp.puzzle[(y)*(N + 2) + (x + 1)], tmp.puzzle[y*(N + 2) + x]);
-				que.push(tmp);
-				swap(tmp.puzzle[(y)*(N + 2) + (x + 1)], tmp.puzzle[y*(N + 2) + x]);
-			}
-
-			if (que.front.puzzle[(y + 1)*(N + 2) + (x)] != -1 || que.front.oparetion == 0) {
-				tmp.oparetion = 2;
-				swap(tmp.puzzle[(y + 1)*(N + 2) + (x)], tmp.puzzle[y*(N + 2) + x]);
-				que.push(tmp);
-				swap(tmp.puzzle[(y + 1)*(N + 2) + (x)], tmp.puzzle[y*(N + 2) + x]);
-			}
-
-			if (que.front.puzzle[(y)*(N + 2) + (x - 1)] != -1 || que.front.oparetion == 1) {
-				tmp.oparetion = 3;
-				swap(tmp.puzzle[(y)*(N + 2) + (x - 1)], tmp.puzzle[y*(N + 2) + x]);
-				que.push(tmp);
-				swap(tmp.puzzle[(y)*(N + 2) + (x - 1)], tmp.puzzle[y*(N + 2) + x]);
-			}
-
-		}
+	while (!que.empty()) {/*変更点　:毎回、最初の状態から現時点までの盤面の復元を行う。*/
+		Node current = que.front();
 		que.pop();
-	}
-	vector<Node> restore;
-		{
-			Node res_tmp = que.front;
 
-			while (res_tmp.oparetion != -1)
-			restore.push_back(res_tmp);
-			res_tmp = *res_tmp.parent;
+		vector<char>op;
+		int sp = initial_sp;
+		Node cur_node = current;
+		int board[sq(N)];
+		memcpy(board, initial_board, sizeof(initial_board));
+
+		while (cur_node.operation!=-1) {
+			op.push_back(cur_node.operation);
+			cur_node = usednode[cur_node.parentIndex];
+
 		}
 
-		//reverse(restore.begin(),restore.end());
-		for (auto itr = restore.rbegin(); itr != restore.rend(); ++itr)
-			switch (itr->oparetion) {
-			case 0:cout << "↑" << endl; break;
-			case 1:cout << "→" << endl; break;
-			case 2:cout << "↓" << endl; break;
-			case 3:cout << "←" << endl; break;
-			default: break;
+		reverse(op.begin(), op.end());
+		rep(i,op.size()) {
+			int _sp = sp + direction(op[i]);
+			swap(board[sp], board[_sp]);
+			sp = _sp;
+		}
+
+		usednode.push_back(current);
+
+		uint64 nowhash = tohash(board);
+
+		if (nowhash == answer_hash) {
+			answer = current;
+			break;
+		}
+
+
+		if (visited.find(nowhash) == visited.end())
+			visited.insert(nowhash);
+		else continue;
+
+		if (sp % 3 <= 1) {//左から1または2番目
+			Node tmp = { 0,usednode.size() - 1 };
+			que.push(tmp);
+		}
+		if (sp / 3 <= 1) {//上から1または2番目
+			Node tmp = { 1,usednode.size() - 1 };
+			que.push(tmp);
 			}
+		if (sp % 3 >= 1) {//左から2または3番目
+			Node tmp = { 2,usednode.size() - 1 };
+			que.push(tmp);
+
+		}
+		if (sp / 3 >= 1) {
+			Node tmp = { 3,usednode.size() - 1 };
+			que.push(tmp);
+
+		}
 	}
+
+	vector<char>op;
+	int sp = initial_sp;
+	Node cur_node = answer;
+	int board[sq(N)];
+	memcpy(board, initial_board, sizeof(initial_board));
+	
+	while (cur_node.operation != -1) {
+		op.push_back(cur_node.operation);
+		cur_node = usednode[cur_node.parentIndex];
+	}
+	printBoard(board);
+
+	for (auto itr = op.rbegin(); itr != op.rend(); ++itr) {
+		int _sp = sp + direction(*itr);
+		swap(board[sp], board[_sp]);
+		sp = _sp;
+		printBoard(board);
+	}
+	
+}
