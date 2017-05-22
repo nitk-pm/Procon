@@ -15,6 +15,7 @@ public:
 
 private:
     QPen pen;
+    QRectF bounding_rect;
 };
 
 #endif /* end of include guard: VERTEX_OBJECT__H */

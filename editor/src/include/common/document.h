@@ -23,6 +23,8 @@ public:
 
 private:
     Scene *_scene;
+    QList<VertexObject*> vertex_list;
+    QList<PolygonObject*> polygon_list;
 };
 
 #endif /* end of include guard: DOCUMENT__H */
