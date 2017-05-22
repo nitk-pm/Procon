@@ -1,15 +1,11 @@
 #include "common/mainwindow.h"
 #include "ui_window_layout.h"
 #include "common/scene.h"
-#include "common/data_container.h"
-#include "mode/plotting_mode.h"
-#include "mode/select_mode.h"
-#include "command/command.h"
+#include "common/editor_manager.h"
 
 #include <QtCore/QSettings>
 #include <QtGui/QCloseEvent>
 #include <QtCore/QTimer>
-#include <QtWidgets/QActionGroup>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);

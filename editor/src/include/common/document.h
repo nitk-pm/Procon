@@ -2,34 +2,27 @@
 #define DOCUMENT__H
 
 #include <QtCore/QObject>
-#include <QtCore/QPointF>
-#include <QtCore/QHash>
 #include <QtCore/QQList>
-#include <QtGui/QPolygonF>
 
-class QGraphicsItem;
-class QGraphicsEllipseItem;
-class QGraphicsPolygonItem;
+class Scene;
+class VertexObject;
+class PolygonObject;
 
 class Document : public QObject {
     Q_OBJECT
 
 public:
-    Document(QObject *parent = 0) : QObject(parent) {}
-    Document(int width, int height, QGraphicsItem *background, QObject *parent = 0);
+    Document(QObject *parent = 0) : QObject(parent), _scene(0) {}
+    Document(Scene *scene, QObject *parent = 0);
 
-    int width() const;
-    int height() const;
-    QGraphicsItem* background() const;
+    Scene* scene() const;
+    void setScene(Scene *scene);
 
-    void addVertex(const QPointF &pos);
-    void addPolygon(const QList<QPointF> &pos_list);
-    void remove(QGraphicsItem *item);
+    void addVertexObject(VertexObject *vertex_obj) {}
+    void addPolygonObject(PolygonObject *polygon_obj) {}
 
 private:
-    int _width;
-    int _height;
-    QGraphicsItem *_background;
+    Scene *_scene;
 };
 
 #endif /* end of include guard: DOCUMENT__H */
