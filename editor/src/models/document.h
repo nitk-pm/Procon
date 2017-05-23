@@ -5,8 +5,7 @@
 #include <QtCore/QQList>
 
 class Scene;
-class VertexObject;
-class PolygonObject;
+class ObjectModel;
 
 class Document : public QObject {
     Q_OBJECT
@@ -18,13 +17,11 @@ public:
     Scene* scene() const;
     void setScene(Scene *scene);
 
-    void addVertexObject(VertexObject *vertex_obj) {}
-    void addPolygonObject(PolygonObject *polygon_obj) {}
+    void addObject(ObjectModel *object) {}
 
 private:
     Scene *_scene;
-    QList<VertexObject*> vertex_list;
-    QList<PolygonObject*> polygon_list;
+    QList<ObjectModel*> object_list;
 };
 
 #endif /* end of include guard: DOCUMENT__H */
