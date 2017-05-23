@@ -1,6 +1,11 @@
 #include "common/mainwindow.h"
 #include "ui_window_layout.h"
 
+#include "common/scene.h"
+#include "editors/editor_manager.h"
+#include "editors/vertex_plotter.h"
+#include "models/document.h"
+
 #include <QtCore/QSettings>
 #include <QtGui/QCloseEvent>
 #include <QtCore/QTimer>
@@ -8,6 +13,17 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     initSettings();
+
+    auto scene = new Scene(101, 65);
+
+    ui->view->setScene(scene);
+
+    auto document = new Document(scene);
+
+    EditorManager::instance()->registerEditor(ui->action_add_vertex, new VertexPlotter(document));
+    EditorManager::instance()->registerEditor(ui->action_select, 0);
+
+    connect(EditorManager::instance(), SIGNAL(triggered(QAction*)), scene, SLOT(changeEditor(QAction*)));
 }
 
 MainWindow::~MainWindow() {

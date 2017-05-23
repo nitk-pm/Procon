@@ -45,6 +45,7 @@ QPointF Scene::modifyPos(const QPointF &pos) {
 
 void Scene::changeEditor(QAction *action) {
     removeEventFilter(current_editor);
+    qDebug("check");
     current_editor = action->data().value<QObject*>();
     installEventFilter(current_editor);
 }
