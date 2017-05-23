@@ -3,7 +3,7 @@
 
 #include <QtGui/QPainter>
 
-VertexObject::VertexObject(const QPointF &pos, QGraphicsItem *parent = 0) : ObjectModel(parent) {
+VertexObject::VertexObject(const QPointF &pos, QGraphicsItem *parent) : ObjectModel(parent) {
     setPos(pos);
     setPen(QPen(Qt::red));
     bounding_rect = QRectF(0, 0, Scene::BASE_SIZE, Scene::BASE_SIZE);

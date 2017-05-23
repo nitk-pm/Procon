@@ -8,7 +8,6 @@ class MainWindow;
 }
 
 class QCloseEvent;
-class EditorManager;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -16,13 +15,14 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    
+    void initSettings();
 
 protected:
     void closeEvent(QCloseEvent *event);
 
 private:
     Ui::MainWindow *ui;
-    EditorManager *editors;
 };
 
 #endif // MAINWINDOW_H

@@ -1,5 +1,5 @@
 #include "common/scene.h"
-#include "common/editor_manager.h"
+#include "editors/editor.h"
 #include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QGraphicsPixmapItem>
 #include <QtWidgets/QGraphicsSceneMouseEvent>
@@ -11,7 +11,7 @@ Scene::Scene(QObject *parent) : QGraphicsScene(parent) {
     setItemIndexMethod(QGraphicsScene::BspTreeIndex);
 }
 
-Scene::Scene(int width, int height, QObject *parent = 0) : QGraphicsScene(parent) {
+Scene::Scene(int width, int height, QObject *parent) : QGraphicsScene(parent) {
     setItemIndexMethod(QGraphicsScene::BspTreeIndex);
     setBoardSize(width, height);
 }
@@ -45,6 +45,6 @@ QPointF Scene::modifyPos(const QPointF &pos) {
 
 void Scene::changeEditor(QAction *action) {
     removeEventFilter(current_editor);
-    current_editor = action->data().value<Editor*>();
+    current_editor = action->data().value<QObject*>();
     installEventFilter(current_editor);
 }

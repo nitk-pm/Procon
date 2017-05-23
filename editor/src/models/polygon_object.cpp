@@ -2,7 +2,7 @@
 
 #include <QtGui/QPainter>
 
-PolygonObject::PolygonObject(const QPolygonF &polygon, QGraphicsItem *parent) : QGraphicsPolygonItem(polygon, parent) {
+PolygonObject::PolygonObject(const QPolygonF &polygon, QGraphicsItem *parent) : ObjectModel(parent) {
     setPen(QPen(Qt::black));
     setBrush(QBrush(Qt::gray));
     setPolygon(polygon);

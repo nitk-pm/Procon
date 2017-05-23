@@ -1,4 +1,4 @@
-#include "common/command_manager.h"
+#include "commands/command_manager.h"
 
 #include <QtWidgets/QAction>
 

@@ -2,7 +2,7 @@
 #define DOCUMENT__H
 
 #include <QtCore/QObject>
-#include <QtCore/QQList>
+#include <QtCore/QList>
 
 class Scene;
 class ObjectModel;
@@ -17,7 +17,8 @@ public:
     Scene* scene() const;
     void setScene(Scene *scene);
 
-    void addObject(ObjectModel *object) {}
+    void addObject(ObjectModel *object);
+    void removeObject(ObjectModel *object);
 
 private:
     Scene *_scene;

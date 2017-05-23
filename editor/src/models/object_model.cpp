@@ -6,7 +6,7 @@ ObjectModel::ObjectModel(QGraphicsItem *parent) : QGraphicsItem(parent) {
 
 void ObjectModel::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     draw(painter);
-    if (_clicked) drawSelected(painter);
+    if (_clicked) drawClicked(painter);
 }
 
 QPen ObjectModel::pen() const {

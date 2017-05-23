@@ -6,4 +6,4 @@ if not exist "build" (
 cd build
 call cmake ../ -G "MinGW Makefiles"
 call mingw32-make
-cd ../win_batch
+cd ../win

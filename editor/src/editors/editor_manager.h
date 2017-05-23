@@ -10,12 +10,15 @@ class EditorManager : public QActionGroup {
     Q_OBJECT
 
 public:
-    EditorManager();
+    static EditorManager* instance();
 
     QList<Editor*> editors() const;
     void registerEditor(QAction *action, Editor *editor);
 
 private:
+    Q_DISABLE_COPY(EditorManager);
+    EditorManager();
+    
     QList<Editor*> _editors;
 };
 

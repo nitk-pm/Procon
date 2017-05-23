@@ -1,7 +1,5 @@
 #include "common/mainwindow.h"
 #include "ui_window_layout.h"
-#include "common/scene.h"
-#include "common/editor_manager.h"
 
 #include <QtCore/QSettings>
 #include <QtGui/QCloseEvent>
@@ -9,49 +7,11 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-    initData();
-    initUndoRedo();
     initSettings();
 }
 
 MainWindow::~MainWindow() {
-    delete select_mode;
-    delete plotting_mode;
-    delete container;
-    delete mode;
     delete ui;
-}
-
-void MainWindow::initData() {
-    auto scene = new Scene();
-    container = new DataContainer(scene, 101, 65);
-    ui->view->setScene(scene);
-
-    mode = new QActionGroup(this);
-    mode->setExclusive(true);
-    mode->addAction(ui->action_select);
-    mode->addAction(ui->action_add_vertex);
-    mode->addAction(ui->action_create_polygon);
-    connect(mode, SIGNAL(triggered(QAction*)), scene, SLOT(changeMode(QAction*)));
-
-    QVariant select_mode_variant;
-    select_mode = new SelectMode(container);
-    select_mode_variant.setValue(select_mode);
-    ui->action_select->setData(select_mode_variant);
-
-    QVariant plotting_mode_variant;
-    plotting_mode = new PlottingMode(container);
-    plotting_mode_variant.setValue(plotting_mode);
-    ui->action_add_vertex->setData(plotting_mode_variant);
-
-    connect(select_mode, SIGNAL(setDeleteActionFlag(bool)), ui->action_delete, SLOT(setEnabled(bool)));
-}
-
-void MainWindow::initUndoRedo() {
-    connect(ui->action_undo, SIGNAL(triggered()), Command::stack, SLOT(undo()));
-    connect(ui->action_redo, SIGNAL(triggered()), Command::stack, SLOT(redo()));
-    connect(Command::stack, SIGNAL(canUndoChanged(bool)), ui->action_undo, SLOT(setEnabled(bool)));
-    connect(Command::stack, SIGNAL(canRedoChanged(bool)), ui->action_redo, SLOT(setEnabled(bool)));
 }
 
 void MainWindow::initSettings() {

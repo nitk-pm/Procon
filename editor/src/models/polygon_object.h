@@ -5,8 +5,6 @@
 #include <QtGui/QPolygonF>
 
 class PolygonObject : public ObjectModel {
-    Q_OBJECT
-
 public:
     PolygonObject(const QPolygonF &polygon, QGraphicsItem *parent = 0);
 

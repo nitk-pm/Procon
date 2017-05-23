@@ -21,12 +21,10 @@ public:
     Document* document() const;
     void setDocument(Document *document);
 
-    virtual void sceneEvent(QGraphicsSceneMouseEvent *event) = 0;
+    virtual void sceneEvent(QGraphicsSceneMouseEvent *event) {}
 
 private:
     Document *_document;
 };
-
-Q_DECLARE_METATYPE(Editor);
 
 #endif /* end of include guard: EDITOR__H */

@@ -1,9 +1,9 @@
-#include "common/editor.h"
-#include "common/document.h"
+#include "editors/editor.h"
+#include "models/document.h"
 
 #include <QtWidgets/QGraphicsSceneMouseEvent>
 
-Editor::Editor(Document *document, QObject *parent = 0) : QObject(parent) {
+Editor::Editor(Document *document, QObject *parent) : QObject(parent) {
     setDocument(document);
 }
 

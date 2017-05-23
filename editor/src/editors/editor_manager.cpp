@@ -1,5 +1,10 @@
-#include "common/editor_manager.h"
-#include "common/editor.h"
+#include "editors/editor_manager.h"
+#include "editors/editor.h"
+
+EditorManager* EditorManager::instance() {
+    static EditorManager manager;
+    return &manager;
+}
 
 EditorManager::EditorManager() : QActionGroup(0) {
     setExclusive(true);
