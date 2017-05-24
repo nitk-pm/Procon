@@ -25,6 +25,6 @@ void test(Point a, Point b, Point c, Point d, bool check) {
 }
 
 int main(void) {
-    test(Point(0, 0), Point(0, 10), Point(0, 5), Point(-5, 5), true);
+    test(Point(0, 0), Point(0, 10), Point(0, 0), Point(5, 0), true);
     return 0;
 }

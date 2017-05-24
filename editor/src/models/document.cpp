@@ -26,7 +26,7 @@ void Document::removeObject(ObjectModel *object) {
 
 ObjectModel* Document::getObject(const QPointF &pos) {
     auto item = _scene->itemAt(pos, QTransform());
-    if (item != _scene->background()) {
+    if (item && item != _scene->background()) {
         ObjectModel *obj = static_cast<ObjectModel*>(item);
         return obj;
     }
