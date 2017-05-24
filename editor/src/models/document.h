@@ -20,6 +20,8 @@ public:
     void addObject(ObjectModel *object);
     void removeObject(ObjectModel *object);
 
+    ObjectModel* getObject(const QPointF &pos);
+
 private:
     Scene *_scene;
     QList<ObjectModel*> object_list;

@@ -23,3 +23,12 @@ void Document::removeObject(ObjectModel *object) {
     object_list.removeOne(object);
     _scene->removeItem(object);
 }
+
+ObjectModel* Document::getObject(const QPointF &pos) {
+    auto item = _scene->itemAt(pos, QTransform());
+    if (item != _scene->background()) {
+        ObjectModel *obj = static_cast<ObjectModel*>(item);
+        return obj;
+    }
+    return nullptr;
+}

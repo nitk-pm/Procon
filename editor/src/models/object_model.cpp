@@ -31,4 +31,5 @@ bool ObjectModel::isClicked() const {
 
 void ObjectModel::setClicked(bool clicked) {
     _clicked = clicked;
+    update(bounding_rect);
 }

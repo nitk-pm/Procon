@@ -17,13 +17,14 @@ public:
     Scene(int width, int height, QObject *parent = 0);
     void setBoardSize(int width, int height);
     QPointF modifyPos(const QPointF &pos);
+    QGraphicsPixmapItem* background() const;
 
 public slots:
     void changeEditor(QAction *action);
 
 private:
     QObject *current_editor;
-    QGraphicsPixmapItem *background;
+    QGraphicsPixmapItem *_background;
 };
 
 #endif // SCENE__H

@@ -30,17 +30,21 @@ void Scene::setBoardSize(int width, int height) {
     }
 
     QPixmap pixmap = QPixmap::fromImage(image);
-    background = new QGraphicsPixmapItem(pixmap);
-    background->setPos(image_size.left(), image_size.top());
+    _background = new QGraphicsPixmapItem(pixmap);
+    _background->setPos(image_size.left(), image_size.top());
     setSceneRect(scene_size);
-    addItem(background);
+    addItem(_background);
 }
 
 QPointF Scene::modifyPos(const QPointF &pos) {
-    QPointF p = background->mapFromScene(pos) / BASE_SIZE;
+    QPointF p = _background->mapFromScene(pos) / BASE_SIZE;
     p = QPointF(int(p.x()) * BASE_SIZE, int(p.y()) * BASE_SIZE);
-    p = background->mapToScene(p);
+    p = _background->mapToScene(p);
     return std::move(p);
+}
+
+QGraphicsPixmapItem* Scene::background() const {
+    return _background;
 }
 
 void Scene::changeEditor(QAction *action) {

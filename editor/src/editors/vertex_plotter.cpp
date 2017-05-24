@@ -12,9 +12,14 @@ VertexPlotter::VertexPlotter(Document *document, QObject *parent) : Editor(docum
 
 void VertexPlotter::sceneEvent(QGraphicsSceneMouseEvent *event) {
     if (event->type() == QEvent::GraphicsSceneMousePress) {
-        auto item = document()->scene()->itemAt(event->scenePos(), QTransform());
-        qDebug() << item;
-        auto pos = document()->scene()->modifyPos(event->scenePos());
-        document()->addObject(new VertexObject(pos));
+        auto obj = document()->getObject(event->scenePos());
+        if (!obj) {
+            auto pos = document()->scene()->modifyPos(event->scenePos());
+            document()->addObject(new VertexObject(pos));
+            qDebug("put");
+        }
+        else {
+            obj->setClicked(true);
+        }
     }
 }
