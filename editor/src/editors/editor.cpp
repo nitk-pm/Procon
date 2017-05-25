@@ -3,6 +3,10 @@
 
 #include <QtWidgets/QGraphicsSceneMouseEvent>
 
+Editor::Editor(QObject *parent) : QObject(parent) {
+    _document = nullptr;
+}
+
 Editor::Editor(Document *document, QObject *parent) : QObject(parent) {
     setDocument(document);
 }

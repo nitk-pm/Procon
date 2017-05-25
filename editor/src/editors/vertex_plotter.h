@@ -5,7 +5,7 @@
 
 class VertexPlotter : public Editor {
 public:
-    VertexPlotter(Document *document, QObject *parent = 0);
+    VertexPlotter() {}
     void sceneEvent(QGraphicsSceneMouseEvent *event);
 };
 

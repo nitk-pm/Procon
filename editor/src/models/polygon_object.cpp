@@ -13,13 +13,10 @@ QRectF PolygonObject::boundingRect() const {
 }
 
 void PolygonObject::draw(QPainter *painter) {
-    painter->setPen(pen());
+    if (isClicked()) painter->setPen(QPen(Qt::blue));
+    else painter->setPen(pen());
     painter->setBrush(brush());
     painter->drawPolygon(_polygon);
-}
-
-void PolygonObject::drawClicked(QPainter *painter) {
-
 }
 
 QPolygonF PolygonObject::polygon() const {

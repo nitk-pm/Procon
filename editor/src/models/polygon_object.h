@@ -10,7 +10,6 @@ public:
 
     QRectF boundingRect() const;
     void draw(QPainter *painter);
-    void drawClicked(QPainter *painter);
 
     QPolygonF polygon() const;
     void setPolygon(const QPolygonF &polygon);

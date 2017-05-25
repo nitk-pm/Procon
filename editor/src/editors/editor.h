@@ -11,7 +11,7 @@ class Editor : public QObject {
     Q_OBJECT
 
 public:
-    Editor(QObject *parent = 0) : QObject(parent) {}
+    Editor(QObject *parent = 0);
     Editor(Document *document, QObject *parent = 0);
 
 private:

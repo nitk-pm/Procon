@@ -1,5 +1,6 @@
 #include "editors/editor_manager.h"
 #include "editors/editor.h"
+#include "models/document.h"
 
 EditorManager* EditorManager::instance() {
     static EditorManager manager;
@@ -19,4 +20,11 @@ void EditorManager::registerEditor(QAction *action, Editor *editor) {
     variant.setValue(editor);
     action->setData(variant);
     addAction(action);
+    _editors.append(editor);
+}
+
+void EditorManager::setDocument(Document *document) {
+    for (auto editor : _editors) {
+        editor->setDocument(document);
+    }
 }

@@ -2,8 +2,10 @@
 #include "ui_window_layout.h"
 
 #include "common/scene.h"
+#include "commands/command_manager.h"
 #include "editors/editor_manager.h"
 #include "editors/vertex_plotter.h"
+#include "editors/object_selector.h"
 #include "models/document.h"
 
 #include <QtCore/QSettings>
@@ -20,10 +22,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     auto document = new Document(scene);
 
-    EditorManager::instance()->registerEditor(ui->action_add_vertex, new VertexPlotter(document));
-    EditorManager::instance()->registerEditor(ui->action_select, 0);
+    auto vertex_plotter = new VertexPlotter();
+    auto object_selector = new ObjectSelector();
 
+    connect(object_selector, SIGNAL(setDeleteActionFlag(bool)), ui->action_delete, SLOT(setEnabled(bool)));
+    connect(ui->action_delete, SIGNAL(triggered()), object_selector, SLOT(remove()));
+
+    EditorManager::instance()->registerEditor(ui->action_add_vertex, vertex_plotter);
+    EditorManager::instance()->registerEditor(ui->action_select, object_selector);
+    EditorManager::instance()->setDocument(document);
     connect(EditorManager::instance(), SIGNAL(triggered(QAction*)), scene, SLOT(changeEditor(QAction*)));
+
+    CommandManager::instance()->setUndoAction(ui->action_undo);
+    CommandManager::instance()->setRedoAction(ui->action_redo);
 }
 
 MainWindow::~MainWindow() {

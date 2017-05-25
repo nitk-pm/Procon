@@ -8,7 +8,6 @@ public:
     VertexObject(const QPointF &pos, QGraphicsItem *parent = 0);
     QRectF boundingRect() const;
     void draw(QPainter *painter);
-    void drawClicked(QPainter *painter);
 };
 
 #endif /* end of include guard: VERTEX_OBJECT__H */

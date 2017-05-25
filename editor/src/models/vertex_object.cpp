@@ -17,14 +17,7 @@ void VertexObject::draw(QPainter *painter) {
     int r = Scene::BASE_SIZE * 0.2;
     QPointF offset = QPointF(Scene::BASE_SIZE, Scene::BASE_SIZE) / 2;
 
-    if (isClicked()) {
-        painter->setPen(QPen(Qt::blue));
-    }
-    else {
-        painter->setPen(pen());
-    }
+    if (isClicked()) painter->setPen(QPen(Qt::blue));
+    else painter->setPen(pen());
     painter->drawEllipse(offset, r, r);
-}
-
-void VertexObject::drawClicked(QPainter *painter) {
 }

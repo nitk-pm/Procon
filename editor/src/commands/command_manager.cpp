@@ -27,8 +27,8 @@ QAction* CommandManager::redoAction() const {
 
 void CommandManager::setRedoAction(QAction *redo_action) {
     _redo_action = redo_action;
-    connect(_redo_action, SIGNAL(triggered()), stack, SLOT(undo()));
-    connect(stack, SIGNAL(canUndoChanged(bool)), _redo_action, SLOT(setEnabled(bool)));
+    connect(_redo_action, SIGNAL(triggered()), stack, SLOT(redo()));
+    connect(stack, SIGNAL(canRedoChanged(bool)), _redo_action, SLOT(setEnabled(bool)));
 }
 
 void CommandManager::registerCommand(QUndoCommand *command) {
