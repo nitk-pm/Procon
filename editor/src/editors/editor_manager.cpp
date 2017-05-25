@@ -1,6 +1,7 @@
 #include "editors/editor_manager.h"
 #include "editors/editor.h"
 #include "models/document.h"
+#include "common/scene.h"
 
 EditorManager* EditorManager::instance() {
     static EditorManager manager;
@@ -26,5 +27,12 @@ void EditorManager::registerEditor(QAction *action, Editor *editor) {
 void EditorManager::setDocument(Document *document) {
     for (auto editor : _editors) {
         editor->setDocument(document);
+    }
+}
+
+void EditorManager::connectScene(Scene *scene) {
+    for (auto editor : _editors) {
+        connect(scene, SIGNAL(beginEditor()), editor, SLOT(begin()));
+        connect(scene, SIGNAL(finishEditor()), editor, SLOT(finish()));
     }
 }

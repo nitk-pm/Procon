@@ -6,16 +6,16 @@
 
 class Editor;
 class Document;
+class Scene;
 
 class EditorManager : public QActionGroup {
-    Q_OBJECT
-
 public:
     static EditorManager* instance();
 
     QList<Editor*> editors() const;
     void registerEditor(QAction *action, Editor *editor);
     void setDocument(Document *document);
+    void connectScene(Scene *scene);
 
 private:
     Q_DISABLE_COPY(EditorManager);

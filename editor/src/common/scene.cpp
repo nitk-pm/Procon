@@ -49,6 +49,8 @@ QGraphicsPixmapItem* Scene::background() const {
 
 void Scene::changeEditor(QAction *action) {
     removeEventFilter(current_editor);
+    finishEditor();
     current_editor = action->data().value<QObject*>();
+    beginEditor();
     installEventFilter(current_editor);
 }

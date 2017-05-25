@@ -23,6 +23,10 @@ public:
 
     virtual void sceneEvent(QGraphicsSceneMouseEvent *event) {}
 
+public slots:
+    virtual void begin() {}
+    virtual void finish() {}
+
 private:
     Document *_document;
 };

@@ -22,6 +22,10 @@ public:
 public slots:
     void changeEditor(QAction *action);
 
+signals:
+    void beginEditor();
+    void finishEditor();
+
 private:
     QObject *current_editor;
     QGraphicsPixmapItem *_background;
