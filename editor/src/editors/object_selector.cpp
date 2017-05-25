@@ -5,6 +5,7 @@
 #include "commands/command_manager.h"
 
 #include <QtWidgets/QGraphicsSceneMouseEvent>
+#include <QtWidgets/QAction>
 
 void ObjectSelector::sceneEvent(QGraphicsSceneMouseEvent *event) {
     if (event->type() == QEvent::GraphicsSceneMouseRelease) {
@@ -15,6 +16,11 @@ void ObjectSelector::sceneEvent(QGraphicsSceneMouseEvent *event) {
         }
         else deselect();
     }
+}
+
+void ObjectSelector::setDeleteAction(QAction *action) {
+    connect(this, SIGNAL(setDeleteActionFlag(bool)), action, SLOT(setEnabled(bool)));
+    connect(action, SIGNAL(triggered()), this, SLOT(remove()));
 }
 
 void ObjectSelector::select(ObjectModel *obj) {

@@ -6,6 +6,7 @@
 #include <QtCore/QList>
 
 class ObjectModel;
+class QAction;
 
 class ObjectSelector : public Editor {
     Q_OBJECT
@@ -13,6 +14,7 @@ class ObjectSelector : public Editor {
 public:
     ObjectSelector() {}
     void sceneEvent(QGraphicsSceneMouseEvent *event);
+    void setDeleteAction(QAction *action);
 
 private:
     void select(ObjectModel *obj);

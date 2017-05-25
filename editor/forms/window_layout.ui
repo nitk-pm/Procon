@@ -13,10 +13,14 @@
   <property name="windowTitle">
    <string>Editor</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resource.qrc">
+    <normaloff>:/action_icon/action_icon/app_icon.png</normaloff>:/action_icon/action_icon/app_icon.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
-     <number>0</number>
+     <number>7</number>
     </property>
     <property name="leftMargin">
      <number>11</number>
@@ -46,6 +50,36 @@
       </property>
       <property name="transformationAnchor">
        <enum>QGraphicsView::NoAnchor</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="message">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::PlainText</enum>
+      </property>
+      <property name="scaledContents">
+       <bool>false</bool>
       </property>
      </widget>
     </item>
@@ -192,27 +226,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
-   </property>
-  </action>
-  <action name="action_mode_moving">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resource.qrc">
-     <normaloff>:/action_icon/action_icon/mode_moving.png</normaloff>:/action_icon/action_icon/mode_moving.png</iconset>
-   </property>
-   <property name="text">
-    <string>移動(M)</string>
-   </property>
-   <property name="toolTip">
-    <string>移動</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+M</string>
    </property>
   </action>
   <action name="action_new_file">

@@ -25,8 +25,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     auto vertex_plotter = new VertexPlotter();
     auto object_selector = new ObjectSelector();
 
-    connect(object_selector, SIGNAL(setDeleteActionFlag(bool)), ui->action_delete, SLOT(setEnabled(bool)));
-    connect(ui->action_delete, SIGNAL(triggered()), object_selector, SLOT(remove()));
+    object_selector->setDeleteAction(ui->action_delete);
 
     EditorManager::instance()->registerEditor(ui->action_add_vertex, vertex_plotter);
     EditorManager::instance()->registerEditor(ui->action_select, object_selector);
