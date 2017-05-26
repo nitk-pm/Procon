@@ -14,6 +14,8 @@ public:
     QPolygonF polygon() const;
     void setPolygon(const QPolygonF &polygon);
 
+    bool containsPoint(const QPointF &pos);
+
 private:
     QPolygonF _polygon;
 };

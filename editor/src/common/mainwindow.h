@@ -8,6 +8,7 @@ class MainWindow;
 }
 
 class QCloseEvent;
+class Document;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -15,7 +16,7 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    
+
     void initSettings();
 
 protected:
@@ -23,6 +24,7 @@ protected:
 
 private:
     Ui::MainWindow *ui;
+    Document *document;
 };
 
 #endif // MAINWINDOW_H

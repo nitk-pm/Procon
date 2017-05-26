@@ -16,6 +16,8 @@ public:
     void sceneEvent(QGraphicsSceneMouseEvent *event);
     void setDeleteAction(QAction *action);
 
+    void finish();
+
 private:
     void select(ObjectModel *obj);
     void reselect(ObjectModel *obj);

@@ -10,7 +10,7 @@
 void ObjectSelector::sceneEvent(QGraphicsSceneMouseEvent *event) {
     if (event->type() == QEvent::GraphicsSceneMouseRelease) {
         auto obj = document()->getObject(event->scenePos());
-        if (obj) {
+        if (obj && !obj->isClicked()) {
             if (!object_list.empty() && event->modifiers() != Qt::ControlModifier) reselect(obj);
             else select(obj);
         }
@@ -21,6 +21,10 @@ void ObjectSelector::sceneEvent(QGraphicsSceneMouseEvent *event) {
 void ObjectSelector::setDeleteAction(QAction *action) {
     connect(this, SIGNAL(setDeleteActionFlag(bool)), action, SLOT(setEnabled(bool)));
     connect(action, SIGNAL(triggered()), this, SLOT(remove()));
+}
+
+void ObjectSelector::finish() {
+    deselect();
 }
 
 void ObjectSelector::select(ObjectModel *obj) {

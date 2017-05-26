@@ -1,6 +1,9 @@
 #include "models/document.h"
 #include "models/object_model.h"
+#include "models/polygon_object.h"
 #include "common/scene.h"
+
+#include <QtCore/QDebug>
 
 Document::Document(Scene *scene, QObject *parent) : QObject(parent) {
     setScene(scene);
@@ -25,10 +28,22 @@ void Document::removeObject(ObjectModel *object) {
 }
 
 ObjectModel* Document::getObject(const QPointF &pos) {
-    auto item = _scene->itemAt(pos, QTransform());
-    if (item && item != _scene->background()) {
+    // auto item = _scene->itemAt(pos, QTransform());
+    // auto item = _scene->selectedItems().last();
+    // if (item && item != _scene->background()) {
+    //     ObjectModel *obj = static_cast<ObjectModel*>(item);
+    //     return obj;
+    // }
+    // return nullptr;
+    auto item_list = _scene->items(pos);
+    item_list.pop_back();
+    for (auto item : item_list) {
         ObjectModel *obj = static_cast<ObjectModel*>(item);
-        return obj;
+        if (obj->id() == ObjectID::Vertex) return obj;
+        if (obj->id() == ObjectID::Polygon) {
+            auto polygon_object = static_cast<PolygonObject*>(obj);
+            if (polygon_object->containsPoint(pos)) return obj;
+        }
     }
     return nullptr;
 }

@@ -3,10 +3,11 @@
 
 #include "common/scene.h"
 #include "commands/command_manager.h"
+#include "models/document.h"
 #include "editors/editor_manager.h"
 #include "editors/vertex_plotter.h"
 #include "editors/object_selector.h"
-#include "models/document.h"
+#include "editors/polygon_creator.h"
 
 #include <QtCore/QSettings>
 #include <QtGui/QCloseEvent>
@@ -24,13 +25,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     auto vertex_plotter = new VertexPlotter();
     auto object_selector = new ObjectSelector();
+    auto polygon_creator = new PolygonCreator();
 
     object_selector->setDeleteAction(ui->action_delete);
 
     EditorManager::instance()->registerEditor(ui->action_add_vertex, vertex_plotter);
     EditorManager::instance()->registerEditor(ui->action_select, object_selector);
+    EditorManager::instance()->registerEditor(ui->action_create_polygon, polygon_creator);
     EditorManager::instance()->setDocument(document);
-    connect(EditorManager::instance(), SIGNAL(triggered(QAction*)), scene, SLOT(changeEditor(QAction*)));
+    EditorManager::instance()->connectScene(scene);
 
     CommandManager::instance()->setUndoAction(ui->action_undo);
     CommandManager::instance()->setRedoAction(ui->action_redo);

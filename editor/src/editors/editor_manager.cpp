@@ -35,4 +35,5 @@ void EditorManager::connectScene(Scene *scene) {
         connect(scene, SIGNAL(beginEditor()), editor, SLOT(begin()));
         connect(scene, SIGNAL(finishEditor()), editor, SLOT(finish()));
     }
+    connect(this, SIGNAL(triggered(QAction*)), scene, SLOT(changeEditor(QAction*)));
 }

@@ -6,6 +6,11 @@
 #include <QtGui/QBrush>
 #include <QtCore/QRectF>
 
+enum ObjectID {
+    Vertex,
+    Polygon
+};
+
 class ObjectModel : public QGraphicsItem {
 public:
     ObjectModel(QGraphicsItem *parent = 0);
@@ -13,6 +18,9 @@ public:
 
     virtual QRectF boundingRect() const = 0;
     virtual void draw(QPainter *painter) = 0;
+
+    ObjectID id() const;
+    void setId(ObjectID id);
 
     QPen pen() const;
     void setPen(const QPen &pen);
@@ -27,9 +35,11 @@ protected:
     QRectF bounding_rect;
 
 private:
+    ObjectID _id;
     QPen _pen;
     QBrush _brush;
     bool _clicked;
+    int z_value;
 };
 
 #endif /* end of include guard: OBJECT_MODEL__H */

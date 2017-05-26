@@ -8,6 +8,14 @@ void ObjectModel::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     draw(painter);
 }
 
+ObjectID ObjectModel::id() const {
+    return _id;
+}
+
+void ObjectModel::setId(ObjectID id) {
+    _id = id;
+}
+
 QPen ObjectModel::pen() const {
     return _pen;
 }
@@ -30,5 +38,11 @@ bool ObjectModel::isClicked() const {
 
 void ObjectModel::setClicked(bool clicked) {
     _clicked = clicked;
+    if (_clicked) {
+        setZValue(zValue() + 1);
+    }
+    else {
+        setZValue(zValue() - 1);
+    }
     update(bounding_rect);
 }
