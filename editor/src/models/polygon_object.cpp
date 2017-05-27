@@ -14,21 +14,10 @@ PolygonObject::PolygonObject(const QPolygonF &polygon, QGraphicsItem *parent) : 
     setPolygon(polygon);
 }
 
-QRectF PolygonObject::boundingRect() const {
-    return bounding_rect;
-}
-
 void PolygonObject::draw(QPainter *painter) {
     painter->setPen(pen());
     painter->setBrush(brush());
     painter->drawPolygon(_polygon);
-    if (isClicked()) {
-        QPen click_pen = QPen(Qt::blue);
-        click_pen.setStyle(Qt::DotLine);
-        painter->setPen(click_pen);
-        painter->setBrush(Qt::NoBrush);
-        painter->drawRect(boundingRect());
-    }
 }
 
 QPolygonF PolygonObject::polygon() const {
@@ -37,7 +26,7 @@ QPolygonF PolygonObject::polygon() const {
 
 void PolygonObject::setPolygon(const QPolygonF &polygon) {
     _polygon = polygon;
-    bounding_rect = _polygon.boundingRect();
+    setBoundingRect(_polygon.boundingRect());
 }
 
 bool PolygonObject::containsPoint(const QPointF &pos) {
@@ -57,6 +46,5 @@ bool PolygonObject::containsPoint(const QPointF &pos) {
             }
         }
     }
-    qDebug() << wn;
     return wn != 0;
 }

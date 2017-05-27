@@ -9,11 +9,7 @@ VertexObject::VertexObject(const QPointF &pos, QGraphicsItem *parent) : ObjectMo
     setZValue(3);
     setSelected(true);
     setPos(pos);
-    bounding_rect = QRectF(0, 0, Scene::BASE_SIZE, Scene::BASE_SIZE);
-}
-
-QRectF VertexObject::boundingRect() const {
-    return bounding_rect;
+    setBoundingRect(QRectF(0, 0, Scene::BASE_SIZE, Scene::BASE_SIZE));
 }
 
 void VertexObject::draw(QPainter *painter) {
@@ -22,10 +18,4 @@ void VertexObject::draw(QPainter *painter) {
 
     painter->setPen(pen());
     painter->drawEllipse(offset, r, r);
-    if (isClicked()) {
-        QPen click_pen = QPen(Qt::blue);
-        click_pen.setStyle(Qt::DotLine);
-        painter->setPen(click_pen);
-        painter->drawRect(boundingRect());
-    }
 }

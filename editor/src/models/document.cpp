@@ -28,13 +28,6 @@ void Document::removeObject(ObjectModel *object) {
 }
 
 ObjectModel* Document::getObject(const QPointF &pos) {
-    // auto item = _scene->itemAt(pos, QTransform());
-    // auto item = _scene->selectedItems().last();
-    // if (item && item != _scene->background()) {
-    //     ObjectModel *obj = static_cast<ObjectModel*>(item);
-    //     return obj;
-    // }
-    // return nullptr;
     auto item_list = _scene->items(pos);
     item_list.pop_back();
     for (auto item : item_list) {
@@ -46,4 +39,16 @@ ObjectModel* Document::getObject(const QPointF &pos) {
         }
     }
     return nullptr;
+}
+
+QList<ObjectModel*> Document::objectList() const {
+    return object_list;
+}
+
+QString Document::serialize() const {
+
+}
+
+void Document::deserialize(const QString &data) {
+
 }

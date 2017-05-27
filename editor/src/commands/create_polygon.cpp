@@ -7,6 +7,10 @@ CreatePolygon::CreatePolygon(Document *doc, PolygonObject *poly, QUndoCommand *p
     polygon = poly;
 }
 
+CreatePolygon::~CreatePolygon() {
+    delete polygon;
+}
+
 void CreatePolygon::undo() {
     document->removeObject(polygon);
 }

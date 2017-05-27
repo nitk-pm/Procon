@@ -10,6 +10,7 @@ class PolygonObject;
 class CreatePolygon : public QUndoCommand {
 public:
     CreatePolygon(Document *doc, PolygonObject *poly, QUndoCommand *parent = 0);
+    ~CreatePolygon();
     void undo();
     void redo();
 

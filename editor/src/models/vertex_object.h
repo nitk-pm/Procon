@@ -6,7 +6,6 @@
 class VertexObject : public ObjectModel {
 public:
     VertexObject(const QPointF &pos, QGraphicsItem *parent = 0);
-    QRectF boundingRect() const;
     void draw(QPainter *painter);
 };
 

@@ -8,7 +8,6 @@ class PolygonObject : public ObjectModel {
 public:
     PolygonObject(const QPolygonF &polygon, QGraphicsItem *parent = 0);
 
-    QRectF boundingRect() const;
     void draw(QPainter *painter);
 
     QPolygonF polygon() const;

@@ -29,6 +29,7 @@ void ObjectSelector::finish() {
 
 void ObjectSelector::select(ObjectModel *obj) {
     obj->setClicked(true);
+    obj->setClickedPenColor(Qt::blue);
     object_list.append(obj);
     setDeleteActionFlag(true);
 }
@@ -39,9 +40,7 @@ void ObjectSelector::reselect(ObjectModel *obj) {
 }
 
 void ObjectSelector::deselect() {
-    for (auto obj : object_list) {
-        obj->setClicked(false);
-    }
+    for (auto obj : object_list) obj->setClicked(false);
     object_list.clear();
     setDeleteActionFlag(false);
 }

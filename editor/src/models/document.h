@@ -19,8 +19,11 @@ public:
 
     void addObject(ObjectModel *object);
     void removeObject(ObjectModel *object);
-
     ObjectModel* getObject(const QPointF &pos);
+    QList<ObjectModel*> objectList() const;
+
+    QString serialize() const;
+    void deserialize(const QString &data);
 
 private:
     Scene *_scene;
