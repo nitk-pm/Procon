@@ -1,4 +1,4 @@
-bin/*
-!.exe
+editor/bin/*
+!editor/bin/*.exe
 
 build
