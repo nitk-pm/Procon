@@ -5,6 +5,7 @@
 
 class QGraphicsScene;
 class QWheelEvent;
+class QResizeEvent;
 class Scene;
 
 class SceneView : public QGraphicsView {
@@ -14,6 +15,8 @@ public:
     explicit SceneView(QWidget *parent = 0);
     ~SceneView();
     virtual void setScene(Scene *scene);
+
+    void adjustScenePos();
 
 private:
     void zoom(int delta);

@@ -7,7 +7,6 @@ VertexObject::VertexObject(const QPointF &pos, QGraphicsItem *parent) : ObjectMo
     setId(ObjectID::Vertex);
     setPen(QPen(Qt::red));
     setZValue(3);
-    setSelected(true);
     setPos(pos);
     setBoundingRect(QRectF(0, 0, Scene::BASE_SIZE, Scene::BASE_SIZE));
 }

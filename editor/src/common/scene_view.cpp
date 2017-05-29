@@ -3,6 +3,7 @@
 
 #include <QtWidgets/QScrollBar>
 #include <QtGui/QWheelEvent>
+#include <QtGui/QResizeEvent>
 #include <QtCore/QTimeLine>
 #include <QtCore/QTimer>
 
@@ -15,10 +16,14 @@ SceneView::~SceneView() {}
 void SceneView::setScene(Scene *scene) {
     QGraphicsView::setScene(scene);
     QTimer::singleShot(100, [&]() {
-        qreal w = this->rect().width() - this->scene()->width() - this->verticalScrollBar()->rect().width();
-        qreal h = this->rect().height() - this->scene()->height() - this->horizontalScrollBar()->rect().height();
-        this->translate(w / 2, h / 2);
+        this->adjustScenePos();
     });
+}
+
+void SceneView::adjustScenePos() {
+    qreal w = rect().width() - scene()->width() - verticalScrollBar()->rect().width();
+    qreal h = rect().height() - scene()->height() - horizontalScrollBar()->rect().height();
+    translate(w / 2, h / 2);
 }
 
 void SceneView::zoom(int delta) {

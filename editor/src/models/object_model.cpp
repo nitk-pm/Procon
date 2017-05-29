@@ -12,6 +12,7 @@ void ObjectModel::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     if (isClicked()) {
         QPen click_pen = QPen(clickedPenColor());
         click_pen.setStyle(Qt::DotLine);
+        click_pen.setWidth(2);
         painter->setPen(click_pen);
         painter->setBrush(Qt::NoBrush);
         painter->drawRect(boundingRect());

@@ -13,7 +13,7 @@ void PolygonCreator::sceneEvent(QGraphicsSceneMouseEvent *event) {
         if (obj && obj->id() == ObjectID::Vertex) {
             if (!obj->isClicked()) {
                 obj->setClicked(true);
-                obj->setClickedPenColor(Qt::darkGreen);
+                obj->setClickedPenColor(Qt::green);
                 object_list.append(obj);
             }
             else if (obj == object_list.first()) {
@@ -23,6 +23,10 @@ void PolygonCreator::sceneEvent(QGraphicsSceneMouseEvent *event) {
                 }
                 CommandManager::instance()->registerCommand(new CreatePolygon(document(), new PolygonObject(polygon)));
                 finish();
+            }
+            else {
+                obj->setClicked(false);
+                object_list.removeOne(obj);
             }
         }
     }

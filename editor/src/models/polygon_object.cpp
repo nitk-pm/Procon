@@ -9,7 +9,7 @@
 PolygonObject::PolygonObject(const QPolygonF &polygon, QGraphicsItem *parent) : ObjectModel(parent) {
     setId(ObjectID::Polygon);
     setPen(QPen(Qt::black));
-    setBrush(QBrush(Qt::gray));
+    setBrush(QBrush(Qt::cyan));
     setZValue(1);
     setPolygon(polygon);
 }
