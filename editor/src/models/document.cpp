@@ -2,7 +2,7 @@
 #include "models/object_model.h"
 #include "models/polygon_object.h"
 #include "common/scene.h"
-#include "util/convex_hull_of_graph.h"
+#include "util/convex_hull.h"
 
 #include <QtCore/QDebug>
 
@@ -47,21 +47,22 @@ QList<ObjectModel*> Document::objectList() const {
 }
 
 QString Document::serialize() const {
-    ConvexHullOfGraph convex_hull;
+    ConvexHull convex_hull;
 
     for (auto obj : object_list) {
         if (obj->id() == ObjectID::Polygon) {
             auto polygon = static_cast<PolygonObject*>(obj)->polygon();
             int size = polygon.count();
             for (int i = 0; i < size; i++) {
-                QPointF p1 = _scene->modifyDataPos(polygon[i]);
-                QPointF p2 = _scene->modifyDataPos(polygon[(i + 1) % size]);
-                convex_hull.addEdge(p1.x(), p1.y(), p2.x(), p2.y());
+                QPointF p = _scene->modifyDataPos(polygon[i]);
+                convex_hull.add(p.x(), p.y());
             }
         }
     }
 
     auto frame = convex_hull.get();
+
+    qDebug("frame point");
     for (auto p : frame) {
         qDebug("x = %lf, y = %lf", p.first, p.second);
     }
