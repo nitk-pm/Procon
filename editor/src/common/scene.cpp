@@ -36,11 +36,14 @@ void Scene::setBoardSize(int width, int height) {
     addItem(_background);
 }
 
-QPointF Scene::modifyPos(const QPointF &pos) {
+QPointF Scene::modifyDataPos(const QPointF &pos) {
     QPointF p = _background->mapFromScene(pos) / BASE_SIZE;
-    p = QPointF(int(p.x()) * BASE_SIZE, int(p.y()) * BASE_SIZE);
-    p = _background->mapToScene(p);
-    return std::move(p);
+    return QPointF(int(p.x()), int(p.y()));
+}
+
+QPointF Scene::modifyPos(const QPointF &pos) {
+    QPointF p = _background->mapToScene(modifyDataPos(pos) * BASE_SIZE);
+    return p;
 }
 
 QGraphicsPixmapItem* Scene::background() const {

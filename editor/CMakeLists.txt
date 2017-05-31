@@ -10,8 +10,8 @@ set(CMAKE_CXX_FLAGS "-Wall -O2 -DQT_MESSAGELOGCONTEXT -std=c++14 -static")
 set(CMAKE_BUILD_TYPE Release)
 
 #Qtを使用するために必要な処理
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)

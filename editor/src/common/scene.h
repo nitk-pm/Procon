@@ -16,6 +16,7 @@ public:
     Scene(QObject *parent = 0);
     Scene(int width, int height, QObject *parent = 0);
     void setBoardSize(int width, int height);
+    QPointF modifyDataPos(const QPointF &pos);
     QPointF modifyPos(const QPointF &pos);
     QGraphicsPixmapItem* background() const;
 

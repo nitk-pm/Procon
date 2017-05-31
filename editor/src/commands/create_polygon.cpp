@@ -17,4 +17,5 @@ void CreatePolygon::undo() {
 
 void CreatePolygon::redo() {
     document->addObject(polygon);
+    document->serialize();
 }
