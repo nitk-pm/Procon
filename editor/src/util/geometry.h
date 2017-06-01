@@ -7,62 +7,66 @@
 
 namespace rucm {
     namespace geometry {
-        const int EPS = 1e-10;
-        const double PI = 3.14159265358979;
+
+        static const int EPS = 1e-10;
+        static const double PI = 3.14159265358979;
+
         typedef std::complex<double> Point;
 
-        /* 二つの値が等しいかどうか（許容誤差を考慮） */
-        bool equal(double a, double b) {
-            return std::abs(a - b) < EPS;
-        }
-
-        double x(const Point &p) {
+        /* Pointクラスのｘ座標を返す */
+        inline double x(const Point &p) {
             return p.real();
         }
 
-        double y(const Point &p) {
+        /* Pointクラスのｙ座標を返す */
+        inline double y(const Point &p) {
             return p.imag();
         }
 
+        /* 二つの値が等しいかどうか（許容誤差を考慮） */
+        inline bool equal(double a, double b) {
+            return std::abs(a - b) < EPS;
+        }
+
         /* 内積 */
-        double dot(const Point &p, const Point &q) {
+        inline double dot(const Point &p, const Point &q) {
             return p.real() * q.real() + p.imag() * q.imag();
         }
 
         /* 外積 */
-        double cross(const Point &p, const Point &q) {
+        inline double cross(const Point &p, const Point &q) {
             return p.real() * q.imag() - p.imag() * q.real();
         }
 
         /* 大きさ */
-        double length(const Point &point) {
+        inline double length(const Point &point) {
             return std::sqrt(point.real() * point.real() + point.imag() * point.imag());
         }
 
         /* 点と点の距離 */
-        double distance(const Point &p, const Point &q) {
+        inline double distance(const Point &p, const Point &q) {
             return length(q - p);
         }
 
         /* 直線と点の距離 */
-        double distance(const Point &p1, const Point &p2, const Point &q) {
+        inline double distance(const Point &p1, const Point &p2, const Point &q) {
             return cross(p2 - p1, q - p1) / length(p2 - p1);
         }
 
         /* 直線と直線の交差判定 */
-        bool intersect(const Point &p1, const Point &p2, const Point &q1, const Point &q2) {
+        inline bool intersect(const Point &p1, const Point &p2, const Point &q1, const Point &q2) {
             double t1 = cross(p2 - p1, q1 - p1) * cross(p2 - p1, q2 - p1);
             double t2 = cross(q2 - q1, p1 - q1) * cross(q2 - q1, p2 - q1);
             return t1 <= 0 && t2 <= 0;
         }
 
         /* 正規化 */
-        Point norm(const Point &point) {
+        inline Point norm(const Point &point) {
             return point / length(point);
         }
 
         /* 角度 */
-        double radian(const Point &p1, const Point &p2, const Point &p3) {
+        inline double radian(const Point &p1, const Point &p2, const Point &p3) {
             Point p = p2 - p1;
             Point q = p3 - p1;
             double rad = std::acos(dot(p, q) / (length(p) * length(q)));
@@ -81,6 +85,14 @@ namespace rucm {
 
             void set(const std::vector<Point> &points) {
                 _points = points;
+            }
+
+            void add(const std::vector<Point> &points) {
+                _points.insert(_points.end(), points.begin(), points.end());
+            }
+
+            void add(const Point &point) {
+                _points.push_back(point);
             }
 
             std::vector<Point> points() const {

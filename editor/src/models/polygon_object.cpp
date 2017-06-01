@@ -1,10 +1,8 @@
 #include "models/polygon_object.h"
+#include "util/geometry.h"
 
 #include <QtGui/QPainter>
-#include <QtGui/QVector2D>
 #include <QtCore/QDebug>
-#include <QtCore/QtGlobal>
-#include <QtCore/qmath.h>
 
 PolygonObject::PolygonObject(const QPolygonF &polygon, QGraphicsItem *parent) : ObjectModel(parent) {
     setId(ObjectID::Polygon);
@@ -30,21 +28,9 @@ void PolygonObject::setPolygon(const QPolygonF &polygon) {
 }
 
 bool PolygonObject::containsPoint(const QPointF &pos) {
-    const int size = _polygon.size();
-    int wn = 0;
-    for (int i = 0; i < size; i++) {
-        if (_polygon[i].y() <= pos.y() && _polygon[(i + 1) % size].y() > pos.y()) {
-            qreal vt = (pos.y() - _polygon[i].y()) / (_polygon[(i + 1) % size].y() - _polygon[i].y());
-            if (pos.x() < (_polygon[i].x() + (vt * (_polygon[(i + 1) % size].x() - _polygon[i].x())))) {
-                wn++;
-            }
-        }
-        else if (_polygon[i].y() > pos.y() && _polygon[(i + 1) % size].y() <= pos.y()) {
-            qreal vt = (pos.y() - _polygon[i].y()) / (_polygon[(i + 1) % size].y() - _polygon[i].y());
-            if (pos.x() < (_polygon[i].x() + (vt * (_polygon[(i + 1) % size].x() - _polygon[i].x())))) {
-                wn--;
-            }
-        }
+    rucm::geometry::Polygon poly;
+    for (auto &p : _polygon) {
+        poly.add(rucm::geometry::Point(p.x(), p.y()));
     }
-    return wn != 0;
+    return poly.containsPoint(rucm::geometry::Point(pos.x(), pos.y()));
 }

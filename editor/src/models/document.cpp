@@ -1,8 +1,8 @@
+#include "util/geometry.h"
 #include "models/document.h"
 #include "models/object_model.h"
 #include "models/polygon_object.h"
 #include "common/scene.h"
-#include "util/geometry.h"
 
 #include <QtCore/QDebug>
 
@@ -30,14 +30,16 @@ void Document::removeObject(ObjectModel *object) {
 
 ObjectModel* Document::getObject(const QPointF &pos) {
     auto item_list = _scene->items(pos);
-    item_list.pop_back();
-    for (auto item : item_list) {
-        ObjectModel *obj = static_cast<ObjectModel*>(item);
-        if (obj->id() == ObjectID::Vertex) return obj;
-        if (obj->id() == ObjectID::Polygon) {
-            auto polygon_object = static_cast<PolygonObject*>(obj);
-            if (polygon_object->containsPoint(pos)) return obj;
-        }
+    if (!item_list.empty()) {
+        item_list.pop_back();
+        for (auto item : item_list) {
+            ObjectModel *obj = static_cast<ObjectModel*>(item);
+            if (obj->id() == ObjectID::Vertex) return obj;
+            if (obj->id() == ObjectID::Polygon) {
+                auto polygon_object = static_cast<PolygonObject*>(obj);
+                if (polygon_object->containsPoint(pos)) return obj;
+            }
+        }        
     }
     return nullptr;
 }
