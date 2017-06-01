@@ -2,7 +2,7 @@
 #include "models/object_model.h"
 #include "models/polygon_object.h"
 #include "common/scene.h"
-#include "util/convex_hull.h"
+#include "util/geometry.h"
 
 #include <QtCore/QDebug>
 
@@ -47,7 +47,8 @@ QList<ObjectModel*> Document::objectList() const {
 }
 
 QString Document::serialize() const {
-    ConvexHull convex_hull;
+    using namespace rucm;
+    geometry::ConvexHull convex_hull;
 
     for (auto obj : object_list) {
         if (obj->id() == ObjectID::Polygon) {
@@ -64,7 +65,7 @@ QString Document::serialize() const {
 
     qDebug("frame point");
     for (auto p : frame) {
-        qDebug("x = %lf, y = %lf", p.first, p.second);
+        qDebug("x = %lf, y = %lf", geometry::x(p), geometry::y(p));
     }
     return QString();
 }
