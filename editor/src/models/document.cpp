@@ -39,7 +39,7 @@ ObjectModel* Document::getObject(const QPointF &pos) {
                 auto polygon_object = static_cast<PolygonObject*>(obj);
                 if (polygon_object->containsPoint(pos)) return obj;
             }
-        }        
+        }
     }
     return nullptr;
 }
@@ -67,7 +67,7 @@ QString Document::serialize() const {
 
     qDebug("frame point");
     for (auto p : frame) {
-        qDebug("x = %lf, y = %lf", geometry::x(p), geometry::y(p));
+        qDebug("x = %lf, y = %lf", p.x(), p.y());
     }
     return QString();
 }

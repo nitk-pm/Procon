@@ -17,7 +17,7 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
     virtual void draw(QPainter *painter) = 0;
-    
+
     QRectF boundingRect() const;
 
     ObjectID id() const;
