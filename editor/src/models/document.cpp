@@ -1,8 +1,9 @@
-#include "util/geometry.h"
 #include "models/document.h"
 #include "models/object_model.h"
 #include "models/polygon_object.h"
 #include "common/scene.h"
+#include "util/geometry.h"
+#include "util/serialize.h"
 
 #include <QtCore/QDebug>
 
@@ -69,6 +70,8 @@ QString Document::serialize() const {
     for (auto p : frame) {
         qDebug("x = %lf, y = %lf", p.x(), p.y());
     }
+    auto serialize = rucm::Serialize(rucm::geometry::Polygon(frame));
+    qDebug() << QString::fromStdString(serialize.get());
     return QString();
 }
 

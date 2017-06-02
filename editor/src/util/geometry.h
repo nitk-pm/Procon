@@ -1,8 +1,8 @@
 #ifndef GEOMETRY__H
 #define GEOMETRY__H
 
-#include <complex>
 #include <vector>
+#include <algorithm>
 #include <cmath>
 
 namespace rucm {
@@ -49,6 +49,7 @@ public:
         return _y;
     }
 
+    /* 大きさ */
     double length() const {
         return std::sqrt(_x * _x + _y * _y);
     }
@@ -232,6 +233,13 @@ public:
         if (equal(_area, 0.0)) return 0;
         else if (_area > 0) return 1;
         return -1;
+    }
+
+    /* 多角形のループの向きを反転する */
+    Polygon reverse() const {
+        Polygon poly = *this;
+        std::reverse(poly._points.begin() + 1, poly._points.end());
+        return poly;
     }
 
 private:
