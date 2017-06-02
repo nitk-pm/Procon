@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace rucm {
+namespace util {
 namespace geometry {
 
 static const double EPS = 1e-10;
@@ -189,6 +189,14 @@ public:
 
     void add(const Point &point) {
         _points.push_back(point);
+    }
+
+    void add(double x, double y) {
+        add(Point(x, y));
+    }
+
+    void clear() {
+        _points.clear();
     }
 
     std::vector<Point> points() const {

@@ -50,29 +50,33 @@ QList<ObjectModel*> Document::objectList() const {
 }
 
 QString Document::serialize() const {
-    using namespace rucm;
-    geometry::ConvexHull convex_hull;
+    using namespace util;
+    util::geometry::ConvexHull convex_hull;
+    util::Serialize serialize;
+    QStringList data_list;
+    int count = 0;
 
     for (auto obj : object_list) {
         if (obj->id() == ObjectID::Polygon) {
             auto polygon = static_cast<PolygonObject*>(obj)->polygon();
             int size = polygon.count();
+            util::geometry::Polygon poly;
             for (int i = 0; i < size; i++) {
                 QPointF p = _scene->modifyDataPos(polygon[i]);
+                poly.add(p.x(), p.y());
                 convex_hull.add(p.x(), p.y());
             }
+            serialize.set(poly);
+            data_list.append(QString::fromStdString(serialize.get()));
+            count++;
         }
     }
+    serialize.set(util::geometry::Polygon(convex_hull.get()));
+    data_list.append(QString::fromStdString(serialize.get()));
 
-    auto frame = convex_hull.get();
-
-    qDebug("frame point");
-    for (auto p : frame) {
-        qDebug("x = %lf, y = %lf", p.x(), p.y());
-    }
-    auto serialize = rucm::Serialize(rucm::geometry::Polygon(frame));
-    qDebug() << QString::fromStdString(serialize.get());
-    return QString();
+    data_list.insert(0, QString("%1").arg(count));
+    qDebug() << data_list.join(":");
+    return data_list.join(":");
 }
 
 void Document::deserialize(const QString &data) {

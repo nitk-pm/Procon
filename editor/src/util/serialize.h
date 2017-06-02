@@ -4,7 +4,7 @@
 #include "util/geometry.h"
 #include <string>
 
-namespace rucm {
+namespace util {
 
 class Serialize {
 public:
@@ -20,6 +20,7 @@ public:
 
         calcOffset(poly);
 
+        _polygon.clear();
         for (auto &p : poly.points()) {
             _polygon.add(p - _offset);
         }

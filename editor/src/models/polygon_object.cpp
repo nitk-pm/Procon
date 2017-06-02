@@ -28,9 +28,9 @@ void PolygonObject::setPolygon(const QPolygonF &polygon) {
 }
 
 bool PolygonObject::containsPoint(const QPointF &pos) {
-    rucm::geometry::Polygon poly;
+    util::geometry::Polygon poly;
     for (auto &p : _polygon) {
-        poly.add(rucm::geometry::Point(p.x(), p.y()));
+        poly.add(util::geometry::Point(p.x(), p.y()));
     }
-    return poly.containsPoint(rucm::geometry::Point(pos.x(), pos.y()));
+    return poly.containsPoint(util::geometry::Point(pos.x(), pos.y()));
 }
