@@ -3,26 +3,32 @@
 
 #include <QtWidgets/QActionGroup>
 #include <QtCore/QList>
+#include <QtCore/QStack>
 
 class Editor;
 class Document;
 class Scene;
 
 class EditorManager : public QActionGroup {
+    Q_OBJECT
+
 public:
     static EditorManager* instance();
 
-    QList<Editor*> editors() const;
-    void registerEditor(QAction *action, Editor *editor, bool default_clicked = false);
+    void registerEditor(QAction *action, Editor *editor);
     void setDocument(Document *document);
-    void connectScene(Scene *scene);
+    void setScene(Scene *scene);
+
+public slots:
+    void selectEditorAt(int index);
+    void changeEditor(QAction *action);
 
 private:
     Q_DISABLE_COPY(EditorManager);
     EditorManager();
 
-    QAction *default_checked_action;
-    QList<Editor*> _editors;
+    Scene *_scene;
+    QStack<Editor*> stack;
 };
 
 #endif /* end of include guard: EDITOR_MANAGER__H */

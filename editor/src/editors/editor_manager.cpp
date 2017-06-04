@@ -10,39 +10,52 @@ EditorManager* EditorManager::instance() {
 
 EditorManager::EditorManager() : QActionGroup(0) {
     setExclusive(true);
+    connect(this, SIGNAL(triggered(QAction*)), this, SLOT(changeEditor(QAction*)));
+    _scene = nullptr;
 }
 
-QList<Editor*> EditorManager::editors() const {
-    return _editors;
-}
-
-void EditorManager::registerEditor(QAction *action, Editor *editor, bool default_clicked) {
+void EditorManager::registerEditor(QAction *action, Editor *editor) {
     QVariant variant;
     variant.setValue(editor);
     action->setData(variant);
     addAction(action);
-    _editors.append(editor);
 
-    if (default_clicked) {
-        default_checked_action = action;
+    if (_scene) {
+        connect(_scene, SIGNAL(beginEditor()), editor, SLOT(begin()));
+        connect(_scene, SIGNAL(finishEditor()), editor, SLOT(finish()));
+    }
+    else {
+        stack.push(editor);
     }
 }
 
 void EditorManager::setDocument(Document *document) {
-    for (auto editor : _editors) {
+    for (auto &action : actions()) {
+        Editor *editor = action->data().value<Editor*>();
         editor->setDocument(document);
     }
 }
 
-void EditorManager::connectScene(Scene *scene) {
-    for (auto editor : _editors) {
-        connect(scene, SIGNAL(beginEditor()), editor, SLOT(begin()));
-        connect(scene, SIGNAL(finishEditor()), editor, SLOT(finish()));
-    }
-    connect(this, SIGNAL(triggered(QAction*)), scene, SLOT(changeEditor(QAction*)));
+void EditorManager::setScene(Scene *scene) {
+    _scene = scene;
 
-    if (default_checked_action) {
-        default_checked_action->setChecked(true);
-        scene->changeEditor(default_checked_action);
+    while(!stack.empty()) {
+        Editor *editor = stack.pop();
+        connect(_scene, SIGNAL(beginEditor()), editor, SLOT(begin()));
+        connect(_scene, SIGNAL(finishEditor()), editor, SLOT(finish()));
     }
+}
+
+void EditorManager::selectEditorAt(int index) {
+    auto action = actions().value(index);
+    if (action) {
+        action->setChecked(true);
+        Editor *editor = action->data().value<Editor*>();
+        _scene->changeEditor(editor);
+    }
+}
+
+void EditorManager::changeEditor(QAction *action) {
+    Editor *editor = action->data().value<Editor*>();
+    if (editor) _scene->changeEditor(editor);
 }

@@ -20,8 +20,7 @@ public:
     QPointF modifyPos(const QPointF &pos);
     QGraphicsPixmapItem* background() const;
 
-public slots:
-    void changeEditor(QAction *action);
+    void changeEditor(QObject *editor);
 
 signals:
     void beginEditor();

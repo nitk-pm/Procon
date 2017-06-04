@@ -29,11 +29,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     object_selector->setDeleteAction(ui->action_delete);
 
-    EditorManager::instance()->registerEditor(ui->action_add_vertex, vertex_plotter, true);
+    EditorManager::instance()->registerEditor(ui->action_add_vertex, vertex_plotter);
     EditorManager::instance()->registerEditor(ui->action_select, object_selector);
     EditorManager::instance()->registerEditor(ui->action_create_polygon, polygon_creator);
+    EditorManager::instance()->setScene(scene);
     EditorManager::instance()->setDocument(document);
-    EditorManager::instance()->connectScene(scene);
+
+    EditorManager::instance()->selectEditorAt(0);
 
     CommandManager::instance()->setUndoAction(ui->action_undo);
     CommandManager::instance()->setRedoAction(ui->action_redo);

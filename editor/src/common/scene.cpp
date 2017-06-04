@@ -1,9 +1,7 @@
 #include "common/scene.h"
-#include "editors/editor.h"
 #include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QGraphicsPixmapItem>
 #include <QtWidgets/QGraphicsSceneMouseEvent>
-#include <QtWidgets/QAction>
 #include <QtGui/QImage>
 #include <QtGui/QPixmap>
 
@@ -50,10 +48,10 @@ QGraphicsPixmapItem* Scene::background() const {
     return _background;
 }
 
-void Scene::changeEditor(QAction *action) {
+void Scene::changeEditor(QObject *editor) {
     removeEventFilter(current_editor);
     finishEditor();
-    current_editor = action->data().value<QObject*>();
+    current_editor = editor;
     beginEditor();
     installEventFilter(current_editor);
 }
