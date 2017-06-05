@@ -20,6 +20,22 @@ Document::~Document() {
     object_list.clear();
 }
 
+QString Document::filename() const {
+    return _filename;
+}
+
+void Document::setFilename(QString filename) {
+    _filename = filename;
+}
+
+bool Document::isUpdated() const {
+    return _updated;
+}
+
+void Document::setUpdated(bool updated) {
+    _updated = updated;
+}
+
 Scene* Document::scene() const {
     return _scene;
 }
@@ -31,13 +47,13 @@ void Document::setScene(Scene *scene) {
 void Document::addObject(ObjectModel *object) {
     object_list.append(object);
     _scene->addItem(object);
-    setUpdated(true);
+    if (object->id() == ObjectID::Polygon) setUpdated(true);
 }
 
 void Document::removeObject(ObjectModel *object) {
     if (object_list.removeOne(object)) {
         _scene->removeItem(object);
-        setUpdated(true);
+        if (object->id() == ObjectID::Polygon) setUpdated(true);
     }
 }
 
@@ -67,7 +83,7 @@ void Document::clear() {
         delete obj;
     }
     object_list.clear();
-    setUpdated(true);
+    setUpdated(false);
 }
 
 QString Document::serialize() const {
@@ -91,23 +107,15 @@ QString Document::serialize() const {
             count++;
         }
     }
-    serialize.set(util::geometry::Polygon(convex_hull.get()));
-    data_list.append(QString::fromStdString(serialize.get()));
-
-    data_list.insert(0, QString("%1").arg(count));
-    QString result = data_list.join(":");
-    qDebug() << result;
-    return result;
+    if (count != 0) {
+        serialize.set(util::geometry::Polygon(convex_hull.get()));
+        data_list.append(QString::fromStdString(serialize.get()));
+        data_list.insert(0, QString("%1").arg(count));
+        return data_list.join(":");
+    }
+    return QString();
 }
 
 void Document::deserialize(const QString &data) {
 
-}
-
-bool Document::isUpdated() const {
-    return _updated_status;
-}
-
-void Document::setUpdated(bool updated) {
-    _updated_status = updated;
 }

@@ -14,6 +14,12 @@ public:
     Document(Scene *scene, QObject *parent = 0);
     ~Document();
 
+    QString filename() const;
+    void setFilename(QString filename);
+
+    bool isUpdated() const;
+    void setUpdated(bool updated);
+
     Scene* scene() const;
     void setScene(Scene *scene);
 
@@ -26,11 +32,9 @@ public:
     QString serialize() const;
     void deserialize(const QString &data);
 
-    bool isUpdated() const;
-    void setUpdated(bool updated);
-
 private:
-    bool _updated_status;
+    QString _filename;
+    bool _updated;
     Scene *_scene;
     QList<ObjectModel*> object_list;
 };

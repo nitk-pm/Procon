@@ -7,6 +7,7 @@ namespace Ui {
 class MainWindow;
 }
 
+class QFile;
 class QCloseEvent;
 class EditorManager;
 class CommandManager;
@@ -22,9 +23,12 @@ public:
     void initSettings();
 
 public slots:
-    void saveFile();
-    void openFile();
+    int checkUpdatedDocument();
+    void save();
+    void saveAs();
     void newFile();
+    void write(QFile &file);
+    void reset();
 
 protected:
     void closeEvent(QCloseEvent *event);
