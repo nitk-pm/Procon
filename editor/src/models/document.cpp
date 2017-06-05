@@ -9,6 +9,15 @@
 
 Document::Document(Scene *scene, QObject *parent) : QObject(parent) {
     setScene(scene);
+    setUpdated(false);
+}
+
+Document::~Document() {
+    for (auto obj : object_list) {
+        _scene->removeItem(obj);
+        delete obj;
+    }
+    object_list.clear();
 }
 
 Scene* Document::scene() const {
@@ -22,11 +31,14 @@ void Document::setScene(Scene *scene) {
 void Document::addObject(ObjectModel *object) {
     object_list.append(object);
     _scene->addItem(object);
+    setUpdated(true);
 }
 
 void Document::removeObject(ObjectModel *object) {
-    object_list.removeOne(object);
-    _scene->removeItem(object);
+    if (object_list.removeOne(object)) {
+        _scene->removeItem(object);
+        setUpdated(true);
+    }
 }
 
 ObjectModel* Document::getObject(const QPointF &pos) {
@@ -49,8 +61,15 @@ QList<ObjectModel*> Document::objectList() const {
     return object_list;
 }
 
+void Document::clear() {
+    for (auto &obj : object_list) {
+        _scene->removeItem(obj);
+    }
+    object_list.clear();
+    setUpdated(true);
+}
+
 QString Document::serialize() const {
-    using namespace util;
     util::geometry::ConvexHull convex_hull;
     util::Serialize serialize;
     QStringList data_list;
@@ -75,10 +94,19 @@ QString Document::serialize() const {
     data_list.append(QString::fromStdString(serialize.get()));
 
     data_list.insert(0, QString("%1").arg(count));
-    qDebug() << data_list.join(":");
-    return data_list.join(":");
+    QString result = data_list.join(":");
+    qDebug() << result;
+    return result;
 }
 
 void Document::deserialize(const QString &data) {
 
+}
+
+bool Document::isUpdated() const {
+    return _updated;
+}
+
+void Document::setUpdated(bool updated) {
+    _updated = updated;
 }

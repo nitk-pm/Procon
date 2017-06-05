@@ -13,6 +13,9 @@ class CommandManager : public QObject {
 public:
     static CommandManager* instance();
 
+    QUndoStack* undoStack() const;
+    void setUndoStack(QUndoStack *stack);
+
     QAction* undoAction() const;
     void setUndoAction(QAction *undo_action);
 
@@ -25,9 +28,9 @@ private:
     Q_DISABLE_COPY(CommandManager);
     CommandManager();
 
+    QUndoStack *_stack;
     QAction *_undo_action;
     QAction *_redo_action;
-    QUndoStack *stack;
 };
 
 #endif /* end of include guard: COMMAND_MANAGER__H */

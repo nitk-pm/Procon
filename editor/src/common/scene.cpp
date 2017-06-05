@@ -44,6 +44,10 @@ QPointF Scene::modifyPos(const QPointF &pos) {
     return p;
 }
 
+QPointF Scene::convertDataPos(int x, int y) {
+    QPointF p = _background->mapToScene(QPointF(x, y) * BASE_SIZE);
+}
+
 QGraphicsPixmapItem* Scene::background() const {
     return _background;
 }

@@ -5,7 +5,6 @@
 
 class QGraphicsPixmapItem;
 class QGraphicsSceneMouseEvent;
-class QAction;
 
 class Scene : public QGraphicsScene {
     Q_OBJECT
@@ -18,6 +17,7 @@ public:
     void setBoardSize(int width, int height);
     QPointF modifyDataPos(const QPointF &pos);
     QPointF modifyPos(const QPointF &pos);
+    QPointF convertDataPos(int x, int y);
     QGraphicsPixmapItem* background() const;
 
     void changeEditor(QObject *editor);

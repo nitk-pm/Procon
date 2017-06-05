@@ -8,6 +8,7 @@ AddVertex::AddVertex(Document *doc, VertexObject *obj, QUndoCommand *parent) : Q
 }
 
 AddVertex::~AddVertex() {
+    document->removeObject(object);
     delete object;
 }
 

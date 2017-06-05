@@ -10,6 +10,7 @@ class ObjectModel;
 class RemoveObject : public QUndoCommand {
 public:
     RemoveObject(Document *doc, QList<ObjectModel*> list);
+    ~RemoveObject();
     void undo();
     void redo();
 

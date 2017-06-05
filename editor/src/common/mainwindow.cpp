@@ -21,11 +21,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->view->setScene(scene);
 
-    auto document = new Document(scene);
-
-    auto vertex_plotter = new VertexPlotter();
-    auto object_selector = new ObjectSelector();
-    auto polygon_creator = new PolygonCreator();
+    document = new Document(scene);
+    vertex_plotter = new VertexPlotter();
+    object_selector = new ObjectSelector();
+    polygon_creator = new PolygonCreator();
+    stack = new QUndoStack();
 
     object_selector->setDeleteAction(ui->action_delete);
 
@@ -37,11 +37,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     EditorManager::instance()->selectEditorAt(0);
 
+    CommandManager::instance()->setUndoStack(stack);
     CommandManager::instance()->setUndoAction(ui->action_undo);
     CommandManager::instance()->setRedoAction(ui->action_redo);
 }
 
 MainWindow::~MainWindow() {
+    delete stack;
+    delete vertex_plotter;
+    delete object_selector;
+    delete polygon_creator;
+    delete document;
     delete ui;
 }
 

@@ -7,6 +7,14 @@ RemoveObject::RemoveObject(Document *doc, QList<ObjectModel*> list) : QUndoComma
     remove_list = list;
 }
 
+RemoveObject::~RemoveObject() {
+    for (auto obj : remove_list) {
+        document->removeObject(obj);
+        delete obj;
+    }
+    remove_list.clear();
+}
+
 void RemoveObject::undo() {
     for (auto obj : remove_list) {
         document->addObject(obj);
