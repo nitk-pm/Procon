@@ -11,10 +11,10 @@ class CommandManager : public QObject {
     Q_OBJECT
 
 public:
-    static CommandManager* instance();
+    CommandManager(QUndoStack *stack);
+    ~CommandManager();
 
     QUndoStack* undoStack() const;
-    void setUndoStack(QUndoStack *stack);
 
     QAction* undoAction() const;
     void setUndoAction(QAction *undo_action);
@@ -25,9 +25,6 @@ public:
     void registerCommand(QUndoCommand *command);
 
 private:
-    Q_DISABLE_COPY(CommandManager);
-    CommandManager();
-
     QUndoStack *_stack;
     QAction *_undo_action;
     QAction *_redo_action;

@@ -8,10 +8,8 @@ class MainWindow;
 }
 
 class QCloseEvent;
-class QUndoStack;
-class VertexPlotter;
-class ObjectSelector;
-class PolygonCreator;
+class EditorManager;
+class CommandManager;
 class Document;
 
 class MainWindow : public QMainWindow {
@@ -33,10 +31,8 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-    QUndoStack *stack;
-    VertexPlotter *vertex_plotter;
-    ObjectSelector *object_selector;
-    PolygonCreator *polygon_creator;
+    EditorManager *editor_manager;
+    CommandManager *command_manager;
     Document *document;
 };
 

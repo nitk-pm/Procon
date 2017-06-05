@@ -21,7 +21,7 @@ void PolygonCreator::sceneEvent(QGraphicsSceneMouseEvent *event) {
                 for (auto p : object_list) {
                     polygon << (p->pos() + p->boundingRect().center());
                 }
-                CommandManager::instance()->registerCommand(new CreatePolygon(document(), new PolygonObject(polygon)));
+                commandManager()->registerCommand(new CreatePolygon(document(), new PolygonObject(polygon)));
                 finish();
             }
             else {

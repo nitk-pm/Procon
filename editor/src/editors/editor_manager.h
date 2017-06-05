@@ -5,30 +5,29 @@
 #include <QtCore/QList>
 #include <QtCore/QStack>
 
+namespace Ui {
+class MainWindow;
+}
+
 class Editor;
 class Document;
-class Scene;
+class CommandManager;
 
 class EditorManager : public QActionGroup {
     Q_OBJECT
 
 public:
-    static EditorManager* instance();
-
+    EditorManager(Document *document, CommandManager *manager, Ui::MainWindow *ui);
     void registerEditor(QAction *action, Editor *editor);
-    void setDocument(Document *document);
-    void setScene(Scene *scene);
 
 public slots:
     void selectEditorAt(int index);
     void changeEditor(QAction *action);
 
 private:
-    Q_DISABLE_COPY(EditorManager);
-    EditorManager();
-
-    Scene *_scene;
-    QStack<Editor*> stack;
+    Document *_document;
+    CommandManager *_manager;
+    Ui::MainWindow *_ui;
 };
 
 #endif /* end of include guard: EDITOR_MANAGER__H */

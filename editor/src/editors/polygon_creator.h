@@ -9,9 +9,7 @@ class ObjectModel;
 
 class PolygonCreator : public Editor {
 public:
-    PolygonCreator() {}
     void sceneEvent(QGraphicsSceneMouseEvent *event);
-
     void finish();
 
 private:

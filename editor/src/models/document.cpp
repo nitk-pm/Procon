@@ -64,6 +64,7 @@ QList<ObjectModel*> Document::objectList() const {
 void Document::clear() {
     for (auto &obj : object_list) {
         _scene->removeItem(obj);
+        delete obj;
     }
     object_list.clear();
     setUpdated(true);

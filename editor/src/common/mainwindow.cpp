@@ -19,35 +19,26 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     initSettings();
 
     auto scene = new Scene(101, 65);
-
     ui->view->setScene(scene);
 
     document = new Document(scene);
-    vertex_plotter = new VertexPlotter();
-    object_selector = new ObjectSelector();
-    polygon_creator = new PolygonCreator();
-    stack = new QUndoStack();
 
-    object_selector->setDeleteAction(ui->action_delete);
+    command_manager = new CommandManager(new QUndoStack());
+    command_manager->setUndoAction(ui->action_undo);
+    command_manager->setRedoAction(ui->action_redo);
 
-    EditorManager::instance()->registerEditor(ui->action_add_vertex, vertex_plotter);
-    EditorManager::instance()->registerEditor(ui->action_select, object_selector);
-    EditorManager::instance()->registerEditor(ui->action_create_polygon, polygon_creator);
-    EditorManager::instance()->setScene(scene);
-    EditorManager::instance()->setDocument(document);
+    editor_manager = new EditorManager(document, command_manager, ui);
+    editor_manager->registerEditor(ui->action_add_vertex, new VertexPlotter());
+    editor_manager->registerEditor(ui->action_select, new ObjectSelector());
+    editor_manager->registerEditor(ui->action_create_polygon, new PolygonCreator());
+    editor_manager->selectEditorAt(0);
 
-    EditorManager::instance()->selectEditorAt(0);
-
-    CommandManager::instance()->setUndoStack(stack);
-    CommandManager::instance()->setUndoAction(ui->action_undo);
-    CommandManager::instance()->setRedoAction(ui->action_redo);
+    connect(ui->action_new_file, SIGNAL(triggered()), this, SLOT(newFile()));
 }
 
 MainWindow::~MainWindow() {
-    delete vertex_plotter;
-    delete object_selector;
-    delete polygon_creator;
-    delete stack;
+    delete editor_manager;
+    delete command_manager;
     delete document;
     delete ui;
 }
@@ -70,7 +61,8 @@ void MainWindow::openFile() {
 }
 
 void MainWindow::newFile() {
-
+    command_manager->undoStack()->clear();
+    document->clear();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {

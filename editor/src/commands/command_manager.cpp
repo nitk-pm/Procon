@@ -2,20 +2,16 @@
 
 #include <QtWidgets/QAction>
 
-CommandManager* CommandManager::instance() {
-    static CommandManager manager;
-    return &manager;
+CommandManager::CommandManager(QUndoStack *stack) : QObject(nullptr) {
+    _stack = stack;
 }
 
-CommandManager::CommandManager() : QObject(nullptr) {
+CommandManager::~CommandManager() {
+    delete _stack;
 }
 
 QUndoStack* CommandManager::undoStack() const {
     return _stack;
-}
-
-void CommandManager::setUndoStack(QUndoStack *stack) {
-    _stack = stack;
 }
 
 QAction* CommandManager::undoAction() const {

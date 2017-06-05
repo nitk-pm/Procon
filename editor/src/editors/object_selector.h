@@ -12,10 +12,12 @@ class ObjectSelector : public Editor {
     Q_OBJECT
 
 public:
-    ObjectSelector() {}
     void sceneEvent(QGraphicsSceneMouseEvent *event);
-    void setDeleteAction(QAction *action);
 
+protected:
+    void connectAction(Ui::MainWindow *ui);
+
+public slots:
     void finish();
 
 private:

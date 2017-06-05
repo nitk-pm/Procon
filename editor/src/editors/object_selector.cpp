@@ -1,3 +1,4 @@
+#include "ui_window_layout.h"
 #include "editors/object_selector.h"
 #include "models/document.h"
 #include "models/object_model.h"
@@ -18,9 +19,9 @@ void ObjectSelector::sceneEvent(QGraphicsSceneMouseEvent *event) {
     }
 }
 
-void ObjectSelector::setDeleteAction(QAction *action) {
-    connect(this, SIGNAL(setDeleteActionFlag(bool)), action, SLOT(setEnabled(bool)));
-    connect(action, SIGNAL(triggered()), this, SLOT(remove()));
+void ObjectSelector::connectAction(Ui::MainWindow *ui) {
+    connect(this, SIGNAL(setDeleteActionFlag(bool)), ui->action_delete, SLOT(setEnabled(bool)));
+    connect(ui->action_delete, SIGNAL(triggered()), this, SLOT(remove()));
 }
 
 void ObjectSelector::finish() {
@@ -46,6 +47,6 @@ void ObjectSelector::deselect() {
 }
 
 void ObjectSelector::remove() {
-    CommandManager::instance()->registerCommand(new RemoveObject(document(), object_list));
+    commandManager()->registerCommand(new RemoveObject(document(), object_list));
     deselect();
 }

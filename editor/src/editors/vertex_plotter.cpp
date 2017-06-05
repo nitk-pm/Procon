@@ -13,7 +13,7 @@ void VertexPlotter::sceneEvent(QGraphicsSceneMouseEvent *event) {
         auto obj = document()->getObject(event->scenePos());
         if (!obj) {
             auto pos = document()->scene()->modifyPos(event->scenePos());
-            CommandManager::instance()->registerCommand(new AddVertex(document(), new VertexObject(pos)));
+            commandManager()->registerCommand(new AddVertex(document(), new VertexObject(pos)));
         }
     }
 }
