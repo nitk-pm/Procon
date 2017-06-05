@@ -12,6 +12,7 @@
 #include <QtCore/QSettings>
 #include <QtGui/QCloseEvent>
 #include <QtCore/QTimer>
+#include <QtCore/QFile>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
@@ -43,10 +44,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 MainWindow::~MainWindow() {
-    delete stack;
     delete vertex_plotter;
     delete object_selector;
     delete polygon_creator;
+    delete stack;
     delete document;
     delete ui;
 }
@@ -58,6 +59,18 @@ void MainWindow::initSettings() {
         this->restoreGeometry(settings.value("main/geometry").toByteArray());
         this->restoreState(settings.value("main/windowState").toByteArray());
     });
+}
+
+void MainWindow::saveFile() {
+
+}
+
+void MainWindow::openFile() {
+
+}
+
+void MainWindow::newFile() {
+
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {

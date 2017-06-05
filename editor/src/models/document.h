@@ -11,7 +11,7 @@ class Document : public QObject {
     Q_OBJECT
 
 public:
-    Document(QObject *parent = 0) : QObject(parent), _scene(0), _updated(false) {}
+    Document(QObject *parent = 0) : QObject(parent), _scene(0), _updated_status(false) {}
     Document(Scene *scene, QObject *parent = 0);
     ~Document();
 
@@ -31,7 +31,7 @@ public:
     void setUpdated(bool updated);
 
 private:
-    bool _updated;
+    bool _updated_status;
     Scene *_scene;
     QList<ObjectModel*> object_list;
 };

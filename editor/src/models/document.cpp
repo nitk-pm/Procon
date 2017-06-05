@@ -104,9 +104,9 @@ void Document::deserialize(const QString &data) {
 }
 
 bool Document::isUpdated() const {
-    return _updated;
+    return _updated_status;
 }
 
 void Document::setUpdated(bool updated) {
-    _updated = updated;
+    _updated_status = updated;
 }

@@ -14,6 +14,10 @@ QUndoStack* CommandManager::undoStack() const {
     return _stack;
 }
 
+void CommandManager::setUndoStack(QUndoStack *stack) {
+    _stack = stack;
+}
+
 QAction* CommandManager::undoAction() const {
     return _undo_action;
 }
