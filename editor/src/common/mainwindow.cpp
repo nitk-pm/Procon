@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     editor_manager->registerEditor(ui->action_create_polygon, new PolygonCreator());
     editor_manager->selectEditorAt(0);
 
+    connect(ui->action_open_file, SIGNAL(triggered()), this, SLOT(open()));
     connect(ui->action_new_file, SIGNAL(triggered()), this, SLOT(newFile()));
     connect(ui->action_save_file, SIGNAL(triggered()), this, SLOT(save()));
     connect(ui->action_save_as_file, SIGNAL(triggered()), this, SLOT(saveAs()));
@@ -70,6 +71,30 @@ int MainWindow::checkUpdatedDocument() {
     }
 
     return QMessageBox::NoButton;
+}
+
+void MainWindow::open() {
+    int message = checkUpdatedDocument();
+    switch(message) {
+        case QMessageBox::Save:
+            save();
+            break;
+
+        case QMessageBox::SaveAll:
+            saveAs();
+            break;
+    };
+
+    QString filename = QFileDialog::getOpenFileName(this,tr("ファイルを開く"),"",tr("テキスト (*.txt)"));
+    if (!filename.isEmpty()) {
+        QFile file(filename);
+        if (file.open(QIODevice::ReadOnly)) {
+            QTextStream data(&file);
+            reset();
+            document->setFilename(filename.split('.').front());
+            document->deserialize(data.readAll());
+        }
+    }
 }
 
 void MainWindow::save() {

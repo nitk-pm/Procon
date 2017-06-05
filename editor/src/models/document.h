@@ -29,7 +29,7 @@ public:
     QList<ObjectModel*> objectList() const;
     void clear();
 
-    QString serialize() const;
+    QString serialize(bool cut_offset = true) const;
     void deserialize(const QString &data);
 
 private:

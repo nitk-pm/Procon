@@ -26,10 +26,12 @@ public:
         }
     }
 
-    std::string get() const {
+    std::string get(bool cut_offset) const {
         std::string result;
         result += std::to_string(_polygon.points().size()) + ' ';
-        for (auto &p : _polygon.points()) {
+        for (auto p : _polygon.points()) {
+            if (!cut_offset) p += _offset;
+
             result += std::to_string(int(p.x())) + ' ';
             result += std::to_string(int(p.y())) + ' ';
         }

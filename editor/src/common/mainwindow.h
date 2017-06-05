@@ -24,6 +24,7 @@ public:
 
 public slots:
     int checkUpdatedDocument();
+    void open();
     void save();
     void saveAs();
     void newFile();

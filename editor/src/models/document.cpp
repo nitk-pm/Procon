@@ -1,5 +1,6 @@
 #include "models/document.h"
 #include "models/object_model.h"
+#include "models/vertex_object.h"
 #include "models/polygon_object.h"
 #include "common/scene.h"
 #include "util/geometry.h"
@@ -86,7 +87,7 @@ void Document::clear() {
     setUpdated(false);
 }
 
-QString Document::serialize() const {
+QString Document::serialize(bool cut_offset) const {
     util::geometry::ConvexHull convex_hull;
     util::Serialize serialize;
     QStringList data_list;
@@ -103,13 +104,13 @@ QString Document::serialize() const {
                 convex_hull.add(p.x(), p.y());
             }
             serialize.set(poly);
-            data_list.append(QString::fromStdString(serialize.get()));
+            data_list.append(QString::fromStdString(serialize.get(cut_offset)));
             count++;
         }
     }
     if (count != 0) {
         serialize.set(util::geometry::Polygon(convex_hull.get()));
-        data_list.append(QString::fromStdString(serialize.get()));
+        data_list.append(QString::fromStdString(serialize.get(false)));
         data_list.insert(0, QString("%1").arg(count));
         return data_list.join(":");
     }
@@ -117,5 +118,27 @@ QString Document::serialize() const {
 }
 
 void Document::deserialize(const QString &data) {
+    auto data_list = data.split(':');
+    data_list.pop_front();
+    data_list.pop_back();
 
+    qDebug() << data_list;
+
+    for (auto data : data_list) {
+        auto d = data.split(" ");
+        qDebug() << d;
+
+        int count = d.front().toInt();
+        d.pop_front();
+
+
+        QPolygonF polygon;
+        for (int i = 0; i < count; i+=2) {
+            QPointF p = _scene->convertDataPos(d[i].toInt(), d[i + 1].toInt());
+            VertexObject *vertex = new VertexObject(p);
+            polygon << (vertex->pos() + vertex->boundingRect().center());
+            addObject(vertex);
+        }
+        addObject(new PolygonObject(polygon));
+    }
 }
