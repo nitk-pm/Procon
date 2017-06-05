@@ -1,61 +1,53 @@
 #include "common/mainwindow.h"
 #include "ui_window_layout.h"
+
 #include "common/scene.h"
-#include "common/data_container.h"
-#include "mode/plotting_mode.h"
-#include "mode/select_mode.h"
-#include "command/command.h"
+#include "commands/command_manager.h"
+#include "models/document.h"
+#include "editors/editor_manager.h"
+#include "editors/vertex_plotter.h"
+#include "editors/object_selector.h"
+#include "editors/polygon_creator.h"
 
 #include <QtCore/QSettings>
 #include <QtGui/QCloseEvent>
+#include <QtCore/QDebug>
 #include <QtCore/QTimer>
-#include <QtWidgets/QActionGroup>
+#include <QtCore/QFile>
+#include <QtCore/QTextStream>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-    initData();
-    initUndoRedo();
     initSettings();
+
+    auto scene = new Scene(101, 65);
+    ui->view->setScene(scene);
+
+    document = new Document(scene);
+    document->setFilename(tr("無題のドキュメント"));
+
+    command_manager = new CommandManager(new QUndoStack());
+    command_manager->setUndoAction(ui->action_undo);
+    command_manager->setRedoAction(ui->action_redo);
+
+    editor_manager = new EditorManager(document, command_manager, ui);
+    editor_manager->registerEditor(ui->action_add_vertex, new VertexPlotter());
+    editor_manager->registerEditor(ui->action_select, new ObjectSelector());
+    editor_manager->registerEditor(ui->action_create_polygon, new PolygonCreator());
+    editor_manager->selectEditorAt(0);
+
+    connect(ui->action_new_file, SIGNAL(triggered()), this, SLOT(newFile()));
+    connect(ui->action_save_file, SIGNAL(triggered()), this, SLOT(save()));
+    connect(ui->action_save_as_file, SIGNAL(triggered()), this, SLOT(saveAs()));
 }
 
 MainWindow::~MainWindow() {
-    delete container;
-    delete mode;
+    delete editor_manager;
+    delete command_manager;
+    delete document;
     delete ui;
-}
-
-void MainWindow::initData() {
-    Scene *scene = new Scene();
-    ui->view->setScene(scene);
-
-    mode = new QActionGroup(this);
-    mode->setExclusive(true);
-    mode->addAction(ui->action_select);
-    mode->addAction(ui->action_add_vertex);
-    mode->addAction(ui->action_create_polygon);
-    connect(mode, SIGNAL(triggered(QAction*)), scene, SLOT(changeMode(QAction*)));
-
-    container = new DataContainer(scene, 101, 65);
-
-    QVariant select_mode_variant;
-    auto select_mode = new SelectMode(container);
-    select_mode_variant.setValue(select_mode);
-
-    QVariant plotting_mode_variant;
-    auto plotting_mode = new PlottingMode(container);
-    plotting_mode_variant.setValue(plotting_mode);
-
-    ui->action_select->setData(select_mode_variant);
-    ui->action_add_vertex->setData(plotting_mode_variant);
-
-    connect(select_mode, SIGNAL(setDeleteActionFlag(bool)), ui->action_delete, SLOT(setEnabled(bool)));
-}
-
-void MainWindow::initUndoRedo() {
-    connect(ui->action_undo, SIGNAL(triggered()), Command::stack, SLOT(undo()));
-    connect(ui->action_redo, SIGNAL(triggered()), Command::stack, SLOT(redo()));
-    connect(Command::stack, SIGNAL(canUndoChanged(bool)), ui->action_undo, SLOT(setEnabled(bool)));
-    connect(Command::stack, SIGNAL(canRedoChanged(bool)), ui->action_redo, SLOT(setEnabled(bool)));
 }
 
 void MainWindow::initSettings() {
@@ -67,7 +59,84 @@ void MainWindow::initSettings() {
     });
 }
 
+int MainWindow::checkUpdatedDocument() {
+    if (document->isUpdated()) {
+        QMessageBox box(this);
+        box.setWindowTitle(tr("確認ダイアログ"));
+        box.setText(document->filename() + tr("は変更されています。\n保存しますか?"));
+        box.setStandardButtons(QMessageBox::Save | QMessageBox::SaveAll | QMessageBox::Cancel);
+        box.setDefaultButton(QMessageBox::Save);
+        return box.exec();
+    }
+
+    return QMessageBox::NoButton;
+}
+
+void MainWindow::save() {
+    QFile file(document->filename() + ".txt");
+    if (file.exists()) write(file);
+    else saveAs();
+}
+
+void MainWindow::saveAs() {
+    QString filename = QFileDialog::getSaveFileName(this,tr("名前を付けて保存"),document->filename(),tr("テキスト (*.txt);;すべてのファイル (*)"));
+    if (filename.isEmpty()) return;
+    else {
+        document->setFilename(filename.split('.').front());
+        QFile file(document->filename() + ".txt");
+        write(file);
+    }
+}
+
+void MainWindow::newFile() {
+    int message = checkUpdatedDocument();
+    switch(message) {
+        case QMessageBox::Save:
+            save();
+            reset();
+            break;
+
+        case QMessageBox::SaveAll:
+            saveAs();
+            reset();
+            break;
+    };
+}
+
+void MainWindow::write(QFile &file) {
+    QString data = document->serialize();
+    if (!data.isEmpty()) {
+        file.open(QIODevice::WriteOnly);
+        QTextStream out(&file);
+        out << data;
+    }
+    else {
+        QMessageBox box(this);
+        box.setIcon(QMessageBox::Warning);
+        box.setWindowTitle(tr("warning"));
+        box.setText(tr("保存出来るデータがありません。"));
+        box.setStandardButtons(QMessageBox::Ok);
+        box.exec();
+    }
+}
+
+void MainWindow::reset() {
+    command_manager->undoStack()->clear();
+    document->setFilename(tr("無題のドキュメント"));
+    document->clear();
+}
+
 void MainWindow::closeEvent(QCloseEvent *event) {
+    int message = checkUpdatedDocument();
+    switch(message) {
+        case QMessageBox::Save:
+            save();
+            break;
+
+        case QMessageBox::SaveAll:
+            saveAs();
+            break;
+    }
     QSettings settings("setting.ini", QSettings::IniFormat);
     settings.setIniCodec("UTF-8");
     settings.setValue("main/geometry", saveGeometry());
