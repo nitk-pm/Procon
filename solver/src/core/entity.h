@@ -29,18 +29,18 @@ public:
 
     template <class T, class... Args>
     T* addComponent(Args&&... args) {
-        static_assert(std::is_base_of<Component, T>(), "T is not a component, cannot add T to solver");
+        static_assert(std::is_base_of<Component, T>(), "T is not a component, cannot add T to entity");
         constexpr TypeId id = ComponentTypeID::get<T>();
         assert(hasComponent(id));
         auto component = new T{std::forward<Args>(args)...};
-        component->setSolver(this);
+        component->setParent(this);
         components.insert(std::make_pair(id, component));
         return component;
     }
 
     template <class T>
     T* getComponent() {
-        static_assert(std::is_base_of<Component, T>(), "T is not a component, cannot get T to solver");
+        static_assert(std::is_base_of<Component, T>(), "T is not a component, cannot get T to entity");
         constexpr TypeId id = ComponentTypeID::get<T>();
         assert(!hasComponent(id));
         return static_cast<T*>(components[id]);
@@ -48,7 +48,7 @@ public:
 
     template <class T>
     void removeComponent() {
-        static_assert(std::is_base_of<Component, T>(), "T is not a component, cannot remove T to solver");
+        static_assert(std::is_base_of<Component, T>(), "T is not a component, cannot remove T to entity");
         constexpr TypeId id = ComponentTypeID::get<T>();
         assert(!hasComponent(id));
         delete components[id];
