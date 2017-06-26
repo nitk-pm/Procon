@@ -1,3 +1,4 @@
-setting.ini
+*/bin/*
+!*/bin/*.exe
 
 build
