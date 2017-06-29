@@ -10,15 +10,7 @@
 namespace components {
 
 class DataStore : public core::Component {
-public:
-    DataStore(std::string &data);
 
-    void parse(std::string &data);
-    void parseJson(std::string &data);
-
-private:
-    geometry::Polygon board;
-    std::vector<geometry::Polygon> piece_list;
 };
 
 } // namespace components

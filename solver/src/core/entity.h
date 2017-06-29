@@ -27,10 +27,10 @@ public:
         for (auto &it : components) delete it.second;
     }
 
-    template <class T, class... Args>
+    template <class T, class Id = T, class... Args>
     T* addComponent(Args&&... args) {
         static_assert(std::is_base_of<Component, T>(), "T is not a component, cannot add T to entity");
-        constexpr TypeId id = ComponentTypeID::get<T>();
+        constexpr TypeId id = ComponentTypeID::get<Id>();
         assert(hasComponent(id));
         auto component = new T{std::forward<Args>(args)...};
         component->setParent(this);
@@ -55,6 +55,14 @@ public:
         components.erase(id);
     }
 
+    template <class T>
+    bool hasComponent() {
+        static_assert(std::is_base_of<Component, T>(), "T is not a component");
+        constexpr TypeId id = ComponentTypeID::get<T>();
+        return hasComponent(id);
+    }
+
+private:
     bool hasComponent(TypeId id) {
         auto iter = components.find(id);
         return iter != components.end();
