@@ -173,10 +173,11 @@ inline double radian(const Point &p1, const Point &p2, const Point &p3) {
 /* 多角形を表したクラス */
 class Polygon {
 public:
-    Polygon() {}
+    Polygon() = default;
     Polygon(const std::vector<Point> &points) {
         set(points);
     }
+    Polygon& operator=(const Polygon &polygon) = default;
 
     void set(const std::vector<Point> &points) {
         _points = points;
@@ -198,8 +199,16 @@ public:
         _points.clear();
     }
 
-    Point& operator[](std::size_t index) const {
+    Point& operator[](int index) {
         return _points[index];
+    }
+
+    const Point& operator[](int index) const {
+        return _points.at(index);
+    }
+
+    int size() const {
+        return _points.size();
     }
 
     std::vector<Point> points() const {
@@ -253,17 +262,53 @@ public:
         return poly;
     }
 
+    /* 引数で渡した多角形が完全に包含されているかチェックする */
+    bool containsPolygon(Polygon &other) {
+        for (int i = 0; i < other.size(); i++) {
+            if (!containsPoint(other[i])) return false;
+        }
+        return true;
+    }
+
+    /* オフセット値で補正したポリゴンを返す */
+    Polygon offset(const Point &p) const {
+        Polygon polygon = *this;
+        for (auto &it : polygon._points) {
+            it += p;
+        }
+        return polygon;
+    }
+
+    /* 多角形を包含する矩形を計算して返す */
     Polygon boundingBox() const {
+        Polygon bounding_box;
+        bounding_box.add(_points[0]);
+        bounding_box.add(_points[0]);
+        bounding_box.add(_points[0]);
+        bounding_box.add(_points[0]);
+        for (auto &it : _points) {
+            if (it.x() < bounding_box[0].x()) {
+                bounding_box[0].setX(it.x());
+                bounding_box[2].setX(it.x());
+            }
+            if (it.x() > bounding_box[1].x()) {
+                bounding_box[1].setX(it.x());
+                bounding_box[3].setX(it.x());
+            }
+            if (it.y() < bounding_box[0].y()) {
+                bounding_box[0].setY(it.y());
+                bounding_box[1].setY(it.y());
+            }
+            if (it.y() > bounding_box[2].y()) {
+                bounding_box[2].setY(it.y());
+                bounding_box[3].setY(it.y());
+            }
+        }
         return bounding_box;
     }
 
 private:
-    void calcBoundingBox() {
-    }
-
-private:
     std::vector<Point> _points;
-    Polygon bounding_box;
 };
 
 /* 凸包の計算 */
