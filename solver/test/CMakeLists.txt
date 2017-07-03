@@ -6,3 +6,5 @@ file(
     COPY ${CMAKE_CURRENT_SOURCE_DIR}/sample.txt
     DESTINATION ${CMAKE_SOURCE_DIR}/bin
 )
+
+add_executable(polygon_test polygon_test.cpp)

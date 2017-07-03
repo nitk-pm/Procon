@@ -18,13 +18,12 @@ inline bool equal(double a, double b) {
 /* 2次元平面上の座標を表すクラス */
 class Point {
 public:
-    Point() {}
+    Point() = default;
+    Point(const Point &p) = default;
+    Point& operator=(const Point &other) = default;
+
     Point(double x, double y) {
         set(x, y);
-    }
-    Point(const Point &p) {
-        _x = p._x;
-        _y = p._y;
     }
 
     void setX(double x) {
@@ -53,10 +52,10 @@ public:
         return std::sqrt(_x * _x + _y * _y);
     }
 
-    Point& operator=(const Point &p) {
-        _x = p._x;
-        _y = p._y;
-        return *this;
+    Point rotate(double angle) const {
+        const double s = std::sin(angle * PI / 180.0);
+        const double c = std::cos(angle * PI / 180.0);
+        return Point(_x * c - _y * s, _x * s + _y * c);
     }
 
     Point& operator+=(const Point &p) {
@@ -174,10 +173,12 @@ inline double radian(const Point &p1, const Point &p2, const Point &p3) {
 class Polygon {
 public:
     Polygon() = default;
+    Polygon(const Polygon &other) = default;
+    Polygon& operator=(const Polygon &polygon) = default;
+
     Polygon(const std::vector<Point> &points) {
         set(points);
     }
-    Polygon& operator=(const Polygon &polygon) = default;
 
     void set(const std::vector<Point> &points) {
         _points = points;
@@ -256,10 +257,45 @@ public:
     }
 
     /* 多角形のループの向きを反転する */
-    Polygon reverse() const {
-        Polygon poly = *this;
-        std::reverse(poly._points.begin() + 1, poly._points.end());
-        return poly;
+    Polygon flipLoopWise() const {
+        Polygon polygon = *this;
+        std::reverse(polygon._points.begin() + 1, polygon._points.end());
+        return polygon;
+    }
+
+    /* 左右反転した多角形を返す */
+    Polygon flipHorizontal() const {
+        Polygon polygon = *this;
+        double max = polygon[0].x();
+        double min = polygon[0].x();
+        for (int i = 0; i < polygon.size(); i++) {
+            max = std::max(max, polygon[i].x());
+            min = std::min(min, polygon[i].x());
+        }
+
+        const double center = (max - min);
+        for (int i = 0; i < polygon.size(); i++) {
+            polygon[i].setX(center - polygon[i].x());
+        }
+        return polygon;
+    }
+
+    /* 原点中心に回転させ、座標補正する */
+    Polygon rotate(double angle) const {
+        const double s = std::sin(angle * PI / 180.0);
+        const double c = std::cos(angle * PI / 180.0);
+        Polygon polygon = *this;
+        Point offset(polygon[0].x(), polygon[0].y());
+        for (int i = 1; i < polygon.size(); i++) {
+            polygon[i].setX(polygon[i].x() * c - polygon[i].y() * s);
+            polygon[i].setY(polygon[i].x() * s + polygon[i].y() * c);
+            offset.setX(std::min(offset.x(), polygon[i].x()));
+            offset.setY(std::min(offset.y(), polygon[i].y()));
+        }
+        // for (int i = 0; i < polygon.size(); i++) {
+        //     polygon[i] -= offset;
+        // }
+        return polygon;
     }
 
     /* 引数で渡した多角形が完全に包含されているかチェックする */

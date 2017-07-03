@@ -1,16 +1,19 @@
 #ifndef DATA_STORE__H
 #define DATA_STORE__H
 
-#include <vector>
-#include <string>
-
 #include "core/component.h"
 #include "lib/geometry.h"
+
+#include <vector>
+#include <string>
+#include <bitset>
 
 namespace core {
 
 constexpr unsigned int MAX_POLYGONS = 50;
 constexpr unsigned int MAX_PIECES = MAX_POLYGONS * 8;
+
+typedef std::bitset<101 * 65> Board;
 
 class Datastore : public Component {
 public:
