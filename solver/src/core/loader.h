@@ -1,7 +1,7 @@
 #ifndef LOADER__H
 #define LOADER__H
 
-#include "component.h"
+#include "core/component.h"
 
 #include <string>
 

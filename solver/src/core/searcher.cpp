@@ -1,8 +1,8 @@
-#include "solver.h"
-#include "searcher.h"
-#include "operator.h"
-#include "evaluator.h"
-#include "verifier.h"
+#include "core/solver.h"
+#include "core/searcher.h"
+#include "core/operator.h"
+#include "core/evaluator.h"
+#include "core/verifier.h"
 
 using namespace core;
 

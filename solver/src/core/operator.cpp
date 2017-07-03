@@ -1,6 +1,6 @@
-#include "operator.h"
-#include "solver.h"
-#include "datastore.h"
+#include "core/operator.h"
+#include "core/solver.h"
+#include "core/datastore.h"
 #include "lib/geometry.h"
 
 using namespace core;

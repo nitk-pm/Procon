@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include "component.h"
+#include "core/component.h"
 #include "lib/geometry.h"
 
 namespace core {

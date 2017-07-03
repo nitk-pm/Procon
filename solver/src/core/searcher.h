@@ -1,7 +1,7 @@
 #ifndef SEARCHER__H
 #define SEARCHER__H
 
-#include "component.h"
+#include "core/component.h"
 
 namespace core {
 

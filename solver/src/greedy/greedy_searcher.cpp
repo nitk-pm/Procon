@@ -1,4 +1,4 @@
-#include "greedy_searcher.h"
+#include "greedy/greedy_searcher.h"
 
 using namespace greedy;
 

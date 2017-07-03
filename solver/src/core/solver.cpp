@@ -1,4 +1,4 @@
-#include "solver.h"
+#include "core/solver.h"
 
 using namespace core;
 

@@ -1,7 +1,7 @@
 #ifndef EVALUATOR__H
 #define EVALUATOR__H
 
-#include "component.h"
+#include "core/component.h"
 
 namespace core {
 

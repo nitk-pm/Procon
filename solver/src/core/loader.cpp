@@ -1,6 +1,6 @@
-#include "solver.h"
-#include "loader.h"
-#include "datastore.h"
+#include "core/solver.h"
+#include "core/loader.h"
+#include "core/datastore.h"
 #include "lib/geometry.h"
 #include "lib/picojson.h"
 

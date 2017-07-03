@@ -1,7 +1,7 @@
 #ifndef VERIFIER__H
 #define VERIFIER__H
 
-#include "component.h"
+#include "core/component.h"
 
 namespace core {
 

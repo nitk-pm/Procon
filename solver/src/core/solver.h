@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <unordered_map>
 
-#include "component.h"
+#include "core/component.h"
 
 namespace core {
 
