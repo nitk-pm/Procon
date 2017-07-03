@@ -30,23 +30,20 @@ void Loader::parseToFile(std::string filename) {
     }
     std::istreambuf_iterator<char> it(ifs);
     std::istreambuf_iterator<char> last;
-
     std::string data(it, last);
-    if (split(filename, '.').back() == "json") parseToJson(data);
-    else parse(data);
+    parse(data);
+    // if (split(filename, '.').back() == "json") parseToJson(data);
+    // else parse(data);
 }
 
 void Loader::parse(std::string data) {
     auto datastore = parent()->getComponent<Datastore>();
     auto piece_list = split(data, ':');
     int  index = 0;
-    std::cout << "check" << std::endl;
 
     datastore->count = std::stoi(piece_list[0]);
 
-    std::cout <<  datastore->count << std::endl;
     for (; index < datastore->count; index++) {
-        std::cout << piece_list[index + 1] << std::endl;
         auto piece = split(piece_list[index + 1], ' ');
         int  count = std::stoi(piece[0]) * 2;
         datastore->polygons[index].clear();
@@ -55,16 +52,10 @@ void Loader::parse(std::string data) {
         }
     }
 
-    std::cout << "check" << std::endl;
-
     auto piece = split(piece_list[index + 1], ' ');
     int count = std::stoi(piece[0]) * 2;
     datastore->frame.clear();
     for (int p = 1; p < count; p += 2) {
         datastore->frame.add(std::stod(piece[p]), std::stod(piece[p + 1]));
     }
-}
-
-void Loader::parseToJson(std::string data) {
-    auto datastore = parent()->getComponent<Datastore>();
 }

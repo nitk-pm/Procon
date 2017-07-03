@@ -263,7 +263,7 @@ public:
     }
 
     /* 引数で渡した多角形が完全に包含されているかチェックする */
-    bool containsPolygon(Polygon &other) {
+    bool containsPolygon(const Polygon &other) const {
         for (int i = 0; i < other.size(); i++) {
             if (!containsPoint(other[i])) return false;
         }

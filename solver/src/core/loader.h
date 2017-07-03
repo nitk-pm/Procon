@@ -11,7 +11,6 @@ class Loader : public Component {
 public:
     void parseToFile(std::string filename);
     void parse(std::string data);
-    void parseToJson(std::string data);
 };
 
 } // namespace core
