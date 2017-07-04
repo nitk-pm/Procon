@@ -2,6 +2,10 @@
 
 using namespace core;
 
+const geometry::Polygon& Datastore::pieceAt(short id, short type) const {
+    return pieces[id * 8 + type];
+}
+
 void Datastore::processingPolygons() {
     for (int i = 0; i < count; i++) {
         pieces[i * 8 + 0] = polygons[i];

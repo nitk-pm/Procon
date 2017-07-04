@@ -23,6 +23,9 @@ public:
     int               count;
     geometry::Polygon polygons[MAX_POLYGONS];
     geometry::Polygon pieces[MAX_PIECES];
+    geometry::Polygon nfp[MAX_PIECES][MAX_PIECES];
+
+    const geometry::Poltgon& pieceAt(short id, short type) const;
 
     void processingPolygons();
 };
