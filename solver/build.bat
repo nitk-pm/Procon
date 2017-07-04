@@ -2,8 +2,8 @@
 @echo off
 
 if not "%1" == "" if "%1" == "clean" (
-    rm -Rf build
-    rm -Rf bin
+    rd /s /q build
+    rd /s /q bin
 )
 
 if not exist "build" (

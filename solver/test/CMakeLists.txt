@@ -1,10 +1,7 @@
 
-add_executable(loader_test loader_test.cpp)
-target_link_libraries(loader_test core)
-
-file(
-    COPY ${CMAKE_CURRENT_SOURCE_DIR}/sample.txt
-    DESTINATION ${CMAKE_SOURCE_DIR}/bin
+add_executable(geometry_test geometry_test.cpp)
+target_link_libraries(
+    geometry_test
+    libgtest.a
+    libgtest_main.a
 )
-
-add_executable(polygon_test polygon_test.cpp)

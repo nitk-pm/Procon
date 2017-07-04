@@ -156,7 +156,7 @@ inline double distance(const Point &p1, const Point &p2, const Point &q) {
 inline bool intersect(const Point &p1, const Point &p2, const Point &q1, const Point &q2) {
     double t1 = cross(p2 - p1, q1 - p1) * cross(p2 - p1, q2 - p1);
     double t2 = cross(q2 - q1, p1 - q1) * cross(q2 - q1, p2 - q1);
-    return t1 <= 0 && t2 <= 0;
+    return t1 < 0 && t2 < 0;
 }
 
 /* 角度 */

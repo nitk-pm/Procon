@@ -9,12 +9,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS "-Wall -O2 -std=c++14 -static")
 set(CMAKE_BUILD_TYPE Release)
 
-include_directories(external/geometry/include)
+# 幾何ライブラリ（自作）
+include_directories(${CMAKE_SOURCE_DIR}/external/geometry/include)
 
-include_directories(external/googletest/include)
-link_directories(external/googletest)
+# ユニットテストフレームワーク
+include_directories(${CMAKE_SOURCE_DIR}/external/googletest/include)
+link_directories(${CMAKE_SOURCE_DIR}/external/googletest/lib)
 
-include_directories(external/picojson/include)
+# jsonライブラリ
+include_directories(${CMAKE_SOURCE_DIR}/external/picojson/include)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
