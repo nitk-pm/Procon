@@ -286,15 +286,17 @@ public:
         const double c = std::cos(angle * PI / 180.0);
         Polygon polygon = *this;
         Point offset(polygon[0].x(), polygon[0].y());
-        for (int i = 1; i < polygon.size(); i++) {
-            polygon[i].setX(polygon[i].x() * c - polygon[i].y() * s);
-            polygon[i].setY(polygon[i].x() * s + polygon[i].y() * c);
+        for (int i = 0; i < polygon.size(); i++) {
+            double x = polygon[i].x();
+            double y = polygon[i].y();
+            polygon[i].setX(x * c - y * s);
+            polygon[i].setY(x * s + y * c);
             offset.setX(std::min(offset.x(), polygon[i].x()));
             offset.setY(std::min(offset.y(), polygon[i].y()));
         }
-        // for (int i = 0; i < polygon.size(); i++) {
-        //     polygon[i] -= offset;
-        // }
+        for (int i = 0; i < polygon.size(); i++) {
+            polygon[i] -= offset;
+        }
         return polygon;
     }
 
@@ -346,6 +348,22 @@ public:
 private:
     std::vector<Point> _points;
 };
+
+inline bool operator==(const Polygon &p, const Polygon &q) {
+    if (p.size() != q.size()) return false;
+    for (int i = 0; i < p.size(); i++) {
+        if (p[i] != q[i]) return false;
+    }
+    return true;
+}
+
+inline bool operator!=(const Polygon &p, const Polygon &q) {
+    if (p.size() != q.size()) return true;
+    for (int i = 0; i < p.size(); i++) {
+        if (p[i] != q[i]) return true;
+    }
+    return false;
+}
 
 /* 凸包の計算 */
 class ConvexHull {

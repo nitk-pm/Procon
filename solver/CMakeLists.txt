@@ -9,7 +9,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS "-Wall -O2 -std=c++14 -static")
 set(CMAKE_BUILD_TYPE Release)
 
+include_directories(external/geometry/include)
+
+include_directories(external/googletest/include)
+link_directories(external/googletest)
+
+include_directories(external/picojson/include)
+
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
 add_subdirectory(src)
 add_subdirectory(test)
+

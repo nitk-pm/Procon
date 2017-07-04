@@ -2,7 +2,7 @@
 #define DATA_STORE__H
 
 #include "core/component.h"
-#include "lib/geometry.h"
+#include "geometry/geometry.h"
 
 #include <vector>
 #include <string>

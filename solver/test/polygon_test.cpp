@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "lib/geometry.h"
+#include "geometry/geometry.h"
 
 using namespace std;
 

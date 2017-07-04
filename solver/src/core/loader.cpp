@@ -1,8 +1,8 @@
 #include "core/solver.h"
 #include "core/loader.h"
 #include "core/datastore.h"
-#include "lib/geometry.h"
-#include "lib/picojson.h"
+#include "geometry/geometry.h"
+#include "picojson/picojson.h"
 
 #include <iostream>
 #include <fstream>
