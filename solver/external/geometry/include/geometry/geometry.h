@@ -39,11 +39,11 @@ public:
         setY(y);
     }
 
-    double x() const {
+    const double x() const {
         return _x;
     }
 
-    double y() const {
+    const double y() const {
         return _y;
     }
 
@@ -52,6 +52,7 @@ public:
         return std::sqrt(_x * _x + _y * _y);
     }
 
+    /* 原点を中心に回転した座標を返す */
     Point rotate(double angle) const {
         const double s = std::sin(angle * PI / 180.0);
         const double c = std::cos(angle * PI / 180.0);
@@ -208,7 +209,7 @@ public:
         return _points.at(index);
     }
 
-    int size() const {
+    std::size_t count() const {
         return _points.size();
     }
 
@@ -268,13 +269,13 @@ public:
         Polygon polygon = *this;
         double max = polygon[0].x();
         double min = polygon[0].x();
-        for (int i = 0; i < polygon.size(); i++) {
+        for (std::size_t i = 0; i < polygon.count(); i++) {
             max = std::max(max, polygon[i].x());
             min = std::min(min, polygon[i].x());
         }
 
         const double center = (max - min);
-        for (int i = 0; i < polygon.size(); i++) {
+        for (std::size_t i = 0; i < polygon.count(); i++) {
             polygon[i].setX(center - polygon[i].x());
         }
         return polygon;
@@ -286,7 +287,7 @@ public:
         const double c = std::cos(angle * PI / 180.0);
         Polygon polygon = *this;
         Point offset(polygon[0].x(), polygon[0].y());
-        for (int i = 0; i < polygon.size(); i++) {
+        for (std::size_t i = 0; i < polygon.count(); i++) {
             double x = polygon[i].x();
             double y = polygon[i].y();
             polygon[i].setX(x * c - y * s);
@@ -294,7 +295,7 @@ public:
             offset.setX(std::min(offset.x(), polygon[i].x()));
             offset.setY(std::min(offset.y(), polygon[i].y()));
         }
-        for (int i = 0; i < polygon.size(); i++) {
+        for (std::size_t i = 0; i < polygon.count(); i++) {
             polygon[i] -= offset;
         }
         return polygon;
@@ -302,7 +303,7 @@ public:
 
     /* 引数で渡した多角形が完全に包含されているかチェックする */
     bool containsPolygon(const Polygon &other) const {
-        for (int i = 0; i < other.size(); i++) {
+        for (std::size_t i = 0; i < other.count(); i++) {
             if (!containsPoint(other[i])) return false;
         }
         return true;
@@ -311,8 +312,8 @@ public:
     /* オフセット値で補正したポリゴンを返す */
     Polygon offset(const Point &p) const {
         Polygon polygon = *this;
-        for (auto &it : polygon._points) {
-            it += p;
+        for (std::size_t i = 0; i < polygon.count(); i++) {
+            polygon[i] += p;
         }
         return polygon;
     }
@@ -324,22 +325,22 @@ public:
         bounding_box.add(_points[0]);
         bounding_box.add(_points[0]);
         bounding_box.add(_points[0]);
-        for (auto &it : _points) {
-            if (it.x() < bounding_box[0].x()) {
-                bounding_box[0].setX(it.x());
-                bounding_box[2].setX(it.x());
+        for (std::size_t i = 0; i < _points.size(); i++) {
+            if (_points[i].x() < bounding_box[0].x()) {
+                bounding_box[0].setX(_points[i].x());
+                bounding_box[2].setX(_points[i].x());
             }
-            if (it.x() > bounding_box[1].x()) {
-                bounding_box[1].setX(it.x());
-                bounding_box[3].setX(it.x());
+            if (_points[i].x() > bounding_box[1].x()) {
+                bounding_box[1].setX(_points[i].x());
+                bounding_box[3].setX(_points[i].x());
             }
-            if (it.y() < bounding_box[0].y()) {
-                bounding_box[0].setY(it.y());
-                bounding_box[1].setY(it.y());
+            if (_points[i].y() < bounding_box[0].y()) {
+                bounding_box[0].setY(_points[i].y());
+                bounding_box[1].setY(_points[i].y());
             }
-            if (it.y() > bounding_box[2].y()) {
-                bounding_box[2].setY(it.y());
-                bounding_box[3].setY(it.y());
+            if (_points[i].y() > bounding_box[2].y()) {
+                bounding_box[2].setY(_points[i].y());
+                bounding_box[3].setY(_points[i].y());
             }
         }
         return bounding_box;
@@ -350,69 +351,29 @@ private:
 };
 
 inline bool operator==(const Polygon &p, const Polygon &q) {
-    if (p.size() != q.size()) return false;
-    for (int i = 0; i < p.size(); i++) {
+    if (p.count() != q.count()) return false;
+    for (std::size_t i = 0; i < p.count(); i++) {
         if (p[i] != q[i]) return false;
     }
     return true;
 }
 
 inline bool operator!=(const Polygon &p, const Polygon &q) {
-    if (p.size() != q.size()) return true;
-    for (int i = 0; i < p.size(); i++) {
+    if (p.count() != q.count()) return true;
+    for (std::size_t i = 0; i < p.count(); i++) {
         if (p[i] != q[i]) return true;
     }
     return false;
 }
 
-/* 凸包の計算 */
-class ConvexHull {
-public:
-    void add(const Point &point) {
-        _points.push_back(point);
-    }
-
-    void add(double x, double y) {
-        add(Point(x, y));
-    }
-
-    void add(const std::vector<Point> &points) {
-        _points.insert(_points.end(), points.begin(), points.end());
-    }
-
-    std::vector<Point> get() const {
-        std::vector<Point> result;
-        result.push_back(minPoint());
-        result.push_back(minRadianPoint(result.back()));
-        while (result.front() != result.back()) result.push_back(minRadianPoint(result.back()));
-        result.pop_back();
-        return std::move(result);
-    }
-
-private:
-    Point minPoint() const {
-        Point min = _points.front();
-        for (auto &p : _points) {
-            if (min > p) min = p;
+/* 座標が最小のポイントを返す */
+inline Point minPoint(const std::vector<Point> &points) {
+    Point min = points[0];
+        for (std::size_t i = 1; i < points.size(); i++) {
+            if (min > points[i]) min = points[i];
         }
-        return min;
-    }
-
-    Point minRadianPoint(const Point &point) const {
-        Point min = point;
-        for (auto &p : _points) {
-            if (min == point) min = p;
-            else {
-                double v = cross(min - point, p - point);
-                if (v > 0 || (equal(v, 0) && (p - point).length() > (min - point).length())) min = p;
-            }
-        }
-        return min;
-    }
-
-private:
-    std::vector<Point> _points;
-};
+    return min;
+}
 
 };
 
