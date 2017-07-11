@@ -1,3 +1,11 @@
 setting.ini
 
 build
+
+namachan/solver/dlang/\.atom-build\.yml
+
+namachan/solver/dlang/dub\.selections\.json
+
+namachan/solver/dlang/solver
+
+namachan/solver/dlang/solver-test-library
