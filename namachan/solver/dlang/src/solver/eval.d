@@ -6,6 +6,7 @@ import procon28.solver.collison;
 
 float angle_and_points (Shape frame, Shape piece, Point pos) {
 	float val = 0.0f;
+	if (is_hit (frame, piece, pos)) return -float.infinity;
 	foreach (piece_seg; piece) {
 		foreach (frame_seg; frame) {
 			if (piece_seg.start + pos == frame_seg.end || piece_seg.start + pos == frame_seg.start) {
