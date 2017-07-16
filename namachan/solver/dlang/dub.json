@@ -7,5 +7,6 @@
 	"copyright": "Copyright © 2017, namachan",
 	"license": "BSL-1.0",
 	"dependencies" : {
+		"derelict-sdl2":"2.1.4"
 	}
 }
