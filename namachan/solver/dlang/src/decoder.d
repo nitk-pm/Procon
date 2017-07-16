@@ -1,4 +1,4 @@
-module prpcon28.decoder;
+module procon28.decoder;
 
 import procon28.solver.data;
 import procon28.basic_data;
