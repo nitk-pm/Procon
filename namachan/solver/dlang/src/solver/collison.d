@@ -10,15 +10,36 @@ bool judge_intersected (in Segment seg1, in Segment seg2) {
 	auto td = (seg1.start.x - seg1.end.x) * (seg2.end.y - seg1.start.y) +  (seg1.start.y - seg1.end.y) * (seg1.start.x - seg2.end.x);
 	return tc * td < 0 && ta * tb < 0;
 }
+unittest {
+	auto seg1 = Segment (Vector (-2, 3), Vector (4, -1));
+	auto seg2 = Segment (Vector ( 3, 1), Vector (1, -3));
+	assert (judge_intersected (seg1, seg2));
+
+	auto seg3 = Segment (Vector ( 1, 3), Vector( 2, 8));
+	auto seg4 = Segment (Vector ( 1, 2), Vector( 3, 8));
+	assert (!judge_intersected (seg3, seg4));
+}
 
 bool judge_inclusion (in Point p,in Segment[] segments) {
-	double angel_sum;
+	double angel_sum = 0.0;
 	foreach (seg; segments) {
 		auto v1 = seg.start - p;
 		auto v2 = seg.end - p;
 		angel_sum += v1.angel(v2);
 	}
 	return angel_sum < 360.0;
+}
+unittest {
+	auto shape = [
+		Segment(Vector (0, 0), Vector(0, 2)),
+		Segment(Vector (0, 2),Vector (2, 2)),
+		Segment(Vector (2, 2), Vector(2, 0)),
+		Segment(Vector (2, 0), Vector(0, 0))
+	];
+	auto pt1 = Vector (1, 1);
+	auto pt2 = Vector (2, 2);
+	assert (judge_inclusion(pt1, shape));
+	assert (!judge_inclusion(pt2, shape));
 }
 
 bool is_hit (in Shape frame, in Shape shape, in Point pos) {
