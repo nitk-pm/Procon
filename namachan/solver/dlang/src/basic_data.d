@@ -96,11 +96,11 @@ unittest {
 struct Vector {
 	int x, y;
 	Vector opBinary(string op)(in Vector pt) const {
-		mixin (format!"return Vector (x %1$s pt.x, y %1$s pt.y);"(op));
+		mixin (format("return Vector (x %1$s pt.x, y %1$s pt.y);", op));
 	}
 	void opOpAssign(string op)(in Vector pt) {
-		mixin (format!"this.x %s= pt.x;"(op));
-		mixin (format!"this.y %s= pt.y;"(op));
+		mixin (format("this.x %s= pt.x;",op));
+		mixin (format("this.y %s= pt.y;",op));
 	}
 
 	@property
