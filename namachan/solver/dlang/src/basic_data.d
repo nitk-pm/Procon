@@ -39,6 +39,7 @@ struct Rational {
 		auto y = rational.normalized;
 		return x.denom == y.denom && x.num == y.num;
 	}
+	
 
 	Rational opBinary(string op)(in Rational rational) const {
 		static if (op == "+" || op == "-") {
@@ -163,6 +164,24 @@ struct Segment {
 		return Line (slope, seg);
 	}
 
+	bool opEquals(in Segment seg) const {
+		return (this.start == seg.start && this.end == seg.end) || (this.start == seg.end && this.end == seg.start);
+	}
+
+	@safe
+	size_t toHash () const {
+		import std.typecons;
+		auto start_hash = tuple(start.x, start.y).toHash;
+		auto end_hash = tuple(start.x, start.y).toHash;
+		if (start_hash > end_hash)
+			return tuple(start_hash, end_hash).toHash;
+		else
+			return tuple(end_hash, start_hash).toHash;
+	}
+	unittest {
+		assert (Segment(Vector(0, 5), Vector(3, 2)).toHash == Segment(Vector(3, 2), Vector(0, 5)).toHash );
+	}
+
 	@property
 	Rational slope () const {
 		return vec.slope;
@@ -171,24 +190,6 @@ struct Segment {
 	@property
 	Vector vec () const {
 		return end - start;
-	}
-
-	bool addable(in Segment seg) const {
-		if (line != seg.line) return false;
-		return
-			(end.x - start.x) * (seg.end.x - end.x) < 0 ||
-			(end.x - start.x) * (seg.start.x - end.x) < 0;
-
-	}
-
-	Segment[] split (in Segment seg) const {
-		auto line = line;
-		auto xs = [start.x, end.x, seg.start.x, seg.end.x].dup.sort!"a>b".uniq.array;
-		Segment[] segs;
-		for (size_t idx; idx < xs.length - 1; ++idx) {
-			segs ~= Segment (Vector(xs[idx], line.y(xs[idx].to!int).toFloat.to!int), Vector (xs[idx+1], line.y(xs[idx+1]).toFloat.to!int));
-		}
-		return segs;
 	}
 }
 
