@@ -46,6 +46,9 @@ class Window {
 		foreach (seg; shape) {
 			ren.SDL_RenderDrawLine (seg.start.x, seg.start.y, seg.end.x, seg.end.y);
 		}
+	}
+
+	void flip () {
 		ren.SDL_RenderPresent();
 	}
 	
