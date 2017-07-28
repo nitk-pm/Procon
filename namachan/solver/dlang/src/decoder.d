@@ -6,7 +6,9 @@ import procon28.basic_data;
 import std.json : parseJSON;
 import std.conv : to;
 
-Segment[] vertexies2segments (Vector[] vertexies) {
+import armos.math.vector;
+
+Segment[] vertexies2segments (Vector2i[] vertexies) {
 	Segment[] segments;
 	foreach (idx, vertex; vertexies[0..$-1]) {
 		segments ~= Segment (vertex, vertexies[idx+1]);
@@ -16,11 +18,11 @@ Segment[] vertexies2segments (Vector[] vertexies) {
 
 Shape decode_frame (in string str) {
 	auto json = str.parseJSON;
-	Vector[] vertexies;
+	Vector2i[] vertexies;
 	foreach (pair; json["frame"].object["shape"].array) {
 		auto x = pair.array[0].integer.to!int;
 		auto y = pair.array[1].integer.to!int;
-		vertexies ~= Vector(x, y);
+		vertexies ~= Vector2i(x, y);
 	}
 	return vertexies2segments (vertexies);
 }
@@ -32,11 +34,11 @@ Piece[] decode_piece (in string str) {
 	foreach (piece_json; json["piece"].array) {
 		Piece piece;
 		foreach (shape_json; piece_json.array) {
-			Vector[] vertexies;
+			Vector2i[] vertexies;
 			foreach (pair; shape_json.array) {
 				auto x = pair.array[0].integer.to!int;
 				auto y = pair.array[1].integer.to!int;
-				vertexies ~= Vector(x, y);
+				vertexies ~= Vector2i(x, y);
 			}
 			auto shape = vertexies2segments (vertexies);
 			piece ~= shape;

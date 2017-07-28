@@ -7,6 +7,7 @@ import std.algorithm.sorting : sort;
 import std.algorithm.iteration : uniq;
 import std.range : array;
 import std.conv : to;
+import armos.math.vector;
 
 struct Rational {
 	int denom, num;
@@ -94,48 +95,8 @@ unittest {
 	assert (x == Rational(-1, 8));
 }
 
-struct Vector {
-	int x, y;
-	Vector opBinary(string op)(in Vector pt) const {
-		mixin (format("return Vector (x %1$s pt.x, y %1$s pt.y);", op));
-	}
-	void opOpAssign(string op)(in Vector pt) {
-		mixin (format("this.x %s= pt.x;",op));
-		mixin (format("this.y %s= pt.y;",op));
-	}
-
-	@property
-	double length () const {
-		return sqrt (cast(float)(x ^^ 2 + y ^^ 2));
-	}
-
-	int cross (in Vector pt) const {
-		return x * pt.x + y * pt.y;
-	}
-
-	//外積の大きさ
-	float dotL (in Vector pt) const {
-		return x * pt.y - pt.x * y;
-	}
-
-	Rational slope () const {
-		return Rational (y, x);
-	}
-
-	double angel (in Vector pt) const {
-		return acos (cross(pt) / (length * pt.length));
-	}
-}
-
-unittest {
-	assert (Vector (2, 5) + Vector (3, -4) == Vector (5, 1));
-	auto pt1 = Vector (6, 10);
-
-	pt1 += Vector (2, 6);
-	assert (pt1 == Vector (8, 16));
-
-	auto pt2 = Vector (4, 2);
-	assert (pt2.cross (Vector (4, 1)) == 18);
+Rational slope (Vector2i vec) {
+	return Rational (vec.y, vec.x);
 }
 
 //一次関数
@@ -153,7 +114,7 @@ struct Line {
 }
 
 struct Segment {
-	Vector start, end;
+	Vector2i start, end;
 
 	Line line () const {
 		auto slope = vec.slope.normalized;
@@ -179,7 +140,7 @@ struct Segment {
 			return tuple(end_hash, start_hash).toHash;
 	}
 	unittest {
-		assert (Segment(Vector(0, 5), Vector(3, 2)).toHash == Segment(Vector(3, 2), Vector(0, 5)).toHash );
+		assert (Segment(Vector2i(0, 5), Vector2i(3, 2)).toHash == Segment(Vector2i(3, 2), Vector2i(0, 5)).toHash );
 	}
 
 	@property
@@ -188,14 +149,15 @@ struct Segment {
 	}
 
 	@property
-	Vector vec () const {
+	Vector2i vec () const {
 		return end - start;
 	}
 }
 
 unittest {
-	auto p1 = Vector ( 4,  8);
-	auto p2 = Vector ( 6, 7);
+	auto p1 = Vector2i ( 4,  8);
+	auto p2 = Vector2i ( 6, 7);
 	auto seg = Segment(p1, p2);
+	import std.stdio;
 	assert (seg.line == Line (Rational (-1,2), Rational (10, 1)));
 }
