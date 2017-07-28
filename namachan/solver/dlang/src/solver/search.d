@@ -6,6 +6,7 @@ import procon28.basic_data;
 
 import std.algorithm.sorting : sort;
 import std.range : array;
+import armos.math.vector;
 
 struct EvaledOp {
 	Op op;
@@ -38,6 +39,6 @@ Op[] search (Piece[] pieces, Shape frame) {
 struct Op {
 	size_t piece_idx;
 	Shape shape;
-	Vector pos;
+	Vector2i pos;
 	float val;
 }

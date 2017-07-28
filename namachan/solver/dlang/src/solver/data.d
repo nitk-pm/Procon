@@ -5,13 +5,14 @@ import std.algorithm.iteration : map;
 import std.range : array, zip;
 import procon28.basic_data;
 import procon28.visualize.window;
+import armos.math.vector;
 
-alias Point = Vector;
+alias Point = Vector2i;
 
 alias Shape = Segment[];
 alias Piece = Shape[];
 
-Shape vertexies2shape (Vector[] vertexies) {
+Shape vertexies2shape (Vector2i[] vertexies) {
 	Shape shape;
 	for (size_t i; i < vertexies.length; ++i) {
 		auto start_idx = i;
@@ -31,8 +32,8 @@ bool judge_overlap(in Segment seg1, in Segment seg2) {
 
 }
 unittest {
-	auto seg1 = Segment(Vector(0,0), Vector(4,4));
-	auto seg2 = Segment(Vector(1,1), Vector(2,2));
+	auto seg1 = Segment(Vector2i(0,0), Vector2i(4,4));
+	auto seg2 = Segment(Vector2i(1,1), Vector2i(2,2));
 	assert (judge_overlap(seg1, seg2));
 }
 
@@ -43,11 +44,11 @@ Segment[2] xor (in Segment seg1, in Segment seg2) {
 		 ys = [seg1.start.y, seg1.end.y, seg2.start.y, seg2.end.y].dup.sort!"a>b".array;
 	else
 		 ys = [seg1.start.y, seg1.end.y, seg2.start.y, seg2.end.y].dup.sort!"a<b".array;
-	return [Segment(Vector(xs[0], ys[0]), Vector(xs[1], ys[1])), Segment(Vector(xs[2], ys[2]), Vector(xs[3], ys[3]))];
+	return [Segment(Vector2i(xs[0], ys[0]), Vector2i(xs[1], ys[1])), Segment(Vector2i(xs[2], ys[2]), Vector2i(xs[3], ys[3]))];
 }
 unittest {
 	alias S = Segment;
-	alias V = Vector;
+	alias V = Vector2i;
 	auto seg1 = S(V(0,0), V(4,4));
 	auto seg2 = S(V(1,1), V(2,2));
 }
