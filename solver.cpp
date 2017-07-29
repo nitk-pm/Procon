@@ -10,11 +10,16 @@
 
 
 接触判定・Frameの更新 <-Frameクラスをリスト化して全てにCrossing numberをかける<-wn をXOR?
---多分All Correct
+--多分AC
 
 探索<-とりあえず面積とBottom-leftで貪欲
 
+ピースごとの面積の算出 OK
+使ってないピースの中から面積が一番大きいものを選ぶ(毎回全走査、ピースをソート、使ったものからerase)
+左上から置けるか探索、最初の置ける地点に配置
+置けるピースがなくなればループ抜け
 
+フレームを全部表示すれば一応できてるかはわかる。
 */
 
 //split、なぜ標準実装じゃないのか。
@@ -45,17 +50,8 @@ public:
 	Position(int xValue, int yValue) { x = xValue; y = yValue; }
 };
 
-//ある点からの相対座標で表示
-Position relativePosition(Position standard, Position object) {
-	double x, y;
-	x = object.x - standard.x;
-	y = object.y - standard.y;
-	return Position(x, y);
-};
-
-
 double cross(Position a, Position b) {
-	return a.x*b.y - a.y - b.x;
+	return a.x*b.y - a.y * b.x;
 }
 
 
@@ -75,18 +71,28 @@ ExpressionElement(double slopeValue, double interceptValue) { slope = slopeValue
 
 /*Pieceクラス　頂点数と各点の座標*/
 class Piece {
-
+	
+	//ある点からの相対座標で表示
+	Position relativePosition(Position standard, Position object) {
+		double x, y;
+		x = object.x - standard.x;
+		y = object.y - standard.y;
+		return Position(x, y);
+	};
+	
+	//外積による面積の算出
 	double areaCalucurasion() {
 		double tmp=0;
 		for (int i = 0; i < this->vertexPositionList.size() - 1; ++i) {
 			tmp += cross(this->vertexPositionList.at(i), this->vertexPositionList.at(i + 1));
 		}
-		return tmp;
+		return tmp/2;
 	}
+
 public:
 
 	double area;
-
+	bool canUse;
 
 
 	std::vector<Position> vertexPositionList;
@@ -112,6 +118,7 @@ public:
 
 		area = areaCalucurasion();
 
+		this->canUse = true;
 		return;
 	}
 	Piece absolutePiecePosition(Position base) {//引数のPositionを基準に合わせる形で全点をずらす。(まともな関数名募集中)
@@ -134,6 +141,11 @@ public:
 		vertexPositionList.push_back(positionList.at(0));
 		return;
 	};
+	Frame(Piece p) {
+		vertexPositionList.reserve(p.vertexPositionList.size());
+		for (int i = 0; i < p.vertexPositionList.size(); ++i)
+			vertexPositionList.push_back(p.vertexPositionList.at(i));
+	}
 
 };
 
@@ -177,9 +189,10 @@ bool isInFrame(Piece p, std::vector<Frame> frameList) {
 	for (int j = 0; j < p.vertexPositionList.size(); ++j) {
 		tmp &= (wn[0][j] != 0);
 	}
+	if (tmp)
 	for (int i = 1; i < frameList.size(); ++i) {
 		for (int j = 0; j < p.vertexPositionList.size(); ++j) {
-			tmp ^= (wn[i][j] == 0);
+			tmp &= (wn[i][j] == 0);
 		}
 	}
 	return tmp;
@@ -232,6 +245,37 @@ public:
 
 	//配置情報読み込み
 	void loadLayoutInfomation() {}
+
+	//貪欲探索
+	void greedySearch() {
+		int biggestPieceID;
+		while (true) {
+			biggestPieceID = -1;
+
+			for (int i = 1; i < pieceNumber-1; ++i) {
+				if (piece.at(i).area < piece.at(i + 1).area&&piece.at(i).canUse)
+					biggestPieceID = i;
+			}
+
+			if (biggestPieceID == -1)	return;
+			for (int l = 0; l < 4 && piece.at(biggestPieceID).canUse; ++l) {//spin
+				for (int k = 0; k < 1; ++k) {//turn
+					for (int i = 0; i < 16; ++i) {//x方向
+						for (int j = 0; j < 10 && piece.at(biggestPieceID).canUse; ++j) {//y方向
+							Position tmpPos(i, j);
+							if (isInFrame(piece.at(biggestPieceID).absolutePiecePosition(tmpPos), frame)) {
+								frame.push_back(piece.at(biggestPieceID).absolutePiecePosition(tmpPos));
+								piece.at(biggestPieceID).canUse = false;
+							}
+						}
+					}
+					piece.at(biggestPieceID).turn();
+				}
+				piece.at(biggestPieceID).spin();
+			}
+			piece.at(biggestPieceID).canUse = false;
+		}
+	}
 };
 
 int main() {
@@ -250,14 +294,17 @@ int main() {
 	}
 	}
 	}*/
-	for (auto i = solve.frame.begin(); i != solve.frame.end(); ++i)
+	solve.greedySearch();
+	for (auto i = solve.frame.begin(); i != solve.frame.end(); ++i) {
 		for (int j = 0; j < i->vertexPositionList.size(); ++j)
 			std::cout << i->vertexPositionList.at(j).x << "," << i->vertexPositionList.at(j).y << std::endl;
-	std::vector<Position> p(0);
-	p.push_back(Position(4, 0));	p.push_back(Position(4, 3));	p.push_back(Position(0, 3));
-	Piece a(p);
-	puts("");
-	std::cout << isInFrame(a.absolutePiecePosition(Position(4, 0)), solve.frame) << std::endl;
+		puts("");
+	}
+	//std::vector<Position> p(0);
+	//p.push_back(Position(4, 0));	p.push_back(Position(4, 3));	p.push_back(Position(0, 3));
+	//Piece a(p);
+	//puts("");
+	//std::cout << isInFrame(a.absolutePiecePosition(Position(4, 0)), solve.frame) << "," << a.area << std::endl;
 	return 0;
 
 }
