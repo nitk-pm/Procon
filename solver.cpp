@@ -5,21 +5,37 @@
 //constexpr double compilePow(double mantissa, unsigned int exponent) { return exponent == 0 ? 1 : mantissa*compilePow(mantissa, exponent - 1); }
 //const double EPS = compilePow(0.1,9);
 
-//todo
+//todoなど
 /*
 
 
 接触判定・Frameの更新 <-Frameクラスをリスト化して全てにCrossing numberをかける<-wn をXOR?
 --多分AC
 
-探索<-とりあえず面積とBottom-leftで貪欲
+探索		フレームを全部表示すれば一応できてるかはわかる。
 
-ピースごとの面積の算出 OK
-使ってないピースの中から面積が一番大きいものを選ぶ(毎回全走査、ピースをソート、使ったものからerase)
-左上から置けるか探索、最初の置ける地点に配置
-置けるピースがなくなればループ抜け
+pieceにboolのcanUse置くよりも現在のノードで使用済みのIDのリスト作ったほうがいいのでは…?要検討。
 
-フレームを全部表示すれば一応できてるかはわかる。
+貪欲
+	面積とBottom-left
+	ピースごとの面積の算出
+	使ってないピースの中から面積が一番大きいものを選ぶ(毎回全走査、面積でピースをソート、使ったものからerase)<-貪欲をわざわざそこまで最適化する意味は…
+	左上から右に向かって置けるか探索、最初の置ける地点に配置
+	置けるピースがなくなればループ抜け
+--AC?<-それっぽい出力だけどまだ検証はしてない
+
+山登り
+	評価値に線分の一致する部分の長さ
+		ピースとフレームを構成する辺に線分の長さ、傾き、切片を定義
+		切片と傾きの一致する二線分の長さのmin
+	
+
+
+枝刈り
+・No Fit Polygonで配置場所を枝刈り
+・ピースの最小の角度で枝刈り
+・
+
 */
 
 //split、なぜ標準実装じゃないのか。
@@ -258,7 +274,7 @@ public:
 			}
 
 			if (biggestPieceID == -1)	return;
-			for (int l = 0; l < 4 && piece.at(biggestPieceID).canUse; ++l) {//spin
+			for (int l = 0; l < 3 && piece.at(biggestPieceID).canUse; ++l) {//spin
 				for (int k = 0; k < 1; ++k) {//turn
 					for (int i = 0; i < 16; ++i) {//x方向
 						for (int j = 0; j < 10 && piece.at(biggestPieceID).canUse; ++j) {//y方向
