@@ -19,7 +19,8 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import (
     QPen,
-    QBrush
+    QBrush,
+    QKeyEvent
 )
 
 
@@ -191,6 +192,11 @@ class Controller(object, metaclass=Singleton):
             return
         self.document.currentObject().updateGuideEdge(pos)
 
+    def interrupt(self):
+        if self.document.isEditing():
+            from commands import InterruptObject
+            self.document.undo_stack.push(InterruptObject())
+
     def save(self, filename: str):
         if len(self.document.objects) == 0:
             return
@@ -215,13 +221,14 @@ class Properties(object):
     def __init__(self, obj_type: str):
         width = 2.0
         style = Qt.SolidPattern
+        poly = Qt.blue
         if obj_type == 'frame':
             width *= 4
-            style = Qt.NoBrush
+            poly = Qt.black
         self.guide = QPen(Qt.red, width, cap=Qt.RoundCap)
         self.normal = QPen(Qt.black, width, cap=Qt.RoundCap)
         self.edit = QPen(Qt.green, width, cap=Qt.RoundCap)
-        self.polygon = QBrush(Qt.blue, style=style)
+        self.polygon = QBrush(poly, style=style)
 
 
 class Object(QGraphicsPolygonItem):
@@ -235,7 +242,11 @@ class Object(QGraphicsPolygonItem):
         self.guide_edge_item = QGraphicsLineItem()
         self.guide_edge_item.setPen(self.properties.guide)
         self.setBrush(self.properties.polygon)
-        self.setFlags(QGraphicsItem.ItemIsSelectable)
+        pen = QPen()
+        pen.setBrush(QBrush(Qt.black, style=Qt.NoBrush))
+        self.setPen(pen)
+        if self.obj_type == 'piece':
+            self.setFlags(QGraphicsItem.ItemIsSelectable)
 
     def push(self, pos: QPointF):
         if len(self.vertexes) != 0:
@@ -264,17 +275,20 @@ class Object(QGraphicsPolygonItem):
         self.guide_edge_item.setLine(QLineF(start, pos))
 
     def editingEnd(self):
+        from PyQt5.QtGui import QPolygonF
         if self.obj_type == 'piece':
-            from PyQt5.QtGui import QPolygonF
             self.setPolygon(QPolygonF(self.vertexes))
-            Controller().document.layers['polygon'].addItem(self)
+        elif self.obj_type == 'frame':
+            poly = QPolygonF(Controller().board.boundingRect())
+            self.setPolygon(poly.subtracted(QPolygonF(self.vertexes)))
+
+        Controller().document.layers['polygon'].addItem(self)
         for edge in self.edge_items:
             edge.setPen(self.properties.normal)
         Controller().document.is_editing = False
 
     def resumeEditing(self):
-        if self.obj_type == 'piece':
-            Controller().document.layers['polygon'].removeItem(self)
+        Controller().document.layers['polygon'].removeItem(self)
         for edge in self.edge_items:
             edge.setPen(self.properties.edit)
         Controller().document.is_editing = True
@@ -283,6 +297,16 @@ class Object(QGraphicsPolygonItem):
         if len(self.edge_items) < 3:
             return True
         return self.vertexes[0] != self.vertexes[-1]
+
+    def setInterrupt(self, flag: bool):
+        if flag:
+            for edge in self.edge_items:
+                Controller().document.layers[self.obj_type].removeItem(edge)
+            self.disableGuideEdge()
+        else:
+            for edge in self.edge_items:
+                Controller().document.layers[self.obj_type].addItem(edge)
+            self.enableGuideEdge()
 
     def enableGuideEdge(self):
         Controller().document.layers['guide'].addItem(self.guide_edge_item)
@@ -319,6 +343,11 @@ class BoardScene(QGraphicsScene):
     @pyqtSlot(bool)
     def changeCreateMode(self, flag: bool):
         self.create_frame = flag
+
+    def keyPressEvent(self, event: QKeyEvent):
+        super().keyPressEvent(event)
+        if event.key() == Qt.Key_Escape:
+            Controller().interrupt()
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
         super().mousePressEvent(event)
