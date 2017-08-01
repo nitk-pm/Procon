@@ -38,3 +38,18 @@ class PlotVertex(QUndoCommand):
             self.obj.disableGuideEdge()
             self.obj.editingEnd()
             print(self.obj.serialize())
+
+
+class InterruptObject(QUndoCommand):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.obj = Controller().document.currentObject()
+
+    def undo(self):
+        self.obj.setInterrupt(False)
+        Controller().document.addObject(self.obj)
+
+    def redo(self):
+        self.obj.setInterrupt(True)
+        Controller().document.removeObject(self.obj)
