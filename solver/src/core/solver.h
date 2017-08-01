@@ -1,17 +1,18 @@
-#ifndef ENTITY__H
-#define ENTITY__H
+#ifndef SOLVER__H
+#define SOLVER__H
 
 #include <type_traits>
+#include <assert.h>
 #include <unordered_map>
 
-#include "component.h"
+#include "core/component.h"
 
 namespace core {
 
 /************************************************
 
-Entityクラス
-・Componentを登録して、Entityを構成する
+Solverクラス
+・Componentを登録して、Solverを構成する
 ・Componentの追加時、追加しようとしているComponentが
 　既に追加したComponentの場合は、警告を出してプログラ
 　ムの実行が中断される
@@ -20,41 +21,49 @@ Entityクラス
 
 *************************************************/
 
-class Entity {
+class Solver {
 public:
-    Entity() = default;
-    ~Entity() {
-        for (auto &it : components) delete it.second;
-    }
+    Solver() = default;
+    ~Solver();
 
-    template <class T, class... Args>
+    void initialize();
+
+    template <class T, class Id = T, class... Args>
     T* addComponent(Args&&... args) {
-        static_assert(std::is_base_of<Component, T>(), "T is not a component, cannot add T to solver");
-        constexpr TypeId id = ComponentTypeID::get<T>();
+        static_assert(std::is_base_of<Component, T>(), "T is not a component, cannot add T to Solver");
+        const TypeId id = ComponentTypeID::get<Id>();
         assert(hasComponent(id));
         auto component = new T{std::forward<Args>(args)...};
-        component->setSolver(this);
+        component->setParent(this);
         components.insert(std::make_pair(id, component));
         return component;
     }
 
     template <class T>
     T* getComponent() {
-        static_assert(std::is_base_of<Component, T>(), "T is not a component, cannot get T to solver");
-        constexpr TypeId id = ComponentTypeID::get<T>();
+        static_assert(std::is_base_of<Component, T>(), "T is not a component, cannot get T to Solver");
+        const TypeId id = ComponentTypeID::get<T>();
         assert(!hasComponent(id));
         return static_cast<T*>(components[id]);
     }
 
     template <class T>
     void removeComponent() {
-        static_assert(std::is_base_of<Component, T>(), "T is not a component, cannot remove T to solver");
-        constexpr TypeId id = ComponentTypeID::get<T>();
+        static_assert(std::is_base_of<Component, T>(), "T is not a component, cannot remove T to Solver");
+        const TypeId id = ComponentTypeID::get<T>();
         assert(!hasComponent(id));
         delete components[id];
         components.erase(id);
     }
 
+    template <class T>
+    bool hasComponent() {
+        static_assert(std::is_base_of<Component, T>(), "T is not a component");
+        const TypeId id = ComponentTypeID::get<T>();
+        return hasComponent(id);
+    }
+
+private:
     bool hasComponent(TypeId id) {
         auto iter = components.find(id);
         return iter != components.end();
@@ -66,4 +75,4 @@ private:
 
 } // namespace core
 
-#endif
+#endif // SOLVER__H

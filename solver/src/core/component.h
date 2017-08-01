@@ -5,27 +5,29 @@
 
 namespace core {
 
-class Entity;
+class Solver;
 
 class Component {
 public:
     Component() = default;
     virtual ~Component() = default;
 
-    Component(Entity *parent) {
+    Component(Solver *parent) {
         setParent(parent);
     }
 
-    void setParent(Entity *parent) {
+    virtual void initialize() {}
+
+    void setParent(Solver *parent) {
         _parent = parent;
     }
 
-    Entity* parent() const {
+    Solver* parent() const {
         return _parent;
     }
 
 private:
-    Entity *_parent;
+    Solver *_parent;
 };
 
 typedef std::size_t TypeId;
@@ -42,8 +44,6 @@ private:
     static TypeId next_type_id;
 };
 
-TypeId ComponentTypeID::next_type_id = 0;
-
 } // namespace core
 
-#endif
+#endif // COMPONENT__H
