@@ -1,3 +1,13 @@
 bin
 
 build
+
+# native code file
+*.o
+*.obj
+*.so
+*.dll
+*.lib
+*.a
+*.exe
+*.out
