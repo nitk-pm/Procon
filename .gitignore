@@ -1,3 +1,16 @@
 bin
 
 build
+
+# binary files
+*.o
+*.obj
+
+*.exe
+*.out
+
+*.so
+*.dll
+
+*.a
+*.lib
