@@ -1,3 +1,17 @@
 bin
 
 build
+
+# binary file
+*.o
+*.out
+*.exe
+
+*.a
+*.lib
+
+*.so
+*.dll
+
+# log file
+*.log
