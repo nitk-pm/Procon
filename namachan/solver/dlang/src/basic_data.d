@@ -9,9 +9,14 @@ import std.range : array;
 import std.conv : to;
 import armos.math.vector;
 
+///有理数クラス
 struct Rational {
-	int denom, num;
+	///分母
+	int denom;
+	///分子
+	int num;
 
+	///自身を約分したものを返す
 	Rational normalized () const {
 		if (num == 0) {
 			if (denom < 0)	return Rational (-1, 0);
@@ -23,6 +28,7 @@ struct Rational {
 		return Rational (abs(denom) * sign / gcd_num, abs(num) / gcd_num);
 	}
 
+	///自身を約分
 	void normalize () {
 		if (num == 0) {
 			if (denom < 0) denom = -1;
@@ -41,7 +47,10 @@ struct Rational {
 		return x.denom == y.denom && x.num == y.num;
 	}
 	
-
+	/++
+	 + Rational同士の二項演算子
+	 + 四則演算のみ対応
+	 +/
 	Rational opBinary(string op)(in Rational rational) const {
 		static if (op == "+" || op == "-") {
 			auto common_num = this.num * rational.num;
@@ -55,6 +64,11 @@ struct Rational {
 		}
 	}
 
+	/++
+	 + intとの二項演算子
+	 + Rationalが左に来た場合
+	 + 四則演算のみ対応
+	 +/
 	Rational opBinary(string op)(in int n) const {
 		static if (op == "+") {
 			return Rational (this.denom + n * this.num, this.num);
@@ -70,6 +84,11 @@ struct Rational {
 		}
 	}
 
+	/++
+	 + intとの二項演算子
+	 + Rationalが右に来た場合
+	 + 四則演算のみ対応
+	 +/
 	Rational opBinaryRight(string op)(in int n) const {
 		static if (op == "-") {
 			return Rational (n * this.num - this.denom, this.num);
@@ -82,9 +101,12 @@ struct Rational {
 		}
 	}
 
+	///doubleへ変換
 	double toDouble () const {
 		return denom.to!double / num.to!double;
 	}
+
+	///floatへ変換
 	float toFloat () const {
 		return denom.to!float / num.to!float;
 	}
@@ -95,27 +117,38 @@ unittest {
 	assert (x == Rational(-1, 8));
 }
 
+///Vector2iの傾きをRationalとして返す
 Rational slope (Vector2i vec) {
 	return Rational (vec.y, vec.x);
 }
 
-//一次関数
+///一次関数
 struct Line {
+	///傾き
 	Rational slope;
+	///切片
 	Rational seg;
 
+	///xに値を代入し、yを計算	
 	Rational y (in int x) const {
 		return slope * x + seg;
 	}
 
+	///yに値を代入し、xを計算
 	Rational x (in int y) const {
 		return (y - seg) / slope;
 	}
 }
 
+///線分
 struct Segment {
-	Vector2i start, end;
 
+	///始点
+	Vector2i start;
+	///終点
+	Vector2i end;
+
+	///その線分と重なる軌跡を描く一次関数
 	Line line () const {
 		auto slope = vec.slope.normalized;
 		if (slope.num == 0)
@@ -125,6 +158,7 @@ struct Segment {
 		return Line (slope, seg);
 	}
 
+	///等価比較演算子
 	bool opEquals(in Segment seg) const {
 		return (this.start == seg.start && this.end == seg.end) || (this.start == seg.end && this.end == seg.start);
 	}
@@ -143,11 +177,13 @@ struct Segment {
 		assert (Segment(Vector2i(0, 5), Vector2i(3, 2)).toHash == Segment(Vector2i(3, 2), Vector2i(0, 5)).toHash );
 	}
 
+	///線分の傾きを計算
 	@property
 	Rational slope () const {
 		return vec.slope;
 	}
 
+	///線分からベクトルを計算
 	@property
 	Vector2i vec () const {
 		return end - start;
