@@ -1,13 +1,12 @@
 {
-	"name": "solver",
+	"name": "procon-solver",
 	"authors": [
-		"namachan"
+		"Nakano Masaki"
 	],
 	"description": "Procon28's solver",
-	"copyright": "Copyright © 2017, namachan",
+	"copyright": "Copyright © 2017, Nakano Masaki",
 	"license": "BSL-1.0",
 	"dependencies" : {
-		"derelict-sdl2":"2.1.4",
 		"armos":"0.2.3"
 	}
 }
