@@ -4,6 +4,10 @@ import procon28.basic_data;
 import procon28.solver.data;
 import procon28.solver.collison;
 
+/++
+ + 線分の角度の一致度と重複した点の数で評価する評価関数
+ + 衝突していた場合は-float.inifinityを返す
+ +/
 float angle_and_points (Shape frame, Shape piece, Point pos) {
 	float val = 0.0f;
 	if (is_hit (frame, piece, pos)) return -float.infinity;
