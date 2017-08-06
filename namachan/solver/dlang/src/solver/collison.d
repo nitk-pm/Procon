@@ -22,26 +22,60 @@ unittest {
 	assert (!judge_intersected (seg3, seg4));
 }
 
-bool judge_inclusion (in Point p,in Segment[] segments) {
-	double angel_sum = 0.0;
-	foreach (seg; segments) {
-		auto v1 = seg.start - p;
-		auto v2 = seg.end - p;
-		angel_sum += v1.angle(v2);
+Vector2f solve_linear (Segment a, Segment b) {
+	if (a.vec.x == 0 || b.vec.x == 0) return Vector2f (a.start.x, 0.0f);
+	if (a.vec.x == 0) {
+		immutable x = a.start.x;
+		immutable y = b.line.slope.toFloat * x + b.line.seg.toFloat;
+		return Vector2f (x, y);
 	}
-	return angel_sum < 360.0;
+	if (b.vec.x == 0) {
+		immutable x = b.start.x;
+		immutable y = a.line.slope.toFloat * x + a.line.seg.toFloat;
+		return Vector2f (x, y);
+	}
+	else {
+		immutable a_slope = a.line.slope.toFloat;
+		immutable a_seg = a.line.seg.toFloat;
+		immutable b_slope = b.line.slope.toFloat;
+		immutable b_seg = b.line.seg.toFloat;
+		immutable x = (b_seg - a_seg) / (a_slope - b_slope);
+		immutable y = a_slope * x + a_seg;
+		return Vector2f (x, y);
+	}
+}
+
+bool judge_inclusion (in Point p, in Segment[] segments) {
+	import std.stdio;
+	auto horizontal_seg  = Segment (Vector2i(-1, p.y), Vector2i (102, p.y));
+	size_t cross_cnt;
+	foreach (ref seg; segments) {
+		if (judge_intersected (horizontal_seg, seg)) {
+			immutable cross_point = solve_linear (seg, horizontal_seg);
+			if (cross_point.x > p.x)
+				++cross_cnt;
+		}
+	}
+	return cross_cnt % 2 == 1;
 }
 unittest {
 	auto shape = [
-		Segment(Vector2i (0, 0), Vector2i(0, 2)),
-		Segment(Vector2i (0, 2),Vector2i (2, 2)),
-		Segment(Vector2i (2, 2), Vector2i(2, 0)),
-		Segment(Vector2i (2, 0), Vector2i(0, 0))
+		S( P(0, 0), P(0, 2)),
+		S( P(0, 2), P(2, 2)),
+		S( P(2, 2), P(2, 0)),
+		S( P(2, 0), P(0, 0)),
+
+		S( P(4, 0), P(4, 4)),
+		S( P(4, 4), P(6, 4)),
+		S( P(6, 4), P(6, 0)),
+		S( P(6, 0), P(4, 0))
 	];
-	auto pt1 = Vector2i (1, 1);
-	auto pt2 = Vector2i (2, 2);
+	auto pt1 = P (1, 1);
+	auto pt2 = P (2, 2);
+	auto pt3 = P (5, 2);
 	assert (judge_inclusion(pt1, shape));
 	assert (!judge_inclusion(pt2, shape));
+	assert (judge_inclusion(pt3, shape));
 }
 
 bool is_hit (in Shape frame, in Shape shape, in Point pos) {
