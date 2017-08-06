@@ -6,9 +6,11 @@ import procon28.solver.data;
 import procon28.basic_data;
 import armos.math.vector;
 
+///armosを使って作られたデバッグ用簡易ビジュアライザ
 class Visualizer : ar.app.BaseApp {
+private:
 	ar.graphics.Mesh[] lines;
-
+public:
 	override void setup () {
 	}
 
@@ -21,6 +23,7 @@ class Visualizer : ar.app.BaseApp {
 		}
 	}
 
+///描画する線分の集合をセット
 	void setLines (Segment[] segs) {
 		foreach (seg; segs) {
 			lines ~= ar.graphics.linePrimitive ([
