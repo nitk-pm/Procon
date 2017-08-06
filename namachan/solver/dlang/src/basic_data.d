@@ -161,3 +161,8 @@ unittest {
 	import std.stdio;
 	assert (seg.line == Line (Rational (-1,2), Rational (10, 1)));
 }
+
+alias R = Rational;
+alias P = Vector2i;
+alias S = Segment;
+alias L = Line;

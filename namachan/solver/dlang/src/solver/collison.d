@@ -60,15 +60,22 @@ bool judge_inclusion (in Point p, in Segment[] segments) {
 }
 unittest {
 	auto shape = [
-		Segment(Vector2i (0, 0), Vector2i(0, 2)),
-		Segment(Vector2i (0, 2),Vector2i (2, 2)),
-		Segment(Vector2i (2, 2), Vector2i(2, 0)),
-		Segment(Vector2i (2, 0), Vector2i(0, 0))
+		S( P(0, 0), P(0, 2)),
+		S( P(0, 2), P(2, 2)),
+		S( P(2, 2), P(2, 0)),
+		S( P(2, 0), P(0, 0)),
+
+		S( P(4, 0), P(4, 4)),
+		S( P(4, 4), P(6, 4)),
+		S( P(6, 4), P(6, 0)),
+		S( P(6, 0), P(4, 0))
 	];
-	auto pt1 = Vector2i (1, 1);
-	auto pt2 = Vector2i (2, 2);
+	auto pt1 = P (1, 1);
+	auto pt2 = P (2, 2);
+	auto pt3 = P (5, 2);
 	assert (judge_inclusion(pt1, shape));
 	assert (!judge_inclusion(pt2, shape));
+	assert (judge_inclusion(pt3, shape));
 }
 
 bool is_hit (in Shape frame, in Shape shape, in Point pos) {
