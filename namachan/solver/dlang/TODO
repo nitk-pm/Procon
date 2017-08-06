@@ -1,2 +1,1 @@
-点の内外判定が凸多角形にしか対応していないのでCrossing Number Algorithに変更
 テストの追加
