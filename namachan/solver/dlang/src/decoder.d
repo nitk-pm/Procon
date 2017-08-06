@@ -16,6 +16,7 @@ Segment[] vertexies2segments (Vector2i[] vertexies) {
 	return segments;
 }
 
+///jsonフォーマットの文字列をShapeにデコード
 Shape decode_frame (in string str) {
 	auto json = str.parseJSON;
 	Vector2i[] vertexies;
@@ -27,6 +28,7 @@ Shape decode_frame (in string str) {
 	return vertexies2segments (vertexies);
 }
 
+///jsonフォーマットの文字列をPieceの集合にデコード
 Piece[] decode_piece (in string str) {
 	auto json = str.parseJSON;
 
