@@ -12,6 +12,7 @@ alias Point = Vector2i;
 alias Shape = Segment[];
 alias Piece = Shape[];
 
+///頂点座標の列を線分の集合に変換
 Shape vertexies2shape (Vector2i[] vertexies) {
 	Shape shape;
 	for (size_t i; i < vertexies.length; ++i) {
@@ -23,6 +24,7 @@ Shape vertexies2shape (Vector2i[] vertexies) {
 	return shape;
 }
 
+///線分が重複しているかどうかを判定
 bool judge_overlap(in Segment seg1, in Segment seg2) {
 	auto ta = (seg2.start.x - seg2.end.x) * (seg1.start.y - seg2.start.y) +  (seg2.start.y - seg2.end.y) * (seg2.start.x - seg1.start.x);
 	auto tb = (seg2.start.x - seg2.end.x) * (seg1.end.y - seg2.start.y) +  (seg2.start.y - seg2.end.y) * (seg2.start.x - seg1.end.x);
@@ -37,6 +39,7 @@ unittest {
 	assert (judge_overlap(seg1, seg2));
 }
 
+///線分のxorを取る。重複していないものには使えない
 Segment[2] xor (in Segment seg1, in Segment seg2) {
 	auto xs = [seg1.start.x, seg1.end.x, seg2.start.x, seg2.end.x].dup.sort!"a>b".array;
 	int[] ys;
@@ -53,6 +56,7 @@ unittest {
 	auto seg2 = S(V(1,1), V(2,2));
 }
 
+///ShapeとShapeをマージ。重複部分は取り除かれる
 Shape merge (Shape x, Shape y) {
 	auto x_hit = new bool[x.length];
 	auto y_hit = new bool[y.length];
