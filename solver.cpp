@@ -4,7 +4,7 @@
 #include <string>
 //constexpr double compilePow(double mantissa, unsigned int exponent) { return exponent == 0 ? 1 : mantissa*compilePow(mantissa, exponent - 1); }
 //const double EPS = compilePow(0.1,9);
-
+const int INF = 10000000;
 //todoなど
 /*
 
@@ -17,18 +17,18 @@
 pieceにboolのcanUse置くよりも現在のノードで使用済みのIDのリスト作ったほうがいいのでは…?要検討。
 
 貪欲
-	面積とBottom-left
-	ピースごとの面積の算出
-	使ってないピースの中から面積が一番大きいものを選ぶ(毎回全走査、面積でピースをソート、使ったものからerase)<-貪欲をわざわざそこまで最適化する意味は…
-	左上から右に向かって置けるか探索、最初の置ける地点に配置
-	置けるピースがなくなればループ抜け
+面積とBottom-left
+ピースごとの面積の算出
+使ってないピースの中から面積が一番大きいものを選ぶ(毎回全走査、面積でピースをソート、使ったものからerase)<-貪欲をわざわざそこまで最適化する意味は…
+左上から右に向かって置けるか探索、最初の置ける地点に配置
+置けるピースがなくなればループ抜け
 --AC?<-それっぽい出力だけどまだ検証はしてない
 
 山登り
-	評価値に線分の一致する部分の長さ
-		ピースとフレームを構成する辺に線分の長さ、傾き、切片を定義
-		切片と傾きの一致する二線分の長さのmin
-	
+評価値に線分の一致する部分の長さ
+ピースとフレームを構成する辺に線分の長さ、傾き、切片を定義
+切片と傾きの一致する二線分の長さのmin
+
 
 
 枝刈り
@@ -55,15 +55,25 @@ std::vector<std::string> split(std::string str, char sep)
 	return v;
 }
 
+double sqrt(double s) {
+	double x = s / 2.0;
+	double lastX = 0.0;
+	while (x != lastX) {//数値に変化がなくなるまで継続
+		lastX = x;
+		x = (x + s / x) / 2.0;//相加平均
+	}
+	return x;
+}
+
 //x,y座標のpair
 class Position {
 public:
 
-	short x, y;//shortで持っているので内外判定の切り捨てでバグるかも。
+	double x, y;
 
-	void renewPosition(int a, int b) { x = a; y = b; return; }//DON'T USE
+	void renewPosition(double a, double b) { x = a; y = b; return; }//DON'T USE
 	Position() {};
-	Position(int xValue, int yValue) { x = xValue; y = yValue; }
+	Position(double xValue, double yValue) { x = xValue; y = yValue; }
 };
 
 double cross(Position a, Position b) {
@@ -72,22 +82,35 @@ double cross(Position a, Position b) {
 
 
 //各辺の直線の式の傾きと切片のpair
-/*
-class ExpressionElement {
 
-private
-:double slope, intercept;
+class Line {
+
 public:
-double slope() { return slope; }
-double intercept() { return intercept; }
-ExpressionElement(){};
-ExpressionElement(double slopeValue, double interceptValue) { slope = slopeValue; intercept = interceptValue; return; }
+	double slope, intercept,length;
+	Line(){};
+	Line(double slopeValue, double interceptValue, double lengthValue) { slope = slopeValue; intercept = interceptValue; length = lengthValue; return; }
 };
-*/
+
 
 /*Pieceクラス　頂点数と各点の座標*/
 class Piece {
+
+	void lineCalculation(){
+		double slope, intercept, length;
+		lineList.reserve(vertexPositionList.size() - 1);
+		for (int i = 0; i < vertexPositionList.size() - 1; ++i) {
+			double x1 = vertexPositionList.at(i).x, x2 = vertexPositionList.at(i + 1).x, y1 = vertexPositionList.at(i).y, y2 = vertexPositionList.at(i + 1).y;
+			slope = (x1 == x2) ? INF : (y2 - y1) / (x2 - x1);
+			intercept = (slope == INF) ? x1 : -slope*x1 + y1;
+
+			//評価値にしか使わないのでルートを外した二乗の値で長さを保持、のちに修正するかも
+			length = (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1);
+
+			lineList.push_back(Line(slope, intercept, length));
+		}
 	
+	}
+
 	//ある点からの相対座標で表示
 	Position relativePosition(Position standard, Position object) {
 		double x, y;
@@ -95,18 +118,20 @@ class Piece {
 		y = object.y - standard.y;
 		return Position(x, y);
 	};
-	
-	//外積による面積の算出
-	double areaCalucurasion() {
-		double tmp=0;
+
+	//外積による面積の算出、
+	double areaCalculation() {
+
+		double tmp = 0;
 		for (int i = 0; i < this->vertexPositionList.size() - 1; ++i) {
 			tmp += cross(this->vertexPositionList.at(i), this->vertexPositionList.at(i + 1));
 		}
-		return tmp/2;
+		return tmp / 2;
 	}
 
 public:
 
+	std::vector<Line> lineList;
 	double area;
 	bool canUse;
 
@@ -132,11 +157,14 @@ public:
 			vertexPositionList.push_back(relativePosition(positionList.at(0), positionList.at(i)));
 		vertexPositionList.push_back(Position(0, 0));
 
-		area = areaCalucurasion();
-
+		area = areaCalculation();
+		lineCalculation();
 		this->canUse = true;
 		return;
 	}
+
+
+
 	Piece absolutePiecePosition(Position base) {//引数のPositionを基準に合わせる形で全点をずらす。(まともな関数名募集中)
 		Piece tmpPiece;
 		for (int i = 0; i < this->vertexPositionList.size(); ++i)
@@ -206,11 +234,11 @@ bool isInFrame(Piece p, std::vector<Frame> frameList) {
 		tmp &= (wn[0][j] != 0);
 	}
 	if (tmp)
-	for (int i = 1; i < frameList.size(); ++i) {
-		for (int j = 0; j < p.vertexPositionList.size(); ++j) {
-			tmp &= (wn[i][j] == 0);
+		for (int i = 1; i < frameList.size(); ++i) {
+			for (int j = 0; j < p.vertexPositionList.size(); ++j) {
+				tmp &= (wn[i][j] == 0);
+			}
 		}
-	}
 	return tmp;
 }
 
@@ -226,13 +254,13 @@ public:
 	void loadShapeInfomation() {
 
 		std::vector <std::string> shapeInfoTmp = split(infomationString, ':');
-		pieceNumber = stod(shapeInfoTmp.at(0));
+		pieceNumber = stoi(shapeInfoTmp.at(0));
 		piece.reserve(pieceNumber);
 
 		//ピースの読み込み
 		for (int i = 1; i < pieceNumber + 1; i++) {
 			std::vector<std::string> shapeInfoTmp2 = split(shapeInfoTmp.at(i), ' ');
-			int vertexNumberTmp = stod(shapeInfoTmp2.at(0));
+			int vertexNumberTmp = stoi(shapeInfoTmp2.at(0));
 			std::vector<Position>piecePositionTmp; piecePositionTmp.reserve(vertexNumberTmp);
 
 			for (int j = 1; j <= vertexNumberTmp * 2; j += 2) {
@@ -244,7 +272,7 @@ public:
 		//枠の読み込み
 		std::vector<std::string> shapeInfoTmp2 = split(shapeInfoTmp.at(pieceNumber + 1), ' ');//shapeInfoTmp[pieceNumber+1]に枠の形状情報
 
-		int frameVertexNumberTmp = stod(shapeInfoTmp2.at(0));
+		int frameVertexNumberTmp = stoi(shapeInfoTmp2.at(0));
 
 		std::vector<Position> framePositionTmp; framePositionTmp.reserve((frameVertexNumberTmp + 1));
 
@@ -268,7 +296,7 @@ public:
 		while (true) {
 			biggestPieceID = -1;
 
-			for (int i = 1; i < pieceNumber-1; ++i) {
+			for (int i = 1; i < pieceNumber - 1; ++i) {
 				if (piece.at(i).area < piece.at(i + 1).area&&piece.at(i).canUse)
 					biggestPieceID = i;
 			}
@@ -292,11 +320,15 @@ public:
 			piece.at(biggestPieceID).canUse = false;
 		}
 	}
+
+
+
 };
 
 int main() {
 	Solver solve;
 	solve.loadShapeInfomation();
+	//spin turn確認
 	/*
 	for (auto i = solve.piece.begin(); i != solve.piece.end(); ++i) {
 	for (int turning = 0; turning < 2; ++turning) {
@@ -310,12 +342,24 @@ int main() {
 	}
 	}
 	}*/
+
+	//貪欲探索確認
+	/*
 	solve.greedySearch();
 	for (auto i = solve.frame.begin(); i != solve.frame.end(); ++i) {
 		for (int j = 0; j < i->vertexPositionList.size(); ++j)
 			std::cout << i->vertexPositionList.at(j).x << "," << i->vertexPositionList.at(j).y << std::endl;
 		puts("");
 	}
+	*/
+
+	//線分確認
+	for (int i = 0; i < solve.piece.size() - 1; ++i){ 
+		for (int j = 0; j < solve.piece.at(i).lineList.size() - 1; ++j) {
+			std::cout << "m=" << solve.piece.at(i).lineList.at(j).slope << "\nc=" << solve.piece.at(i).lineList.at(j).intercept << "\nl=" << solve.piece.at(i).lineList.at(j).length << "\n\n";
+		}
+	}
+
 	//std::vector<Position> p(0);
 	//p.push_back(Position(4, 0));	p.push_back(Position(4, 3));	p.push_back(Position(0, 3));
 	//Piece a(p);
