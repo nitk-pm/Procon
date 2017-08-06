@@ -5,6 +5,10 @@ import procon28.solver.data;
 
 import armos.math.vector;
 
+/++
+ + 線分の交差判定
+ + 始点と終点が線分に接触していた場合は交差していないとみなす
+ +/
 bool judge_intersected (in Segment seg1, in Segment seg2) {
 	auto ta = (seg2.start.x - seg2.end.x) * (seg1.start.y - seg2.start.y) +  (seg2.start.y - seg2.end.y) * (seg2.start.x - seg1.start.x);
 	auto tb = (seg2.start.x - seg2.end.x) * (seg1.end.y - seg2.start.y) +  (seg2.start.y - seg2.end.y) * (seg2.start.x - seg1.end.x);
@@ -22,6 +26,10 @@ unittest {
 	assert (!judge_intersected (seg3, seg4));
 }
 
+/++
+ + 一次方程式を解き、交点を返す
+ + 解けない場合の動作は未定義
+ +/
 Vector2f solve_linear (Segment a, Segment b) {
 	if (a.vec.x == 0 || b.vec.x == 0) return Vector2f (a.start.x, 0.0f);
 	if (a.vec.x == 0) {
@@ -45,6 +53,7 @@ Vector2f solve_linear (Segment a, Segment b) {
 	}
 }
 
+///点の図形に対する内外判定
 bool judge_inclusion (in Point p, in Segment[] segments) {
 	import std.stdio;
 	auto horizontal_seg  = Segment (Vector2i(-1, p.y), Vector2i (102, p.y));
@@ -78,6 +87,7 @@ unittest {
 	assert (judge_inclusion(pt3, shape));
 }
 
+///図形同士の当たり判定
 bool is_hit (in Shape frame, in Shape shape, in Point pos) {
 	foreach (shape_seg; shape) {
 		foreach (frame_seg; frame) {
