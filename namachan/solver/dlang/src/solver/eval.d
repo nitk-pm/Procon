@@ -1,8 +1,7 @@
 module procon28.solver.eval;
 
-import procon28.basic_data;
-import procon28.solver.data;
-import procon28.solver.collison;
+import procon28.solver.collison : is_hit;
+import procon28.solver.data : Point, Shape;
 
 /++
  + 線分の角度の一致度と重複した点の数で評価する評価関数

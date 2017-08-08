@@ -1,13 +1,14 @@
 module procon28.basic_data;
 
-import std.format;
-import std.math : abs, sqrt, acos;
-import std.numeric : gcd;
-import std.algorithm.sorting : sort;
-import std.algorithm.iteration : uniq;
-import std.range : array;
-import std.conv : to;
 import armos.math.vector;
+
+import std.algorithm.iteration : uniq;
+import std.algorithm.sorting : sort;
+import std.conv : to;
+import std.format : format;
+import std.math : abs;
+import std.numeric : gcd;
+import std.range : array;
 
 ///有理数クラス
 struct Rational {
