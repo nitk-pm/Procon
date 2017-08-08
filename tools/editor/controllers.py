@@ -19,6 +19,7 @@ class Singleton(type):
 
 class Controller(object, metaclass=Singleton):
 
+    status = None
     document = None
 
     def create_object(self, pos: QPointF, object_type: str):
@@ -81,8 +82,6 @@ class Controller(object, metaclass=Singleton):
         with open(filename, 'w') as f:
             f.write(serial)
 
-    def check_editing(self):
-        obj = self.document.current_object()
-        if obj is None:
-            return False
-        return obj.is_editing
+    def show_message(self, message):
+        if self.status is not None:
+            self.status.showMessage(message)
