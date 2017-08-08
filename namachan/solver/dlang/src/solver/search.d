@@ -1,12 +1,12 @@
 module procon28.solver.search;
 
-import procon28.solver.data;
-import procon28.solver.eval;
-import procon28.basic_data;
+import armos.math.vector : Vector2i;
+
+import procon28.solver.data : merge, Piece, Shape;
+import procon28.solver.eval : angle_and_points;
 
 import std.algorithm.sorting : sort;
 import std.range : array;
-import armos.math.vector;
 
 ///操作を記録する構造体
 struct Op {

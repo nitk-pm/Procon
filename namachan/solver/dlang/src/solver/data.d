@@ -1,11 +1,12 @@
 module procon28.solver.data;
 
-import std.algorithm.sorting : sort;
-import std.algorithm.iteration : map;
-import std.range : array, zip;
-import procon28.basic_data;
-import procon28.visualize.window;
 import armos.math.vector;
+
+import procon28.basic_data : Segment;
+
+import std.algorithm.iteration : map;
+import std.algorithm.sorting : sort;
+import std.range : array, zip;
 
 alias Point = Vector2i;
 

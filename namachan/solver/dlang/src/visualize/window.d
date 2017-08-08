@@ -2,9 +2,9 @@ module procon28.visualize.window;
 
 static import ar = armos;
 
-import procon28.solver.data;
-import procon28.basic_data;
-import armos.math.vector;
+import armos.math.vector : Vector3f;
+
+import procon28.basic_data : Segment;
 
 ///armosを使って作られたデバッグ用簡易ビジュアライザ
 class Visualizer : ar.app.BaseApp {

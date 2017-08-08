@@ -1,9 +1,9 @@
 module procon28.solver.collison;
 
-import procon28.basic_data;
-import procon28.solver.data;
-
 import armos.math.vector;
+
+import procon28.basic_data : Segment, P, S;
+import procon28.solver.data : Point, Shape;
 
 /++
  + 線分の交差判定
