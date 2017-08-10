@@ -24,7 +24,7 @@ public:
 	}
 
 ///描画する線分の集合をセット
-	void setLines (Segment[] segs) {
+	void addLines (Segment[] segs) {
 		foreach (seg; segs) {
 			lines ~= ar.graphics.linePrimitive ([
 				Vector3f (seg.start.x, seg.start.y, 0),
