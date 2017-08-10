@@ -43,7 +43,7 @@ Op[] search (Piece[] pieces, Shape frame) {
 				foreach (frame_seg; frame) {
 					auto frame_vertex = frame_seg.start;
 					auto diff = frame_vertex - piece_vertex;
-					auto val = angle_and_points (pattern, frame, diff);
+					auto val = angle_and_points (frame, pattern.move(diff));
 					ops ~= Op (piece_idx, pattern, diff, val);
 				}
 			}
