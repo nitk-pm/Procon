@@ -57,6 +57,15 @@ unittest {
 	auto seg2 = S(V(1,1), V(2,2));
 }
 
+Shape move (Shape shape, Vector2i pos) {
+	auto copy = shape.dup;
+	foreach (ref seg; copy) {
+		seg.start += pos;
+		seg.end += pos;
+	}
+	return copy;
+}
+
 ///ShapeとShapeをマージ。重複部分は取り除かれる
 Shape merge (Shape x, Shape y) {
 	auto x_hit = new bool[x.length];
