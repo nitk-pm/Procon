@@ -203,3 +203,6 @@ alias R = Rational;
 alias P = Vector2i;
 alias S = Segment;
 alias L = Line;
+
+alias Shape = Segment[];
+alias Piece = Shape[];

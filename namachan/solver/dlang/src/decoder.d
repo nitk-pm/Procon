@@ -2,8 +2,8 @@ module procon28.decoder;
 
 import armos.math.vector;
 
-import procon28.basic_data : Segment;
-import procon28.solver.data : Piece, Shape, vertexies2shape;
+import procon28.basic_data : Segment, Piece, Shape;
+import procon28.solver.data : vertexies2shape;
 
 import std.conv : to;
 import std.json : parseJSON;

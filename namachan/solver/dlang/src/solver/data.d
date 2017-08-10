@@ -2,16 +2,11 @@ module procon28.solver.data;
 
 import armos.math.vector;
 
-import procon28.basic_data : Segment;
+import procon28.basic_data : Segment, Shape;
 
 import std.algorithm.iteration : map;
 import std.algorithm.sorting : sort;
 import std.range : array, zip;
-
-alias Point = Vector2i;
-
-alias Shape = Segment[];
-alias Piece = Shape[];
 
 ///頂点座標の列を線分の集合に変換
 Shape vertexies2shape (Vector2i[] vertexies) {

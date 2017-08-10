@@ -2,7 +2,8 @@ module procon28.solver.search;
 
 import armos.math.vector : Vector2i;
 
-import procon28.solver.data : merge, Piece, Shape;
+import procon28.basic_data : P, S, Piece, Shape;
+import procon28.solver.data : merge, move, vertexies2shape;
 import procon28.solver.eval : angle_and_points;
 
 import std.algorithm.sorting : sort;
