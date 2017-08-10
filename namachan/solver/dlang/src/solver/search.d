@@ -36,11 +36,13 @@ struct EvaledOp {
 Op[] search (Piece[] pieces, Shape frame) {
 	Op[] ops;
 	if (pieces.length == 0) return [];
-	foreach (piece; pieces) {
+	size_t cnt;
+	foreach (piece_idx,piece; pieces) {
 		foreach (spin_level, pattern; piece) {
-			foreach (piece_idx, piece_seg; pattern) {
+			foreach (piece_seg; pattern) {
 				auto piece_vertex = piece_seg.start;
 				foreach (frame_seg; frame) {
+					cnt++;
 					auto frame_vertex = frame_seg.start;
 					auto diff = frame_vertex - piece_vertex;
 					auto val = angle_and_points (frame, pattern.move(diff));
@@ -54,4 +56,10 @@ Op[] search (Piece[] pieces, Shape frame) {
 	auto new_frame = merge (frame, sorted[0].shape);
 	auto piece_set = pieces[0..sorted[0].piece_idx] ~ pieces[sorted[0].piece_idx+1..$];
 	return sorted[0] ~ search (piece_set, new_frame);
+}
+unittest {
+	auto p1 = [[P(0,0), P(0,20), P(20,0)].vertexies2shape];
+	auto p2 = [[P(20,0), P(20,20), P(0,20)].vertexies2shape];
+	auto p3 = [[P(0,0), P(0,20), P(20,20), P (20, 0)].vertexies2shape];
+	auto frame = [P(0,0), P(20,0), P(20,40), P(0,40)].vertexies2shape;
 }
