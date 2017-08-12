@@ -5,7 +5,7 @@ from PyQt5.QtCore import (
     QLineF,
     QRectF,
     pyqtSignal,
-    pyqtSlot
+    pyqtSlot,
 )
 from PyQt5.QtWidgets import (
     QUndoStack,
@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import (
     QPen,
     QBrush,
+    QColor,
     QKeyEvent
 )
 
@@ -150,13 +151,13 @@ class Properties(object):
 
     def __init__(self, object_type: str):
         width = 2.0
-        filled_color = Qt.blue
+        filled_color = QColor('#0288D1')
         if object_type == 'frame':
             width = 4.0
-            filled_color = Qt.black
-        self.guide = QPen(Qt.red, width, cap=Qt.RoundCap)
-        self.normal = QPen(Qt.black, width, cap=Qt.RoundCap)
-        self.edit = QPen(Qt.green, width, cap=Qt.RoundCap)
+            filled_color = QColor('#000000')
+        self.guide = QPen(QColor('#F44336'), width, cap=Qt.RoundCap)
+        self.normal = QPen(QColor('#000000'), width, cap=Qt.RoundCap)
+        self.edit = QPen(QColor('#4CAF50'), width, cap=Qt.RoundCap)
         self.filled = QBrush(filled_color)
 
 
@@ -204,6 +205,11 @@ class Object(QGraphicsPolygonItem):
         if start == pos:
             return
         self.guide.setLine(QLineF(start, pos))
+        from controllers import Controller
+        _pos = self.document.board.adjust_to_data(pos) 
+        _start = self.document.board.adjust_to_data(start) 
+        dif = _pos - _start
+        Controller().show_message('x:%f, y:%f' % (dif.x(), dif.y()))
 
     def set_guide_show(self, enable: bool):
         if enable:
@@ -266,3 +272,6 @@ class Object(QGraphicsPolygonItem):
             p = data[i] - offset
             serial += '%d %d ' % (p.x(), p.y())
         return serial.strip()
+
+    def copy(self):
+        pass

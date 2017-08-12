@@ -36,8 +36,6 @@ class PlotVertex(QUndoCommand):
     def redo(self):
         self.obj.push(self.pos)
         self.obj.set_edit_mode(False)
-        if self.obj.is_closed:
-            print(self.obj.serialize())
 
 
 class InterruptObject(QUndoCommand):
@@ -63,12 +61,11 @@ class DeleteObjects(QUndoCommand):
 
     def undo(self):
         for obj in self.objects:
+            obj.setSelected(False)
             obj.set_interrupt(False)
             obj.document.add_object(obj)
-        print('delete undo')
 
     def redo(self):
         for obj in self.objects:
             obj.set_interrupt(True)
             obj.document.remove_object(obj)
-        print('delete redo')

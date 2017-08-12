@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="actions">
+    <file>icons/cut.png</file>
+    <file>icons/copy.png</file>
     <file>icons/frame-checked.png</file>
     <file>icons/piece-checked.png</file>
     <file>icons/piece.png</file>
