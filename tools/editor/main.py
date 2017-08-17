@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QAction
 )
-from ui_mainwindow import Ui_MainWindow
+from PyQt5 import uic
 from widgets import View, Preview, BoardScene
 from objects import Document, Board
 from controllers import Controller
@@ -18,7 +18,8 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.ui = Ui_MainWindow()
+        Ui = uic.loadUiType('mainwindow.ui')[0]
+        self.ui = Ui()
         self.ui.setupUi(self)
 
         Controller().status = self.ui.statusBar
