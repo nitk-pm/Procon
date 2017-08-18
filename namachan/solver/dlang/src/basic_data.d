@@ -177,6 +177,11 @@ struct Segment {
 	unittest {
 		assert (Segment(Vector2i(0, 5), Vector2i(3, 2)).toHash == Segment(Vector2i(3, 2), Vector2i(0, 5)).toHash );
 	}
+	@safe 
+	pure string toString() const {
+		import std.format : format;
+		return format ("S(V (%d, %d), V(%d, %d))", start.x, start.y, end.x, end.y);
+	}
 
 	///線分の傾きを計算
 	@property
