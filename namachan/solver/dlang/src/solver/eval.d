@@ -8,7 +8,7 @@ import procon28.solver.data : move, vertexies2shape;
  + 線分の角度の一致度と重複した点の数で評価する評価関数
  + 衝突していた場合は-float.inifinityを返す
  +/
-float angle_and_points (Shape frame, Shape piece) {
+float angle_and_points (in Shape frame,in Shape piece) {
 	float val_by_point = 0.0f;
 	float val_by_slope = 0.0f;
 	if (is_hit (frame, piece))

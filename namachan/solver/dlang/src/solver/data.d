@@ -52,7 +52,7 @@ unittest {
 	auto seg2 = S(V(1,1), V(2,2));
 }
 
-Shape move (Shape shape, Vector2i pos) {
+Shape move (in Shape shape,in Vector2i pos) {
 	auto copy = shape.dup;
 	foreach (ref seg; copy) {
 		seg.start += pos;
@@ -62,7 +62,7 @@ Shape move (Shape shape, Vector2i pos) {
 }
 
 ///ShapeとShapeをマージ。重複部分は取り除かれる
-Shape merge (Shape x, Shape y) {
+Shape merge (in Shape x, in Shape y) {
 	auto x_hit = new bool[x.length];
 	auto y_hit = new bool[y.length];
 	Segment[] splited;
