@@ -1,0 +1,33 @@
+$schema: "http://json-schema.org/draft-4/schema#"
+titile: "output"
+type: "object"
+required:
+  - operations
+properties:
+  # 行った操作(添字が増えるごとに新しい操作になる)
+  operations:
+    type: array
+    items:
+      type: object
+      required:
+        - piece_id
+        - shape_id
+        - pos
+      properties:
+        # piece-schemaで定義されたpiecesの添字
+        piece_id:
+          type: integer
+        # piece-schemaで定義されたshapesの添字
+        shape_id:
+          type: integer
+        # 座標の変化分
+        pos:
+          type: object
+          required:
+            - x
+            - y
+          properties:
+            x:
+              type: integer
+            y:
+              type: integer
