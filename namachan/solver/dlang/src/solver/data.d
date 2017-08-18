@@ -90,8 +90,14 @@ Shape merge (in Shape x, in Shape y) {
 	}
 	Shape result;
 	foreach (seg; mixed) {
-		if (cnt[seg] < 2)
-		result ~= seg;
+		if (cnt[seg] < 2 && seg.start != seg.end)
+			result ~= seg;
 	}
 	return result;
+}
+unittest {
+	import procon28.basic_data : S, P;
+	auto s1 = [P(0,0), P(10,0),P(0, 10)].vertexies2shape;
+	auto s2 = [P(0,0), P(10,0),P(0, 10)].vertexies2shape;
+	assert (merge(s1,s2) == []);
 }
