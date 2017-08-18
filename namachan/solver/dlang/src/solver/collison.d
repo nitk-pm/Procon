@@ -2,6 +2,8 @@ module procon28.solver.collison;
 
 import armos.math.vector;
 
+import std.stdio;
+
 import procon28.basic_data : Segment, P, S, Shape;
 import procon28.solver.data : move, vertexies2shape;
 
@@ -53,8 +55,12 @@ bool judge_cross_horizontal_line (in Segment seg, in int height) {
 	return false;
 }
 
+Vector2i mid_point (in Segment seg) {
+	return (seg.start + seg.end) / 2;
+}
+
 ///点の図形に対する内外判定
-bool judge_inclusion (in Vector2i p, in Segment[] segments) {
+bool judge_inclusion (in Vector2i p, in Segment[] segments, bool inclide_on_line = true) {
 	size_t cross_cnt;
 	size_t point_cnt;
 	foreach (ref seg; segments) {
@@ -67,7 +73,10 @@ bool judge_inclusion (in Vector2i p, in Segment[] segments) {
 		}
 		//始点又は終点と重なっていた場合は、境界線上なので含まれるとする
 		if (seg.end == p || seg.start == p){
-			return true;
+			if (inclide_on_line)
+				return true;
+			else
+				return false;
 		}
 		//線分と点の重なりを判定
 		immutable v1 = seg.vec;
@@ -77,7 +86,10 @@ bool judge_inclusion (in Vector2i p, in Segment[] segments) {
 		immutable dot = v1.dotProduct(v2);
 		//内積が|v1|*|v2|かつ内積が正(角度が同じ)で、v2の長さがv1より短い(線分の中に含まれている)場合は線の上にあるとみなす。
 		if (dot > 0 && dot^^2 == v1_abs_2*v2_abs_2 && v1_abs_2 >= v2_abs_2){
-			return true;
+			if (inclide_on_line)
+				return true;
+			else
+				return false;
 		}
 		//同じ高さで右側に始点もしくは交点があればカウント
 		//向きによって始点か終点どちらかだけをカウントするアルゴリズムが紹介されていたが、
@@ -116,6 +128,13 @@ bool is_hit (in Shape frame, in Shape shape) {
 		}
 		if (!judge_inclusion(shape_seg.start, frame))
 			return true;
+	}
+	//ピースの中を横切る線分の対処
+	//線分の中点がピースの中にあればピースの中を線分が横切っている
+	foreach (seg; frame) {
+		if (judge_inclusion(mid_point(seg), shape, false)) {
+			return true;
+		}
 	}
 	return false;
 }
