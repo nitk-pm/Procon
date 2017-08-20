@@ -29,3 +29,6 @@ class Graph(object):
             return
         self.nodes[src].remove(dest)
         self.nodes[dest].remove(src)
+
+    def closed_path(self, path):
+        pass
