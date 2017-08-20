@@ -260,18 +260,18 @@ class Object(QGraphicsPolygonItem):
             else:
                 self.set_guide_show(True)
 
-    def serialize(self):
+    def serialize(self, offset_flag=True):
         length = len(self.vertexes) - 1
         data = []
         for i in range(length):
             data.append(self.document.board.adjust_to_data(self.vertexes[i]))
-        offset = self.boundingRect().topLeft()
-        offset = self.document.board.adjust_to_data(offset)
+
+        offset = QPointF(0, 0)
+        if offset_flag and self.object_type == 'piece':
+            offset = self.boundingRect().topLeft()
+            offset = self.document.board.adjust_to_data(offset)
         serial = '%d ' % length
         for i in range(length):
             p = data[i] - offset
             serial += '%d %d ' % (p.x(), p.y())
         return serial.strip()
-
-    def copy(self):
-        pass
