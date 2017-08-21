@@ -91,24 +91,30 @@ let output_frame frame =
 	|> Yojson.to_string
 	|> output_string frame_channel
 
-let main () =
-	let splited_input = read_line ()
-		|> split_piece
-		|> Core.List.map ~f:ints_of_string
-		(*ピース数情報の切り落とし*)
+let rec read_all () =
+	let splited_input =
+	read_line ()
+	|> split_piece
+	|> Core.List.map ~f:ints_of_string
 	in match splited_input with
-	| [pieces_num] :: pieces ->
-		let shapes_num = Core.List.length pieces in
-		if pieces_num = shapes_num
-		then
-			output_pieces pieces
-		else
-			Core.List.slice pieces pieces_num shapes_num
-			|> output_frame;
-			Core.List.slice pieces 0 pieces_num
-			|> output_pieces
+	| [pieces_num] :: shapes ->
+		let shape_length = Core.List.length shapes in
+		let pieces = Core.List.slice shapes 0 (pieces_num - 1) in
+		let frames = Core.List.slice shapes pieces_num shape_length in
+		Printf.printf "%d %d\n" (Core.List.length pieces) (Core.List.length frames);
+		begin try
+			let (pieces_next, frames_next) = read_all () in
+			(pieces_next @ pieces, frames_next @ frames)
+		with
+		| End_of_file ->
+			(pieces, shapes)
+		end
 	| _ ->
 		raise (Parse_error "shortage of shape info")
 
-let () =
-	main ()
+let main () =
+	let (pieces, frames) = read_all () in
+	pieces |> output_pieces;
+	frames |> output_frame
+	
+let () = main ()
