@@ -1,10 +1,6 @@
 
 class Graph(object):
-
     nodes = {}
-
-    def __init__(self):
-        pass
 
     def add_node(self, node):
         if node not in self.nodes:
@@ -30,5 +26,8 @@ class Graph(object):
         self.nodes[src].remove(dest)
         self.nodes[dest].remove(src)
 
-    def closed_path(self, path):
+    def get_closed_paths(self):
+        pass
+
+    def shortest_path(self, start, goal):
         pass
