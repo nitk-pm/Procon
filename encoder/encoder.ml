@@ -96,8 +96,10 @@ let rec read_all () =
 	read_line ()
 	|> split_piece
 	|> Core.List.map ~f:ints_of_string
+	(*グリッド数情報の切り落とし*)
 	in match splited_input with
-	| [pieces_num] :: shapes ->
+	| [pieces_num] :: shapes_with_grid_num ->
+		let shapes = Core.List.map shapes_with_grid_num ~f:Core.List.tl_exn in
 		let shape_length = Core.List.length shapes in
 		let pieces = Core.List.slice shapes 0 (pieces_num - 1) in
 		let frames = Core.List.slice shapes pieces_num shape_length in
