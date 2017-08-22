@@ -1,0 +1,19 @@
+{
+	"operations":[
+		{
+			"piece_id": 0,
+			"shape_id": 2,
+			"pos" : {"x": 5, "y": 4}
+		},
+		{
+			"piece_id": 1,
+			"shape_id": 1,
+			"pos" : {"x": 7, "y": 0}
+		},
+		{
+			"piece_id": 6,
+			"shape_id": 5,
+			"pos" : {"x": 1, "y": 9}
+		}
+	]
+}

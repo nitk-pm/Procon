@@ -7,3 +7,17 @@ namachan/solver/dlang/dub\.selections\.json
 namachan/solver/dlang/procon-solver
 namachan/solver/dlang/procon-solver-test-library
 namachan/solver/dlang/.vscode/
+
+# binary file
+*.o
+*.out
+*.exe
+
+*.a
+*.lib
+
+*.so
+*.dll
+
+# log file
+*.log
