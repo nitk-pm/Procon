@@ -1,0 +1,17 @@
+PROGRAM = encoder
+
+USE_OCAMLFIND = true
+
+OCAMLPACKS[] =
+	core
+	yojson
+
+OCAMLFLAGS += -thread -warn-error A
+
+FILES[] =
+	encoder
+
+.DEFAULT: $(OCamlProgram $(PROGRAM), $(FILES))
+
+clean:
+	rm -rf *.omc *.cmx *.cmt *.cmi *.cmti *.cmo *.automaton *.conflicts *.o *.out *.opt parser.mli parser.ml kakec
