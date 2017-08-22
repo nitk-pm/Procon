@@ -103,7 +103,6 @@ let rec read_all () =
 		let shape_length = Core.List.length shapes in
 		let pieces = Core.List.slice shapes 0 (pieces_num - 1) in
 		let frames = Core.List.slice shapes pieces_num shape_length in
-		Printf.printf "%d %d\n" (Core.List.length pieces) (Core.List.length frames);
 		begin try
 			let (pieces_next, frames_next) = read_all () in
 			(pieces_next @ pieces, frames_next @ frames)
