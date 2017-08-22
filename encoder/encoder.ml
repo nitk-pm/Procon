@@ -101,14 +101,14 @@ let rec read_all () =
 	| [pieces_num] :: shapes_with_grid_num ->
 		let shapes = Core.List.map shapes_with_grid_num ~f:Core.List.tl_exn in
 		let shape_length = Core.List.length shapes in
-		let pieces = Core.List.slice shapes 0 (pieces_num - 1) in
+		let pieces = Core.List.slice shapes 0 pieces_num in
 		let frames = Core.List.slice shapes pieces_num shape_length in
 		begin try
 			let (pieces_next, frames_next) = read_all () in
 			(pieces_next @ pieces, frames_next @ frames)
 		with
 		| End_of_file ->
-			(pieces, shapes)
+			(pieces, frames)
 		end
 	| _ ->
 		raise (Parse_error "shortage of shape info")
