@@ -29,7 +29,7 @@ class Controller(object, metaclass=Singleton):
         if object_type == 'frame' and self.document.exist_frame:
             return
 
-        p = self.document.board.map_from_grid(pos)
+        p = self.document.board.map_to_grid(pos)
         if not self.document.board.contains(p):
             return
         from commands import CreateObject
@@ -38,7 +38,7 @@ class Controller(object, metaclass=Singleton):
     def plot_vertex(self, pos: QPointF):
         if not self.document.is_editing:
             return
-        p = self.document.board.map_from_grid(pos)
+        p = self.document.board.map_to_grid(pos)
         if not self.document.board.contains(p):
             return
 
@@ -48,7 +48,7 @@ class Controller(object, metaclass=Singleton):
     def update_guide(self, pos: QPointF):
         if not self.document.is_editing:
             return
-        p = self.document.board.map_from_grid(pos)
+        p = self.document.board.map_to_grid(pos)
         if not self.document.board.contains(p):
             return
         self.document.editing_object.update_guide(p)
