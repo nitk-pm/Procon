@@ -64,34 +64,34 @@ class Board(QGraphicsPixmapItem):
         self.height = (height + 1) * self.base
 
         from PyQt5.QtGui import QImage, QPixmap, QPainter
+        from itertools import product
         pixmap = QPixmap(self.width, self.height)
         pixmap.fill()
+
         painter = QPainter()
         painter.begin(pixmap)
         painter.setBrush(Qt.black)
-        for y in range(1, height + 1):
-            for x in range(1, width + 1):
-                painter.drawEllipse(
-                    x * self.base,
-                    y * self.base,
-                    base / 4,
-                    base / 4
-                )
+
+        b = base / 4
+        for y, x in product(range(1, height + 1), range(1, width + 1)):
+            painter.drawEllipse(x * self.base, y * self.base, b, b)
+
         painter.end()
+
         self.setPixmap(pixmap)
         self.area = QRectF(1, 1, self.width - 1, self.height - 1)
 
-    def adjust_to_data(self, pos: QPointF):
+    def map_to_grid(self, pos):
         b = QPointF(self.base / 2, self.base / 2)
         p = self.mapFromScene(pos - b) / self.base
         return QPointF(int(p.x()), int(p.y()))
 
-    def adjust_to_grid(self, pos: QPointF):
-        p = self.adjust_to_data(pos)
+    def map_from_grid(self, pos):
+        p = self.map_to_grid(pos)
         p = self.mapToScene(p * self.base)
         return p + QPointF(self.base, self.base) * 1.075
 
-    def contains(self, pos: QPointF):
+    def contains(self, pos):
         return self.area.contains(pos)
 
 
@@ -206,8 +206,8 @@ class Object(QGraphicsPolygonItem):
             return
         self.guide.setLine(QLineF(start, pos))
         from controllers import Controller
-        _pos = self.document.board.adjust_to_data(pos) 
-        _start = self.document.board.adjust_to_data(start) 
+        _pos = self.document.board.map_to_grid(pos) 
+        _start = self.document.board.map_to_grid(start) 
         dif = _pos - _start
         Controller().show_message('x:%f, y:%f' % (dif.x(), dif.y()))
 
@@ -264,12 +264,12 @@ class Object(QGraphicsPolygonItem):
         length = len(self.vertexes) - 1
         data = []
         for i in range(length):
-            data.append(self.document.board.adjust_to_data(self.vertexes[i]))
+            data.append(self.document.board.map_to_grid(self.vertexes[i]))
 
         offset = QPointF(0, 0)
         if offset_flag and self.object_type == 'piece':
             offset = self.boundingRect().topLeft()
-            offset = self.document.board.adjust_to_data(offset)
+            offset = self.document.board.map_to_grid(offset)
         serial = '%d ' % length
         for i in range(length):
             p = data[i] - offset
