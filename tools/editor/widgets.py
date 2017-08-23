@@ -11,7 +11,11 @@ from PyQt5.QtWidgets import (
     QGraphicsScene,
     QGraphicsSceneMouseEvent,
     QAction,
-    QActionGroup
+    QActionGroup,
+    QGraphicsItem,
+    QGraphicsPixmapItem,
+    QGraphicsLineItem,
+    QGraphicsEllipseItem
 )
 from PyQt5.QtGui import (
     QWheelEvent,
@@ -19,43 +23,180 @@ from PyQt5.QtGui import (
     QKeyEvent,
     QColor
 )
-from controllers import Controller
+
+
+class Layer(QGraphicsItem):
+
+    def __init__(self, name='layer', z_value=0, opacity=1.0, parent=None):
+        super().__init__(parent)
+        self.name = name
+        self.setZValue(z_value)
+        self.setOpacity(opacity)
+
+    def add_item(self, item):
+        if item not in self.childItems():
+            item.setParentItem(self)
+            self.scene().update()
+
+    def remove_item(self, item):
+        if item in self.childItems():
+            item.setParentItem(None)
+            self.scene().remove_item(item)
+
+
+class Board(QGraphicsPixmapItem):
+
+    def __init__(self, width=101, height=65, base=1, parent=None):
+        super().__init__(parent)
+        base *= 20
+        self.base = base * 2
+        self.width = (width + 1) * self.base
+        self.height = (height + 1) * self.base
+
+        from PyQt5.QtGui import QImage, QPixmap, QPainter
+        from itertools import product
+        pixmap = QPixmap(self.width, self.height)
+        pixmap.fill()
+
+        painter = QPainter()
+        painter.begin(pixmap)
+        painter.setBrush(Qt.black)
+
+        b = base / 4
+        for y, x in product(range(1, height + 1), range(1, width + 1)):
+            painter.drawEllipse(x * self.base, y * self.base, b, b)
+
+        painter.end()
+
+        self.setPixmap(pixmap)
+        self.area = QRectF(1, 1, self.width - 1, self.height - 1)
+
+    def map_from_grid(self, pos):
+        b = QPointF(self.base / 2, self.base / 2)
+        p = self.mapFromScene(pos - b) / self.base
+        return QPointF(int(p.x()), int(p.y()))
+
+    def map_to_grid(self, pos):
+        p = self.map_from_grid(pos)
+        p = self.mapToScene(p * self.base)
+        return p + QPointF(self.base, self.base) * 1.075
+
+    def contains(self, pos):
+        return self.area.contains(pos)
+
+
+class Edge(QGraphicsLineItem):
+
+    def __init__(self, src_node, dest_node, width, parent=None):
+        super().__init__(parent)
+        self.setFlag(QGraphicsItem.ItemIsSelectable)
+        self.setPen(QPen(QColor('#000000'), width, cap=Qt.RoundCap))
+        self.source = src_node
+        self.dest = dest_node
+        self.adjust()
+
+    def set_source(self, node):
+        self.source = node
+        self.adjust()
+
+    def set_dest(self, node):
+        self.dest = node
+        self.adjust()
+
+    def adjust(self):
+        from PyQt5.QtCore import QLineF
+        self.setLine(QLineF(self.source.pos(), self.dest.pos()))
+
+
+class Node(QGraphicsEllipseItem):
+
+    def __init__(self, pos, radius, board, parent=None):
+        super().__init__(parent)
+        self.setFlag(QGraphicsItem.ItemIsSelectable)
+        self.setFlag(QGraphicsItem.ItemIsMovable)
+        self.setPos(pos)
+        self.setRect(QRectF(-radius, -radius, radius * 2, radius * 2))
+        self.setBrush(QColor('#FFFFFF'))
+
+        self.normal_pen = QPen(QColor('#000000'), radius / 4, cap=Qt.RoundCap)
+        self.enter_pen = QPen(QColor('#0288D1'), radius / 4, cap=Qt.RoundCap)
+        self.setPen(self.normal_pen)
+
+        self.board = board
+        self.edge_list = []
+
+    def add_edge(self, edge):
+        self.edge_list.append(edge)
+
+    def itemChange(self, change, value):
+        if change == QGraphicsItem.ItemPositionHasChanged:
+            pos = self.board.map_to_grid(value.toPointF())
+            pos = self.board.map_from_grid(pos)
+            self.setPos(pos)
+            for edge in self.edge_list:
+                edge.adjust()
+
+        return super().itemChange(change, value)
+
+    def hoverEnterEvent(self, event):
+        self.setPen(self.enter_pen)
+        super().hoverEnterEvent(event)
+
+    def hoverLeaveEvent(self, event):
+        self.setPen(self.normal_pen)
+        super().hoverLeaveEvent(event)
 
 
 class BoardScene(QGraphicsScene):
 
-    def __init__(self, parent=None):
+    def __init__(self, controller, board, parent=None):
         super().__init__(parent)
+        self.board = board
+        self.vertex_layer = Layer(name='vertex', z_value=1, opacity=1.0)
+        self.edge_layer = Layer(name='edge', z_value=0, opacity=1.0)
+        self.controller = controller
         self.actions = QActionGroup(self)
+
+        self.addItem(self.board)
+        self.addItem(self.vertex_layer)
+        self.addItem(self.edge_layer)
+
         self.actions.setExclusive(True)
         self.selectionChanged.connect(self.select_controll)
 
-    def setup_actions(self, piece: QAction, frame: QAction, delete: QAction):
-        self.actions.addAction(piece)
-        self.actions.addAction(frame)
-        self.action_delete = delete
-        self.action_delete.triggered.connect(self.delete_objects)
+    def setup_actions(self, actions):
+        if 'mode' in actions:
+            for action in actions['mode']:
+                self.actions.addAction(action)
+        if 'delete' in actions:
+            self.action_delete = actions['delete']
+            self.action_delete.triggered.connect(self.delete_objects)
 
     def keyPressEvent(self, event: QKeyEvent):
         super().keyPressEvent(event)
-        if event.key() == Qt.Key_Escape:
-            Controller().interrupt()
+        # if event.key() == Qt.Key_Escape:
+        #     Controller().interrupt()
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-        if not Controller().document.is_editing:
-            super().mousePressEvent(event)
-        Controller().plot_vertex(event.scenePos())
+        grid = self.board.map_to_grid(event.scenePos())
+        pos = self.board.map_from_grid(grid)
+        self.src = Node(pos, 2)
+        self.dest = Node(pos, 2)
+        self.edge = Edge(self.src, self.dest)
+        # if not Controller().document.is_editing:
+        #     super().mousePressEvent(event)
+        # Controller().plot_vertex(event.scenePos())
 
     def mouseDoubleClickEvent(self, event: QGraphicsSceneMouseEvent):
         super().mouseDoubleClickEvent(event)
-        Controller().create_object(
-            event.scenePos(),
-            self.actions.checkedAction().text()
-        )
+        # Controller().create_object(
+        #     event.scenePos(),
+        #     self.actions.checkedAction().text()
+        # )
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
         super().mouseMoveEvent(event)
-        Controller().update_guide(event.scenePos())
+        # Controller().update_guide(event.scenePos())
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
         super().mouseReleaseEvent(event)
