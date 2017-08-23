@@ -22,9 +22,14 @@ class MainWindow(QMainWindow):
         self.ui = Ui()
         self.ui.setupUi(self)
 
-        Controller().status = self.ui.statusBar
+        # Controller().status = self.ui.statusBar
 
         scene = BoardScene(None, Board())
+        scene.setup_actions({
+            'mode': [
+            ],
+            'delete': self.ui.action_delete
+        })
 
         # scene.setup_actions(
         #     self.ui.action_piece,
