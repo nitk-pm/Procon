@@ -9,8 +9,8 @@ from PyQt5.QtWidgets import (
     QAction
 )
 from PyQt5 import uic
-from widgets import View, Preview, BoardScene
-from objects import Document, Board
+from widgets import View, Preview, BoardScene, Board
+from objects import Document
 from controllers import Controller
 
 
@@ -24,19 +24,20 @@ class MainWindow(QMainWindow):
 
         Controller().status = self.ui.statusBar
 
-        scene = BoardScene()
-        scene.setup_actions(
-            self.ui.action_piece,
-            self.ui.action_frame,
-            self.ui.action_delete
-        )
+        scene = BoardScene(None, Board())
 
-        Controller().document = Document()
-        Controller().document.setup_to_scene(scene)
-        Controller().document.setup_actions(
-            self.ui.action_undo,
-            self.ui.action_redo 
-        )
+        # scene.setup_actions(
+        #     self.ui.action_piece,
+        #     self.ui.action_frame,
+        #     self.ui.action_delete
+        # )
+
+        # Controller().document = Document()
+        # Controller().document.setup_to_scene(scene)
+        # Controller().document.setup_actions(
+        #     self.ui.action_undo,
+        #     self.ui.action_redo 
+        # )
 
         self.preview = Preview()
         self.preview.setScene(scene)
