@@ -187,8 +187,6 @@ class BoardScene(QGraphicsScene):
 
     def keyPressEvent(self, event: QKeyEvent):
         super().keyPressEvent(event)
-        # if event.key() == Qt.Key_Escape:
-        #     Controller().interrupt()
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
         grid = self.board.map_from_grid(event.scenePos())
@@ -201,16 +199,9 @@ class BoardScene(QGraphicsScene):
             self.vertex_layer.add_item(self.dest)
             self.edge_layer.add_item(self.edge)
         super().mousePressEvent(event)
-        # if not Controller().document.is_editing:
-        #     super().mousePressEvent(event)
-        # Controller().plot_vertex(event.scenePos())
 
     def mouseDoubleClickEvent(self, event: QGraphicsSceneMouseEvent):
         super().mouseDoubleClickEvent(event)
-        # Controller().create_object(
-        #     event.scenePos(),
-        #     self.actions.checkedAction().text()
-        # )
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
         super().mouseMoveEvent(event)
