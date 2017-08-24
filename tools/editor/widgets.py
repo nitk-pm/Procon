@@ -43,7 +43,7 @@ class Layer(QGraphicsItem):
     def remove_item(self, item):
         if item in self.childItems():
             item.setParentItem(None)
-            self.scene().remove_item(item)
+            self.scene().removeItem(item)
 
     def paint(self, painter, option, widget=None):
         pass
@@ -85,7 +85,6 @@ class Board(QGraphicsPixmapItem):
         return QPointF(int(p.x()), int(p.y()))
 
     def map_to_grid(self, pos):
-        # p = self.map_from_grid(pos)
         p = self.mapToScene(pos * self.base)
         return p + QPointF(self.base, self.base) * 1.075
 
@@ -112,6 +111,11 @@ class Edge(QGraphicsLineItem):
         self.dest = node
         self.adjust()
 
+    def remove(self):
+        self.source.edges.remove(self)
+        self.dest.edges.remove(self)
+        self.parentItem().remove_item(self)
+
     def adjust(self):
         from PyQt5.QtCore import QLineF
         self.setLine(QLineF(self.source.pos(), self.dest.pos()))
@@ -122,34 +126,41 @@ class Node(QGraphicsEllipseItem):
     def __init__(self, pos, radius, board, parent=None):
         super().__init__(parent)
         self.board = board
-        self.edge_list = []
-        self.setFlag(QGraphicsItem.ItemIsSelectable)
+        self.edges = []
         self.setFlag(QGraphicsItem.ItemIsMovable)
+        self.setFlag(QGraphicsItem.ItemIsSelectable)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)
         self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
         self.setPos(pos)
         self.setRect(QRectF(-radius * 2, -radius * 2, radius * 4, radius * 4))
-        self.setBrush(QColor('#FFFFFF'))
 
         self.normal_pen = QPen(QColor('#000000'), radius / 2, cap=Qt.RoundCap)
         self.enter_pen = QPen(QColor('#0288D1'), radius / 2, cap=Qt.RoundCap)
         self.setPen(self.normal_pen)
+        self.setBrush(QColor('#FFFFFF'))
 
     def add_edge(self, edge):
-        self.edge_list.append(edge)
+        self.edges.append(edge)
+
+    def remove(self):
+        if self.scene() is None:
+            return
+
+        for edge in self.edges:
+            edge.remove()
+        self.parentItem().remove_item(self)
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionHasChanged:
             grid = self.board.map_from_grid(value)
             pos = self.board.map_to_grid(grid)
             self.setPos(pos)
-            for edge in self.edge_list:
+            for edge in self.edges:
                 edge.adjust()
 
         elif change == QGraphicsItem.ItemPositionChange:
             grid = self.board.map_from_grid(value)
             pos = self.board.map_to_grid(grid)
-            prev_pos = self.pos()
             if not self.board.contains(pos):
                 return self.pos()
 
@@ -160,11 +171,12 @@ class BoardScene(QGraphicsScene):
 
     def __init__(self, controller, board, parent=None):
         super().__init__(parent)
+        self.controller = controller
         self.board = board
         self.vertex_layer = Layer(name='vertex', z_value=1, opacity=1.0)
         self.edge_layer = Layer(name='edge', z_value=0, opacity=1.0)
-        self.controller = controller
         self.actions = QActionGroup(self)
+        self.action_delete = None
 
         self.addItem(self.board)
         self.addItem(self.vertex_layer)
@@ -191,13 +203,16 @@ class BoardScene(QGraphicsScene):
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
         grid = self.board.map_from_grid(event.scenePos())
         pos = self.board.map_to_grid(grid)
-        if event.modifiers() & Qt.ControlModifier:
-            self.src = Node(pos, 4, self.board)
-            self.dest = Node(pos, 4, self.board)
-            self.edge = Edge(self.src, self.dest, 4)
-            self.vertex_layer.add_item(self.src)
-            self.vertex_layer.add_item(self.dest)
-            self.edge_layer.add_item(self.edge)
+        if self.actions.checkedAction().text() == 'edge':
+            src = Node(pos, 4, self.board)
+            dest = Node(pos, 4, self.board)
+            edge = Edge(src, dest, 4)
+            self.vertex_layer.add_item(src)
+            self.vertex_layer.add_item(dest)
+            self.edge_layer.add_item(edge)
+            print(src.parentItem())
+        elif self.actions.checkedAction().text() == 'select':
+            pass
         super().mousePressEvent(event)
 
     def mouseDoubleClickEvent(self, event: QGraphicsSceneMouseEvent):
@@ -207,10 +222,6 @@ class BoardScene(QGraphicsScene):
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
-        print(self.mouseGrabberItem())
-        self.src = None
-        self.dest = None
-        self.edge = None
         super().mouseReleaseEvent(event)
 
     @pyqtSlot()
@@ -220,7 +231,8 @@ class BoardScene(QGraphicsScene):
     @pyqtSlot()
     def delete_objects(self):
         for item in self.selectedItems():
-            self.removeItem(item)
+            print(item)
+            item.remove()
 
 
 class View(QGraphicsView):

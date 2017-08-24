@@ -130,8 +130,8 @@ border-color: rgb(255, 255, 255);</string>
    <addaction name="action_close"/>
    <addaction name="separator"/>
    <addaction name="action_preview"/>
-   <addaction name="action_piece"/>
-   <addaction name="action_frame"/>
+   <addaction name="action_select"/>
+   <addaction name="action_edge"/>
    <addaction name="separator"/>
    <addaction name="action_delete"/>
    <addaction name="action_undo"/>
@@ -276,32 +276,32 @@ border-color: rgb(255, 255, 255);</string>
     <string>Del</string>
    </property>
   </action>
-  <action name="action_frame">
+  <action name="action_select">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/actions/icons/frame.png</normaloff>
-     <activeon>:/actions/icons/frame-checked.png</activeon>:/actions/icons/frame.png</iconset>
+     <normaloff>:/actions/icons/select.png</normaloff>
+     <activeon>:/actions/icons/select_checked.png</activeon>:/actions/icons/select.png</iconset>
    </property>
    <property name="text">
-    <string>frame</string>
+    <string>select</string>
    </property>
    <property name="toolTip">
-    <string>edit frame</string>
+    <string>select</string>
    </property>
    <property name="shortcut">
     <string>Shift+F</string>
    </property>
   </action>
-  <action name="action_piece">
+  <action name="action_edge">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -310,15 +310,14 @@ border-color: rgb(255, 255, 255);</string>
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/actions/icons/piece.png</normaloff>
-     <activeon>:/actions/icons/piece-checked.png</activeon>
-     <selectedon>:/actions/icons/piece.png</selectedon>:/actions/icons/piece.png</iconset>
+     <normaloff>:/actions/icons/edge.png</normaloff>
+     <activeon>:/actions/icons/edge_checked.png</activeon>:/actions/icons/edge.png</iconset>
    </property>
    <property name="text">
-    <string>piece</string>
+    <string>edge</string>
    </property>
    <property name="toolTip">
-    <string>edit piece</string>
+    <string>draw edge</string>
    </property>
    <property name="shortcut">
     <string>Shift+P</string>
@@ -326,7 +325,7 @@ border-color: rgb(255, 255, 255);</string>
   </action>
   <action name="action_copy">
    <property name="icon">
-    <iconset resource="resource.qrc">
+    <iconset>
      <normaloff>:/actions/icons/copy.png</normaloff>:/actions/icons/copy.png</iconset>
    </property>
    <property name="text">
@@ -344,7 +343,7 @@ border-color: rgb(255, 255, 255);</string>
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resource.qrc">
+    <iconset>
      <normaloff>:/actions/icons/cut.png</normaloff>:/actions/icons/cut.png</iconset>
    </property>
    <property name="text">

@@ -27,6 +27,8 @@ class MainWindow(QMainWindow):
         scene = BoardScene(None, Board())
         scene.setup_actions({
             'mode': [
+                self.ui.action_select,
+                self.ui.action_edge
             ],
             'delete': self.ui.action_delete
         })
@@ -49,8 +51,6 @@ class MainWindow(QMainWindow):
         self.ui.view.setScene(scene)
         self.ui.action_preview.triggered.connect(self.preview.show_preview)
         self.ui.action_save.triggered.connect(self.save)
-
-        self.ui.action_piece.setChecked(True)
 
     def closeEvent(self, event):
         super().closeEvent(event)
