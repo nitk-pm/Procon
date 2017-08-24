@@ -88,6 +88,10 @@ class Board(QGraphicsPixmapItem):
         p = self.mapToScene(pos * self.base)
         return p + QPointF(self.base, self.base) * 1.075
 
+    def snap_to_grid(self, pos):
+        p = self.map_from_grid(pos)
+        return self.map_to_grid(p)
+
     def contains(self, pos):
         return self.area.contains(pos)
 
@@ -123,9 +127,8 @@ class Edge(QGraphicsLineItem):
 
 class Node(QGraphicsEllipseItem):
 
-    def __init__(self, pos, radius, board, parent=None):
+    def __init__(self, pos, radius, parent=None):
         super().__init__(parent)
-        self.board = board
         self.edges = []
         self.setFlag(QGraphicsItem.ItemIsMovable)
         self.setFlag(QGraphicsItem.ItemIsSelectable)
@@ -151,28 +154,27 @@ class Node(QGraphicsEllipseItem):
         self.parentItem().remove_item(self)
 
     def itemChange(self, change, value):
-        if change == QGraphicsItem.ItemPositionHasChanged:
-            grid = self.board.map_from_grid(value)
-            pos = self.board.map_to_grid(grid)
-            self.setPos(pos)
-            for edge in self.edges:
-                edge.adjust()
+        if self.scene() is not None:
+            if change == QGraphicsItem.ItemPositionHasChanged:
+                pos = self.scene().board.snap_to_grid(value)
+                self.setPos(pos)
+                for edge in self.edges:
+                    edge.adjust()
 
-        elif change == QGraphicsItem.ItemPositionChange:
-            grid = self.board.map_from_grid(value)
-            pos = self.board.map_to_grid(grid)
-            if not self.board.contains(pos):
-                return self.pos()
+            elif change == QGraphicsItem.ItemPositionChange:
+                pos = self.scene().board.snap_to_grid(value)
+                if not self.scene().board.contains(pos):
+                    return self.pos()
 
         return super().itemChange(change, value)
 
 
 class BoardScene(QGraphicsScene):
 
-    def __init__(self, controller, board, parent=None):
+    def __init__(self, controller, parent=None):
         super().__init__(parent)
         self.controller = controller
-        self.board = board
+        self.board = Board()
         self.vertex_layer = Layer(name='vertex', z_value=1, opacity=1.0)
         self.edge_layer = Layer(name='edge', z_value=0, opacity=1.0)
         self.actions = QActionGroup(self)
@@ -184,10 +186,6 @@ class BoardScene(QGraphicsScene):
 
         self.actions.setExclusive(True)
         self.selectionChanged.connect(self.select_controll)
-
-        self.src = None
-        self.dest = None
-        self.edge = None
 
     def setup_actions(self, actions):
         if 'mode' in actions:
@@ -201,16 +199,11 @@ class BoardScene(QGraphicsScene):
         super().keyPressEvent(event)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-        grid = self.board.map_from_grid(event.scenePos())
-        pos = self.board.map_to_grid(grid)
+        pos = self.board.snap_to_grid(event.scenePos())
         if self.actions.checkedAction().text() == 'edge':
-            src = Node(pos, 4, self.board)
-            dest = Node(pos, 4, self.board)
-            edge = Edge(src, dest, 4)
-            self.vertex_layer.add_item(src)
-            self.vertex_layer.add_item(dest)
-            self.edge_layer.add_item(edge)
-            print(src.parentItem())
+            src = Node(pos, 4, self.vertex_layer)
+            dest = Node(pos, 4, self.vertex_layer)
+            edge = Edge(src, dest, 4, self.edge_layer)
         elif self.actions.checkedAction().text() == 'select':
             pass
         super().mousePressEvent(event)
@@ -231,7 +224,6 @@ class BoardScene(QGraphicsScene):
     @pyqtSlot()
     def delete_objects(self):
         for item in self.selectedItems():
-            print(item)
             item.remove()
 
 
