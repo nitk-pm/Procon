@@ -103,8 +103,8 @@ class Edge(QGraphicsLineItem):
         self.setPen(QPen(QColor('#000000'), width, cap=Qt.RoundCap))
         self.source = src_node
         self.dest = dest_node
-        self.source.add_edge(self)
-        self.dest.add_edge(self)
+        self.source.edges.append(self)
+        self.dest.edges.append(self)
         self.adjust()
 
     def set_source(self, node):
@@ -115,6 +115,12 @@ class Edge(QGraphicsLineItem):
         self.dest = node
         self.adjust()
 
+    def replace(self, old_node, new_node):
+        if old_node == self.source:
+            self.source = new_node
+        elif old_node == self.dest:
+            self.dest = new_node
+
     def remove(self):
         self.source.edges.remove(self)
         self.dest.edges.remove(self)
@@ -123,6 +129,9 @@ class Edge(QGraphicsLineItem):
     def adjust(self):
         from PyQt5.QtCore import QLineF
         self.setLine(QLineF(self.source.pos(), self.dest.pos()))
+
+    def merge(self):
+        pass
 
 
 class Node(QGraphicsEllipseItem):
@@ -142,8 +151,17 @@ class Node(QGraphicsEllipseItem):
         self.setPen(self.normal_pen)
         self.setBrush(QColor('#FFFFFF'))
 
-    def add_edge(self, edge):
-        self.edges.append(edge)
+    def merge(self):
+        if self.scene() is None:
+            return
+        for node in self.scene().collidingItems(self):
+            if not isinstance(node, Node):
+                continue
+            for edge in node.edges:
+                edge.replace(node, self)
+                self.edges.append(edge)
+            node.edges.clear()
+            node.remove()
 
     def remove(self):
         if self.scene() is None:
@@ -171,9 +189,8 @@ class Node(QGraphicsEllipseItem):
 
 class BoardScene(QGraphicsScene):
 
-    def __init__(self, controller, parent=None):
+    def __init__(self, document, parent=None):
         super().__init__(parent)
-        self.controller = controller
         self.board = Board()
         self.vertex_layer = Layer(name='vertex', z_value=1, opacity=1.0)
         self.edge_layer = Layer(name='edge', z_value=0, opacity=1.0)
@@ -186,6 +203,10 @@ class BoardScene(QGraphicsScene):
 
         self.actions.setExclusive(True)
         self.selectionChanged.connect(self.select_controll)
+
+        self.src = None
+        self.dest = None
+        self.edge = None
 
     def setup_actions(self, actions):
         if 'mode' in actions:
@@ -201,9 +222,9 @@ class BoardScene(QGraphicsScene):
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
         pos = self.board.snap_to_grid(event.scenePos())
         if self.actions.checkedAction().text() == 'edge':
-            src = Node(pos, 4, self.vertex_layer)
-            dest = Node(pos, 4, self.vertex_layer)
-            edge = Edge(src, dest, 4, self.edge_layer)
+            self.src = Node(pos, 4, self.vertex_layer)
+            self.dest = Node(pos, 4, self.vertex_layer)
+            self.edge = Edge(self.src, self.dest, 4, self.edge_layer)
         elif self.actions.checkedAction().text() == 'select':
             pass
         super().mousePressEvent(event)
@@ -215,6 +236,12 @@ class BoardScene(QGraphicsScene):
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
+        pos = self.board.snap_to_grid(event.scenePos())
+        if self.actions.checkedAction().text() == 'edge':
+            print('src')
+            self.src.merge()
+            print('dest')
+            self.dest.merge()
         super().mouseReleaseEvent(event)
 
     @pyqtSlot()

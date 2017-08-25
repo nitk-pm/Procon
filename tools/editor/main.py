@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
 
         # Controller().status = self.ui.statusBar
 
-        scene = BoardScene(None, Board())
+        scene = BoardScene(None)
         scene.setup_actions({
             'mode': [
                 self.ui.action_select,
