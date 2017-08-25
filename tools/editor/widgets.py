@@ -132,8 +132,12 @@ class Edge(QGraphicsLineItem):
         from PyQt5.QtCore import QLineF
         self.setLine(QLineF(self.source.pos(), self.dest.pos()))
 
-    def merge(self):
-        pass
+    def split(self, node):
+        self.dest.edges.remove(self)
+        node.edges.append(self)
+        Edge(node, self.dest, 4, self.parentItem())
+        self.dest = node
+        self.adjust()
 
 
 class Node(QGraphicsEllipseItem):
@@ -156,13 +160,14 @@ class Node(QGraphicsEllipseItem):
     def merge(self):
         if self.scene() is None:
             return
-        for node in self.scene().collidingItems(self):
-            if not isinstance(node, Node):
-                continue
-            while len(node.edges) != 0:
-                self.edges.append(node.edges[0])
-                node.edges[0].replace(node, self)
-            node.remove()
+        for item in self.scene().collidingItems(self):
+            if isinstance(item, Node):
+                while len(item.edges) != 0:
+                    self.edges.append(item.edges[0])
+                    item.edges[0].replace(item, self)
+                item.remove()
+            elif isinstance(item, Edge):
+                item.split(self)
 
     def remove(self):
         if self.scene() is None:
@@ -236,10 +241,15 @@ class BoardScene(QGraphicsScene):
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
-        pos = self.board.snap_to_grid(event.scenePos())
         if self.actions.checkedAction().text() == 'edge':
+            if self.src.pos() == self.dest.pos():
+                self.dest.remove()
+            else:
+                self.dest.merge()
             self.src.merge()
-            self.dest.merge()
+        elif self.actions.checkedAction().text() == 'select':
+            for node in self.selectedItems():
+                node.merge()
         super().mouseReleaseEvent(event)
 
     @pyqtSlot()
