@@ -5,11 +5,13 @@
 #include <map>//pair用
 #include <string>
 #include <queue>
+#include <assert.h>
 //constexpr double compilePow(double mantissa, unsigned int exponent) { return exponent == 0 ? 1 : mantissa*compilePow(mantissa, exponent - 1); }
 //const double EPS = compilePow(0.1,9);
 const int INF = 10000000;
-//todoなど
+#define rep(i,n) for (int i=0;i<n;++i) //デバッグ専用！！！！！！！！！！！！！！
 
+//todoなど
 /*
 
 
@@ -35,7 +37,10 @@ pieceにboolのcanUse置くよりも現在のノードで使用済みのIDのリ
 ピースとフレームを構成する辺に線分の長さ、傾き、切片を定義
 切片と傾きの一致する二線分の長さのmin
 
-
+現在の処理は
+面積の大きいものから選択<-出来てない
+盤面全点に対して評価値を計算
+もっともよいものを選択してピースを配置
 
 枝刈り
 ・No Fit Polygonで配置場所を枝刈り
@@ -75,6 +80,11 @@ double sqrt(double s) {
 //x,y座標のpair
 class Position {
 public:
+	bool operator<(const Position& p)const;
+	bool operator>(const Position& p)const;
+	bool operator==(const Position& p)const;
+	bool operator!=(const Position& p)const;
+
 
 	double x, y;
 
@@ -82,6 +92,18 @@ public:
 	Position() {};
 	Position(double xValue, double yValue) { x = xValue; y = yValue; }
 };
+bool Position::operator<(const Position& p)const {
+	return (this->x == p.x ? false : this->x < p.x ? true : false);
+}
+bool Position::operator>(const Position& p)const {
+	return (this->x == p.x ? false : this->x > p.x ? true : false);
+}
+bool Position::operator==(const Position& p)const {
+	return (this->x == p.x&&this->y == p.y);
+}
+bool Position::operator!=(const Position& p)const {
+	return (this->x != p.x || this->y != p.y);
+}
 
 
 double cross(Position a, Position b) {
@@ -131,13 +153,18 @@ class Piece {
 
 		double tmp = 0;
 		for (int i = 0; i < this->vertexPositionList.size() - 1; ++i) {
-			tmp += cross(this->vertexPositionList.at(i), this->vertexPositionList.at(i + 1));
+			tmp += cross(this->vertexPositionList.at(i), this->vertexPositionList.at(i + 1))/2;
 		}
-		return tmp / 2;
+		return tmp ;
 	}
 
 public:
-	
+
+	bool operator <(const Piece& p)const;
+	bool operator >(const Piece& p)const;
+	bool operator ==(const Piece& p)const;
+	bool operator !=(const Piece& p)const;
+
 	std::vector<Line> lineList;
 	double area;
 	bool canUse;
@@ -153,13 +180,14 @@ public:
 
 	void turn() {
 		for (int i = 0; i < vertexPositionList.size(); ++i)
-			vertexPositionList.at(i).renewPosition(-vertexPositionList.at(i).x, vertexPositionList.at(i).y);
+			vertexPositionList.at(i).renewPosition(vertexPositionList.at(i).x, -vertexPositionList.at(i).y);
 		return;
 	}
 
 	Piece() {};
 	Piece(std::vector<Position>positionList) {
 		vertexPositionList.reserve(positionList.size() + 1);
+
 		for (int i = 0; i < positionList.size(); ++i)
 			vertexPositionList.push_back(relativePosition(positionList.at(0), positionList.at(i)));
 		vertexPositionList.push_back(Position(0, 0));
@@ -168,9 +196,7 @@ public:
 		lineCalculation();
 		this->canUse = true;
 		return;
-	}
-
-
+	};
 
 	Piece absolutePiecePosition(Position base) {//引数のPositionを基準に合わせる形で全点をずらす。
 		Piece tmpPiece;
@@ -179,6 +205,25 @@ public:
 		return tmpPiece;
 	}
 };
+bool Piece::operator <(const Piece& p)const {
+	return (this->area < p.area);
+}
+bool Piece::operator >(const Piece& p)const {
+	return (this->area > p.area);
+}
+bool Piece::operator ==(const Piece& p)const {
+	if (this->vertexPositionList.size() == p.vertexPositionList.size()) {
+		bool tmp = true;
+		for (int i = 0; i < this->vertexPositionList.size(); ++i)
+			tmp &= (this->vertexPositionList.at(i) == p.vertexPositionList.at(i));
+		return tmp;
+	}
+	else return false;
+}
+bool Piece::operator !=(const Piece& p)const {
+	return !(*this == p);
+}
+
 
 class Frame {
 	void lineCalculation() {
@@ -197,10 +242,10 @@ class Frame {
 
 	}
 public:
-	
+
 	std::vector<Position> vertexPositionList;
 	std::vector<Line> lineList;
-	
+
 	Frame() {};
 	Frame(std::vector<Position>positionList) {
 		vertexPositionList.reserve(positionList.size() + 1);
@@ -230,6 +275,7 @@ bool lineHitCheck(Position a, Position b, Position c, Position d) {
 	return  ta*tb < 0 && tc*td < 0;
 }
 //線分の交差判定による内外判定
+
 bool isInFrame(Piece p, std::vector<Frame> frameList) {
 	bool tmp1 = false;
 	for (int i = 0; i < p.vertexPositionList.size() - 1; ++i) {//ピースのなす線分のループ
@@ -248,55 +294,57 @@ bool isInFrame(Piece p, std::vector<Frame> frameList) {
 	}
 
 
-//widing number algorithmによる内外判定
+	//widing number algorithmによる内外判定
 
-		/*std::cout <<p.vertexPositionList.size();*/
+	/*std::cout <<p.vertexPositionList.size();*/
 
-		std::vector<std::vector<int>> wn(frameList.size(), std::vector<int>(p.vertexPositionList.size()));
-		for (int i = 0; i < frameList.size(); ++i)
-			for (int j = 0; j < p.vertexPositionList.size() - 1; ++j)
-				wn[i][j] = 0;
-
-		for (int i = 0; i < frameList.size(); ++i) {//枠の数に対応するループ
-			for (int j = 0; j < p.vertexPositionList.size(); ++j) {//ピースの頂点数に対応するループ
-																   //std::cout << p.vertexPositionList.at(i).x << "," << p.vertexPositionList.at(i).y << std::endl;
-				for (int k = 0; k < frameList.at(i).vertexPositionList.size() - 1; ++k) {//currentな枠の頂点数に対応するループ
-					double vt = (double)(p.vertexPositionList.at(j).y - frameList.at(i).vertexPositionList.at(k).y) / (frameList.at(i).vertexPositionList.at(k + 1).y - frameList.at(i).vertexPositionList.at(k).y);//k,k+1のなす線分の傾き
-																																																					//std::cout << "pos: " << frameList.at(i).vertexPositionList.at(k).y << "," << frameList.at(i).vertexPositionList.at(k).x << std::endl;
-																																																					//std::cout << "pos: " << frameList.at(i).vertexPositionList.at(k + 1).y << "," << frameList.at(i).vertexPositionList.at(k + 1).x << std::endl;
-
-					if ((frameList.at(i).vertexPositionList.at(k).y <= p.vertexPositionList.at(j).y) //始点以上終点未満のy値
-						&& (frameList.at(i).vertexPositionList.at(k + 1).y > p.vertexPositionList.at(j).y)) {
-						if (p.vertexPositionList.at(j).x < (frameList.at(i).vertexPositionList.at(k).x + (vt * (frameList.at(i).vertexPositionList.at(k + 1).x - frameList.at(i).vertexPositionList.at(k).x))))
-						{
-
-							//std::cout << "a " << p.vertexPositionList.at(j).x << "," << (frameList.at(i).vertexPositionList.at(k).x + (vt * (frameList.at(i).vertexPositionList.at(k + 1).x - frameList.at(i).vertexPositionList.at(k).x))) << std::endl;
-							wn.at(i).at(j)++;
-						}
-					}
-					else if ((frameList.at(i).vertexPositionList.at(k).y > p.vertexPositionList.at(j).y)//あるいは終点以下始点超過のy値
-						&& (frameList.at(i).vertexPositionList.at(k + 1).y <= p.vertexPositionList.at(j).y)) {
-						if (p.vertexPositionList.at(j).x < (frameList.at(i).vertexPositionList.at(k).x + (vt * (frameList.at(i).vertexPositionList.at(k + 1).x - frameList.at(i).vertexPositionList.at(k).x))))
-						{
-							//std::cout << "b " << p.vertexPositionList.at(j).x << "," << (frameList.at(i).vertexPositionList.at(k).x + (vt * (frameList.at(i).vertexPositionList.at(k + 1).x - frameList.at(i).vertexPositionList.at(k).x))) << std::endl;
-							wn.at(i).at(j)--;
-						}
-					}
-				}
-			}
-		}
-		bool tmp2 = true;
-		for (int j = 0; j < p.vertexPositionList.size(); ++j) {
-			tmp2 &= (wn[0][j] != 0);
-		}
-		if (tmp2)
-			for (int i = 1; i < frameList.size(); ++i) {
-				for (int j = 0; j < p.vertexPositionList.size(); ++j) {
-					tmp2 &= (wn[i][j] == 0);
-				}
-			}
-		return tmp2 && !tmp1;
+	std::vector<int> wn(frameList.size(),0);
+	int xSum = 0, ySum = 0;
+	for (int i = 0;i < p.vertexPositionList.size() - 1;++i)
+	{	xSum += p.vertexPositionList.at(i).x;
+	ySum += p.vertexPositionList.at(i).y;
 	}
+	Position centerOfGravity(xSum / p.vertexPositionList.size(), ySum / p.vertexPositionList.size())
+		;
+	for (int i = 0; i < frameList.size(); ++i) {//枠の数に対応するループ
+															   //std::cout << p.vertexPositionList.at(i).x << "," << p.vertexPositionList.at(i).y << std::endl;
+			for (int k = 0; k < frameList.at(i).vertexPositionList.size() - 1; ++k) {//currentな枠の頂点数に対応するループ
+				double vt = (double)(centerOfGravity.y - frameList.at(i).vertexPositionList.at(k).y) / (frameList.at(i).vertexPositionList.at(k + 1).y - frameList.at(i).vertexPositionList.at(k).y);//k,k+1のなす線分の傾き
+																																																				//std::cout << "pos: " << frameList.at(i).vertexPositionList.at(k).y << "," << frameList.at(i).vertexPositionList.at(k).x << std::endl;
+																																																				//std::cout << "pos: " << frameList.at(i).vertexPositionList.at(k + 1).y << "," << frameList.at(i).vertexPositionList.at(k + 1).x << std::endl;
+
+				if ((frameList.at(i).vertexPositionList.at(k).y <= centerOfGravity.y) //始点以上終点未満のy値
+					&& (frameList.at(i).vertexPositionList.at(k + 1).y > centerOfGravity.y)) {
+					if (centerOfGravity.x < (frameList.at(i).vertexPositionList.at(k).x + (vt * (frameList.at(i).vertexPositionList.at(k + 1).x - frameList.at(i).vertexPositionList.at(k).x))))
+					{
+
+						//std::cout << "a " << p.vertexPositionList.at(j).x << "," << (frameList.at(i).vertexPositionList.at(k).x + (vt * (frameList.at(i).vertexPositionList.at(k + 1).x - frameList.at(i).vertexPositionList.at(k).x))) << std::endl;
+						wn.at(i)++;
+					}
+				}
+				else if ((frameList.at(i).vertexPositionList.at(k).y > centerOfGravity.y)//あるいは終点以下始点超過のy値
+					&& (frameList.at(i).vertexPositionList.at(k + 1).y <= centerOfGravity.y)) {
+					if (centerOfGravity.x < (frameList.at(i).vertexPositionList.at(k).x + (vt * (frameList.at(i).vertexPositionList.at(k + 1).x - frameList.at(i).vertexPositionList.at(k).x))))
+					{
+						//std::cout << "b " << p.vertexPositionList.at(j).x << "," << (frameList.at(i).vertexPositionList.at(k).x + (vt * (frameList.at(i).vertexPositionList.at(k + 1).x - frameList.at(i).vertexPositionList.at(k).x))) << std::endl;
+						wn.at(i)--;
+					}
+				}
+			}
+	}
+	bool tmp2 = true;
+	for (int j = 0; j < p.vertexPositionList.size(); ++j) {
+		tmp2 &= (wn[0] != 0);
+		if (wn[0] == 0)std::cout << j << std::endl;
+	}
+	if (tmp2)
+		for (int i = 1; i < frameList.size(); ++i) {
+			for (int j = 0; j < p.vertexPositionList.size(); ++j) {
+				tmp2 &= (wn[i] == 0);
+			}
+		}
+	return tmp2 && !tmp1;
+}
 
 class Solver {
 public:
@@ -348,50 +396,14 @@ public:
 
 	//貪欲探索
 	void greedySearch() {
-		std::vector<bool> usableList(this->pieceNumber,true);
-
-		int biggestPieceID;
-		while (true) {
-			biggestPieceID = -1;
-
-			for (int i = 0; i < pieceNumber-1; ++i) {
-				if (!usableList.at(i+1) && usableList.at(i) ||piece.at(i).area < piece.at(i + 1).area&&usableList.at(i))
-					biggestPieceID = i;
-			}
-
-			if (biggestPieceID == -1)	return;
-			std::cout << biggestPieceID << "\n";
-
-					for (int i = 0; i < 16; ++i) {//x方向
-						for (int j = 0; j < 10 && usableList.at(biggestPieceID); ++j) {//y方向
-							Position tmpPos(i, j);
-							if (isInFrame(piece.at(biggestPieceID).absolutePiecePosition(tmpPos), frame)) {
-								frame.push_back(piece.at(biggestPieceID).absolutePiecePosition(tmpPos));
-								
-								
-								for (int tm = 0;tm < piece.at(biggestPieceID).vertexPositionList.size();++tm)
-				
-									std::cout << "     " <<  piece.at(biggestPieceID).vertexPositionList.at(tm).x << "," << piece.at(biggestPieceID).vertexPositionList.at(tm).y << std::endl;
-								usableList.at(biggestPieceID) = false;
-							}
-						}
-			}
-			usableList.at(biggestPieceID) = false;
-		}
-	}
-
-	//山登り探索
-	void hillClimbingsearch() {
 		std::vector<bool> usableList(this->pieceNumber, true);
 
 		int biggestPieceID;
 		while (true) {
-			std::vector<std::pair<double, Position>>EvalutionList;
-			
 			biggestPieceID = -1;
 
 			for (int i = 0; i < pieceNumber - 1; ++i) {
-				if (piece.at(i).area > piece.at(i + 1).area&&usableList.at(i)|| !usableList.at(i + 1) && usableList.at(i) )
+				if (!usableList.at(i + 1) && usableList.at(i) || piece.at(i).area < piece.at(i + 1).area&&usableList.at(i))
 					biggestPieceID = i;
 			}
 
@@ -401,69 +413,107 @@ public:
 			for (int i = 0; i < 16; ++i) {//x方向
 				for (int j = 0; j < 10 && usableList.at(biggestPieceID); ++j) {//y方向
 					Position tmpPos(i, j);
-					double tmpEval = 0;
 					if (isInFrame(piece.at(biggestPieceID).absolutePiecePosition(tmpPos), frame)) {
-						
-						for (int k=0;k < piece.at(biggestPieceID).lineList.size();++k) {//currentなピースの線分に対するループ
-							for (int l=0;l < frame.size();++l) {//フレームの数に対するループ
-								for (int m=0;m < frame.at(l).lineList.size();++m) {//フレームの線分に対するループ
-									/* コピペ用
-									
-									piece.at(biggestPieceID).lineList.at(k).
-									frame.at(l).lineList.at(m).
-
-									*/
-									Line tmpLine(piece.at(biggestPieceID).lineList.at(k));
-
-									tmpLine.intercept += (tmpLine.slope == INF) ? i : (tmpLine.slope == 0) ? j : (tmpLine.slope*i - j);
+						frame.push_back(piece.at(biggestPieceID).absolutePiecePosition(tmpPos));
 
 
-									if (tmpLine.intercept==frame.at(l).lineList.at(m).intercept &&
-										tmpLine.slope==	frame.at(l).lineList.at(m).slope) {//傾きと切片が等しいとき(＝同じ式で表せるとき）
-										
-										double tmpLength = std::min(piece.at(biggestPieceID).lineList.at(k).length, frame.at(l).lineList.at(m).length);
-										piece.at(biggestPieceID).lineList.at(k).length -= tmpLength;
-										tmpEval+=pow(tmpLength, 2);
-										EvalutionList.push_back(std::pair<double, Position>(tmpEval, tmpPos));
-										
-										//std::cout << "a\n";
-									}
+						for (int tm = 0; tm < piece.at(biggestPieceID).vertexPositionList.size(); ++tm)
 
-
-
-								}
-							}
-						}
-							
-
-						//for (int tm = 0;tm < piece.at(biggestPieceID).vertexPositionList.size();++tm)
-						//	std::cout << "     " << piece.at(biggestPieceID).vertexPositionList.at(tm).x << "," << piece.at(biggestPieceID).vertexPositionList.at(tm).y << std::endl;
-
+							std::cout << "     " << piece.at(biggestPieceID).vertexPositionList.at(tm).x << "," << piece.at(biggestPieceID).vertexPositionList.at(tm).y << std::endl;
+						usableList.at(biggestPieceID) = false;
 					}
 				}
-			}
-			if (EvalutionList.size() > 0) {
-
-				int tmpEvalID = -1;
-
-				if (EvalutionList.size() == 1)
-					tmpEvalID = 0;
-				else {
-					for (int k = 0;k < EvalutionList.size() - 1;++k) {
-						if (EvalutionList.at(k).first > EvalutionList.at(k + 1).first)
-							tmpEvalID = k;
-					}
-				}
-
-				frame.push_back(piece.at(biggestPieceID).absolutePiecePosition(EvalutionList.at(tmpEvalID).second));
-				
 			}
 			usableList.at(biggestPieceID) = false;
 		}
-		return;
 	}
 
+	//山登り探索
+	void hillClimbingsearch() {
+		
+		std::vector<bool> usableList(this->pieceNumber, true);
 
+		while (true) {
+			for (int cnt = 0;cnt < piece.size();++cnt) {
+				
+				std::priority_queue<std::pair<double,std::pair<int, Position>>>EvalutionList;
+
+				for (int biggestPieceID = 0; biggestPieceID < piece.size(); ++biggestPieceID) {
+					if (!usableList.at(biggestPieceID))
+						continue;
+					//std::cout << biggestPieceID << "\n";
+					
+					for (int i = 0; i < 16; ++i) {//x方向
+						for (int j = 0; j < 10; ++j) {//y方向
+
+							Position tmpPos(i, j);
+							double tmpEval = 0;
+							for (int spin=0;spin<4;++spin){
+								piece.at(biggestPieceID).spin();
+								for (int turn = 0;turn < 4;++turn) {
+									piece.at(biggestPieceID).turn();
+									if (isInFrame(piece.at(biggestPieceID).absolutePiecePosition(tmpPos), frame)) {
+										
+										//if (biggestPieceID == 6) { std::cout << tmpPos.x << "," << tmpPos.y << std::endl; }
+										
+										for (int k = 0; k < piece.at(biggestPieceID).lineList.size(); ++k) {//currentなピースの線分に対するループ
+											for (int l = 0; l < frame.size(); ++l) {//フレームの数に対するループ
+												for (int m = 0; m < frame.at(l).lineList.size(); ++m) {//フレームの線分に対するループ
+
+													Line tmpLine(piece.at(biggestPieceID).lineList.at(k));
+
+													tmpLine.intercept += (tmpLine.slope == INF) ? i : (tmpLine.slope == 0) ? j : (tmpLine.slope*i - j);
+
+
+													if (tmpLine.intercept == frame.at(l).lineList.at(m).intercept &&
+														tmpLine.slope == frame.at(l).lineList.at(m).slope) {//傾きと切片が等しいとき(＝同じ式で表せるとき）
+														
+														assert(isInFrame(piece.at(biggestPieceID).absolutePiecePosition(tmpPos), frame));
+													
+
+														double tmpLength = std::min(piece.at(biggestPieceID).lineList.at(k).length, frame.at(l).lineList.at(m).length);
+														//piece.at(biggestPieceID).lineList.at(k).length -= tmpLength;
+														tmpEval += pow(tmpLength, 2);
+														EvalutionList.push(std::pair<double,std::pair<int, Position>>(tmpEval,std::pair<int, Position>(biggestPieceID, tmpPos) ));
+														
+														assert(isInFrame(piece.at(EvalutionList.top().second.first).absolutePiecePosition(EvalutionList.top().second.second), frame));
+
+
+														//if (biggestPieceID == 6){std::cout << i << "," << j<< std::endl;}
+
+														//std::cout << "a\n";
+													}
+
+
+
+												}
+											}
+										}
+									}
+								}
+
+
+								//for (int tm = 0;tm < piece.at(biggestPieceID).vertexPositionList.size();++tm)
+								//	std::cout << "     " << piece.at(biggestPieceID).vertexPositionList.at(tm).x << "," << piece.at(biggestPieceID).vertexPositionList.at(tm).y << std::endl;
+
+							}
+						}
+					}
+
+				}
+				if (!EvalutionList.empty()) {
+					frame.push_back(piece.at(EvalutionList.top().second.first).absolutePiecePosition(EvalutionList.top().second.second));
+					std::cout << EvalutionList.top().second.first << "\n";
+					std::cout << EvalutionList.top().second.second.x << "," << EvalutionList.top().second.second.y << std::endl;
+					
+					assert(isInFrame(piece.at(EvalutionList.top().second.first).absolutePiecePosition(EvalutionList.top().second.second),frame));
+					
+					usableList.at(EvalutionList.top().second.first) = false;
+				}
+			}
+			return;
+		}
+	}
 };
 
 int main() {
@@ -488,14 +538,14 @@ int main() {
 	/*
 	solve.greedySearch();
 	for (auto i = solve.frame.begin(); i != solve.frame.end(); ++i) {
-		for (int j = 0; j < i->vertexPositionList.size(); ++j)
-			std::cout << i->vertexPositionList.at(j).x << "," << i->vertexPositionList.at(j).y << std::endl;
-		puts("");
+	for (int j = 0; j < i->vertexPositionList.size(); ++j)
+	std::cout << i->vertexPositionList.at(j).x << "," << i->vertexPositionList.at(j).y << std::endl;
+	puts("");
 	}
 	/**/
 
 	//山登り探索確認
-	/**/
+	/*/
 
 	solve.hillClimbingsearch();
 	for (auto i = solve.frame.begin(); i != solve.frame.end(); ++i) {
@@ -506,22 +556,39 @@ int main() {
 	/**/
 
 	//線分確認
-	/*	for (int i = 0; i < solve.piece.size() - 1; ++i) {
-		for (int j = 0; j < solve.piece.at(i).lineList.size() - 1; ++j) {
-			std::cout << "m=" << solve.piece.at(i).lineList.at(j).slope << "\nc=" << solve.piece.at(i).lineList.at(j).intercept << "\nl=" << solve.piece.at(i).lineList.at(j).length << "\n\n";
-		}
+	/*
+	for (int i = 0; i < solve.piece.size() - 1; ++i) {
+	for (int j = 0; j < solve.piece.at(i).lineList.size() - 1; ++j) {
+	std::cout << "m=" << solve.piece.at(i).lineList.at(j).slope << "\nc=" << solve.piece.at(i).lineList.at(j).intercept << "\nl=" << solve.piece.at(i).lineList.at(j).length << "\n\n";
 	}
-	*/
+	}
+	/**/
 
 	//内外判定確認
-	/*
+	//
 	std::vector<Position> p(0);
+	std::vector<Position> f(0);
+	//p.push_back(Position(6, 2));	p.push_back(Position(0, 7));	p.push_back(Position(0, 0));
 	p.push_back(Position(4, 0));	p.push_back(Position(4, 3));	p.push_back(Position(0, 3));
+	
+	f.push_back(Position(5, 1));f.push_back(Position(5, 0));f.push_back(Position(7, 0));f.push_back(Position(7, 3));f.push_back(Position(0, 3));f.push_back(Position(0, 0));f.push_back(Position(2, 0));f.push_back(Position(2, 1));
 	Piece a(p);
-	puts("");
-	std::cout << isInFrame(a.absolutePiecePosition(Position(4, 0)), solve.frame) << "," << a.area << std::endl;
-	*/
+	Piece b(f);
+	//solve.frame.push_back(Frame(b));
+	//a.turn();
+	//rep(i, 4)		a.spin();
+	rep(i, a.vertexPositionList.size())	std::cout << a.vertexPositionList.at(i).x << "," << a.vertexPositionList.at(i).y << std::endl;	puts("");
+	
+	std::cout << isInFrame(b.absolutePiecePosition(Position()), solve.frame) << "," << a.area <<"\n\n";
+	
+	
+	
+	for (auto i = solve.frame.begin(); i != solve.frame.end(); ++i) {
+		for (int j = 0; j < i->vertexPositionList.size(); ++j)
+			std::cout << i->vertexPositionList.at(j).x << "," << i->vertexPositionList.at(j).y << std::endl;
+		puts("");
+	}
+	/**/
 
 	return 0;
-
 }
