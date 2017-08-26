@@ -32,23 +32,11 @@ class MainWindow(QMainWindow):
             ],
             'delete': self.ui.action_delete
         })
-
-        # scene.setup_actions(
-        #     self.ui.action_piece,
-        #     self.ui.action_frame,
-        #     self.ui.action_delete
-        # )
-
-        # Controller().document = Document()
-        # Controller().document.setup_to_scene(scene)
-        # Controller().document.setup_actions(
-        #     self.ui.action_undo,
-        #     self.ui.action_redo 
-        # )
+        self.ui.view.setScene(scene)
 
         self.preview = Preview()
         self.preview.setScene(scene)
-        self.ui.view.setScene(scene)
+
         self.ui.action_preview.triggered.connect(self.preview.show_preview)
         self.ui.action_save.triggered.connect(self.save)
 

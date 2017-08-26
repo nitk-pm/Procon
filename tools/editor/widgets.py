@@ -139,12 +139,18 @@ class Edge(QGraphicsLineItem):
         self.dest = node
         self.adjust()
 
+    def equal(self, edge):
+        return self.source == edge.source and self.dest == edge.dest
+
 
 class Node(QGraphicsEllipseItem):
 
     def __init__(self, pos, radius, parent=None):
         super().__init__(parent)
         self.edges = []
+        self.radius = radius
+
+        self.setAcceptHoverEvents(True)
         self.setFlag(QGraphicsItem.ItemIsMovable)
         self.setFlag(QGraphicsItem.ItemIsSelectable)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)
@@ -166,7 +172,7 @@ class Node(QGraphicsEllipseItem):
                     self.edges.append(item.edges[0])
                     item.edges[0].replace(item, self)
                 item.remove()
-            elif isinstance(item, Edge):
+            elif isinstance(item, Edge) and item not in self.edges:
                 item.split(self)
 
     def remove(self):
@@ -191,11 +197,24 @@ class Node(QGraphicsEllipseItem):
 
         return super().itemChange(change, value)
 
+    def boundingRect(self):
+        r = self.radius
+        return QRectF(-r * 4, -r * 4, r * 8, r * 8)
+
+    def hoverEnterEvent(self, event):
+        self.setPen(self.enter_pen)
+        super().hoverEnterEvent(event)
+
+    def hoverLeaveEvent(self, event):
+        self.setPen(self.normal_pen)
+        super().hoverLeaveEvent(event)
+
 
 class BoardScene(QGraphicsScene):
 
     def __init__(self, document, parent=None):
         super().__init__(parent)
+        self.document = document
         self.board = Board()
         self.vertex_layer = Layer(name='vertex', z_value=1, opacity=1.0)
         self.edge_layer = Layer(name='edge', z_value=0, opacity=1.0)
@@ -221,9 +240,6 @@ class BoardScene(QGraphicsScene):
             self.action_delete = actions['delete']
             self.action_delete.triggered.connect(self.delete_objects)
 
-    def keyPressEvent(self, event: QKeyEvent):
-        super().keyPressEvent(event)
-
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
         pos = self.board.snap_to_grid(event.scenePos())
         if self.actions.checkedAction().text() == 'edge':
@@ -243,8 +259,10 @@ class BoardScene(QGraphicsScene):
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
         if self.actions.checkedAction().text() == 'edge':
             if self.src.pos() == self.dest.pos():
+                print('remove')
                 self.dest.remove()
             else:
+                print('merge')
                 self.dest.merge()
             self.src.merge()
         elif self.actions.checkedAction().text() == 'select':
