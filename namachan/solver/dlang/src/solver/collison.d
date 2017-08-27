@@ -134,42 +134,26 @@ unittest {
 ///Crossing Number Algorithm
 bool crossing_number (in Vector2i p, in Segment[] segments, bool include_on_line = true) {
 	size_t cross_cnt;
-	size_t point_cnt;
 	foreach (ref seg; segments) {
-		//線分の始点と終点には当たり判定がない
-		//線分が交差していて、交点のx座標がpより大きい時、カウント
-		if (judge_cross_horizontal_line (seg, p.y)) {
-			immutable cross_point = cross_point_of_horizontal_line(seg, p.y);
-			if (cross_point.x > p.x)
+		if (judge_on_line(p, seg))
+			return include_on_line;
+		if (seg.vec.y == 0) continue;
+		if (seg.end.y > seg.start.y && seg.start.y == p.y && seg.start.x > p.x) {
+			++cross_cnt;
+			continue;
+		}
+		else if (seg.end.y == p.y && seg.end.x > p.x) {
 				++cross_cnt;
+				continue;
 		}
-		//始点又は終点と重なっていた場合は、境界線上なので含まれるとする
-		if (seg.end == p || seg.start == p){
-			if (include_on_line)
-				return true;
-			else
-				return false;
+		if (judge_cross_horizontal_line(seg, p.y)) {
+			if (cross_point_of_horizontal_line(seg, p.y).x > p.x) {
+				++cross_cnt;
+				continue;
+			}
 		}
-		//線分と点の重なりを判定
-		immutable v1 = seg.vec;
-		immutable v2 = p - seg.start;
-		immutable v1_abs_2 = (v1.x^^2+v1.y^^2);
-		immutable v2_abs_2 = (v2.x^^2+v2.y^^2);
-		immutable dot = v1.dotProduct(v2);
-		//内積が|v1|*|v2|かつ内積が正(角度が同じ)で、v2の長さがv1より短い(線分の中に含まれている)場合は線の上にあるとみなす。
-		if (dot > 0 && dot^^2 == v1_abs_2*v2_abs_2 && v1_abs_2 >= v2_abs_2){
-			if (include_on_line)
-				return true;
-			else
-				return false;
-		}
-		//同じ高さで右側に始点もしくは交点があればカウント
-		//向きによって始点か終点どちらかだけをカウントするアルゴリズムが紹介されていたが、
-		//向きの判定は難しいので始点と終点両方をカウントして2で割る
-		if ((seg.start.x > p.x && seg.start.y == p.y) || (seg.end.x > p.x && seg.end.y == p.y))
-			++point_cnt;
 	}
-	return (cross_cnt + (point_cnt / 2)) % 2 == 1;
+	return cross_cnt % 2 == 1;
 }
 unittest {
 	auto shape1 = [
@@ -178,27 +162,47 @@ unittest {
 		S( P(2, 2), P(2, 0)),
 		S( P(2, 0), P(0, 0)),
 
-		S( P(6, 4), P(6, 0)),
+		S( P(4, 0), P(4, 4)),
 		S( P(4, 4), P(6, 4)),
-		S( P(6, 0), P(4, 0)),
-		S( P(4, 0), P(4, 4))
+		S( P(6, 4), P(6, 0)),
+		S( P(6, 0), P(4, 0))
 	];
 	auto pt1 = P (1, 1);
 	auto pt2 = P (2, 3);
 	auto pt3 = P (5, 2);
 	auto pt4 = P (3, 2);
 
-	auto shape2 = [P(0,0), P(-10,0), P(-10, 10)].vertexies2shape;
-	auto pt5 = P(10,10);
+	auto shape2 = [
+		S (P(0,0), P(0,3)),
+		S (P(3,0), P(0,3)),
+		S (P(3,0), P(0,0))
+	];
+	auto pt5 = P(2,0);
+	auto pt6 = P(1,1);
+
+	auto shape3 = [P(0,0), P(-10,0), P(-10, 10)].vertexies2shape;
+	auto pt7 = P(10,10);
+
+	auto shape4 = [S(P (0, 0), P(20, 0)), S(P (20, 0), P(20, 40)), S(P (20, 40), P(0, 40)), S(P (0, 40), P(0, 0))];
+	auto pt8 = P (0,20);
+	auto pt9 = P (20,0);
 	assert (crossing_number(pt1, shape1));
 	assert (!crossing_number(pt2, shape1));
 	assert (crossing_number(pt3, shape1));
 	assert (!crossing_number(pt4, shape1));
-	assert (!crossing_number(pt5, shape2));
+
+	assert (crossing_number(pt5, shape2));
+	assert (crossing_number(pt6, shape2));
+
+	assert (!crossing_number(pt7, shape3));
+
+	assert (crossing_number(pt8,shape4));
+	assert (crossing_number(pt9,shape4));
 }
 
 //枠と図形の当たり判定
-bool is_hit (in Shape frame, in Shape shape) {
+bool is_hit (in Shape frame, in Shape shape_origin) {
+	auto shape = segment_sort (shape_origin);
 	foreach (shape_seg; shape) {
 		foreach (frame_seg; frame) {
 			if (judge_intersected (frame_seg, shape_seg))
