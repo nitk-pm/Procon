@@ -10,8 +10,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5 import uic
 from widgets import View, Preview, BoardScene, Board
-from objects import Document
-from controllers import Controller
+from models import Document
 
 
 class MainWindow(QMainWindow):
@@ -22,9 +21,9 @@ class MainWindow(QMainWindow):
         self.ui = Ui()
         self.ui.setupUi(self)
 
-        # Controller().status = self.ui.statusBar
+        self.document = Document()
 
-        scene = BoardScene(None)
+        scene = BoardScene(self.document)
         scene.setup_actions({
             'mode': [
                 self.ui.action_select,
