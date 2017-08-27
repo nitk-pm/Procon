@@ -124,9 +124,10 @@ class Edge(QGraphicsLineItem):
             self.dest = new_node
 
     def remove(self):
-        self.parentItem().remove_item(self)
-        self.source.edges.remove(self)
-        self.dest.edges.remove(self)
+        if self.parentItem() is not None:
+            self.parentItem().remove_item(self)
+            self.source.edges.remove(self)
+            self.dest.edges.remove(self)
 
     def adjust(self):
         from PyQt5.QtCore import QLineF
@@ -140,7 +141,13 @@ class Edge(QGraphicsLineItem):
         self.adjust()
 
     def equal(self, edge):
-        return self.source == edge.source and self.dest == edge.dest
+        p1, p2 = self.line().p1(), self.line().p2()
+        p3, p4 = edge.line().p1(), edge.line().p2()
+        if p1 == p3 and p2 == p4:
+            return True
+        elif p1 == p4 and p2 == p3:
+            return True
+        return False
 
 
 class Node(QGraphicsEllipseItem):
@@ -163,6 +170,13 @@ class Node(QGraphicsEllipseItem):
         self.setPen(self.normal_pen)
         self.setBrush(QColor('#FFFFFF'))
 
+    def remove(self):
+        if self.scene() is None:
+            return
+        while len(self.edges) != 0:
+            self.edges[0].remove()
+        self.parentItem().remove_item(self)
+
     def merge(self):
         if self.scene() is None:
             return
@@ -174,13 +188,16 @@ class Node(QGraphicsEllipseItem):
                 item.remove()
             elif isinstance(item, Edge) and item not in self.edges:
                 item.split(self)
+        remove_list = []
+        length = len(self.edges)
+        for i in range(length - 1):
+            if self.edges[i].equal(self.edges[i + 1]):
+                remove_list.append(self.edges[i])
+            elif self.edges[i].line().length() == 0:
+                remove_list.append(self.edges[i])
 
-    def remove(self):
-        if self.scene() is None:
-            return
-        while len(self.edges) != 0:
-            self.edges[0].remove()
-        self.parentItem().remove_item(self)
+        for edge in remove_list:
+            edge.remove()
 
     def itemChange(self, change, value):
         if self.scene() is not None:
@@ -240,14 +257,19 @@ class BoardScene(QGraphicsScene):
             self.action_delete = actions['delete']
             self.action_delete.triggered.connect(self.delete_objects)
 
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            self.clearSelection()
+
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-        pos = self.board.snap_to_grid(event.scenePos())
-        if self.actions.checkedAction().text() == 'edge':
-            self.src = Node(pos, 4, self.vertex_layer)
-            self.dest = Node(pos, 4, self.vertex_layer)
-            self.edge = Edge(self.src, self.dest, 4, self.edge_layer)
-        elif self.actions.checkedAction().text() == 'select':
-            pass
+        if len(self.selectedItems()) == 0:
+            pos = self.board.snap_to_grid(event.scenePos())
+            if self.actions.checkedAction().text() == 'edge':
+                self.src = Node(pos, 4, self.vertex_layer)
+                self.dest = Node(pos, 4, self.vertex_layer)
+                self.edge = Edge(self.src, self.dest, 4, self.edge_layer)
+            elif self.actions.checkedAction().text() == 'select':
+                pass
         super().mousePressEvent(event)
 
     def mouseDoubleClickEvent(self, event: QGraphicsSceneMouseEvent):
@@ -259,12 +281,11 @@ class BoardScene(QGraphicsScene):
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
         if self.actions.checkedAction().text() == 'edge':
             if self.src.pos() == self.dest.pos():
-                print('remove')
                 self.dest.remove()
             else:
-                print('merge')
                 self.dest.merge()
             self.src.merge()
+            self.clearSelection()
         elif self.actions.checkedAction().text() == 'select':
             for node in self.selectedItems():
                 node.merge()
