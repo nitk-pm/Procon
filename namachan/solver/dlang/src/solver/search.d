@@ -2,7 +2,7 @@ module procon28.solver.search;
 
 import armos.math.vector : Vector2i;
 
-import procon28.basic_data : P, S, Piece, Shape;
+import procon28.basic_data : P, S, Piece, Shape, Segment;
 import procon28.solver.data : shape_xor, move, vertexies2shape;
 import procon28.solver.eval : angle_and_points;
 
@@ -65,13 +65,20 @@ auto sort(alias compare, T)(inout T[] ops) {
 	return merge (sort!compare(ops[0..center_idx]), sort!compare(ops[center_idx..$]));
 }
 
+import std.typecons : Tuple, tuple;
+alias key_t = Tuple!(const size_t, const size_t, const(Segment)[], const int, const int);
+float[key_t] hash;
+
+key_t toHash(in size_t piece_idx, in size_t spin_level, in Shape shape, in Vector2i pos) {
+	return tuple(piece_idx, spin_level, shape, pos.x, pos.y);
+}
+
 Procedure[] eval_all(alias EvalFunc)(Piece[] pieces, Procedure acc)
 in {
 	assert (pieces.length == acc.used_mask.length);
 }
 body{
 	Procedure[] procedures;
-	import std.typecons;
 	foreach (piece_idx,piece; pieces) {
 		if (acc.used_mask[piece_idx]) continue;
 		foreach (spin_level, pattern; piece) {
@@ -80,8 +87,17 @@ body{
 				foreach (frame_seg; acc.frame) {
 					foreach (frame_vertex; [frame_seg.start, frame_seg.end]) {
 						auto diff = frame_vertex - piece_vertex;
+						auto key = toHash(piece_idx, spin_level, acc.frame, diff);
 						float val;
 						auto moved = pattern.move(diff);
+						if (key in hash) {
+							continue;
+						}
+						else {
+							val = EvalFunc (acc.frame, moved);
+							hash[key] = val;
+							stderr.writeln(val);
+						}
 						if (val == -float.infinity){
 							continue;
 						}
