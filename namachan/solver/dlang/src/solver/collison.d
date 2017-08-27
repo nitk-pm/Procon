@@ -67,7 +67,9 @@ Vector2i mid_point (in Segment seg) {
 	return (seg.start + seg.end) / 2;
 }
 
-bool judge_inclusion2 (in Vector2i p, in Segment[] segments, bool include_on_line = true) {
+///Widing Number Algorithm
+///FIXME
+bool widing_number (in Vector2i p, in Segment[] segments, bool include_on_line = true) {
 	int wn;
 	auto sorted = segment_sort(segments);
 	foreach (seg; segments) {
@@ -115,21 +117,22 @@ unittest {
 	auto shape4 = [S(P (0, 0), P(20, 0)), S(P (20, 0), P(20, 40)), S(P (20, 40), P(0, 40)), S(P (0, 40), P(0, 0))];
 	auto pt8 = P (0,20);
 	auto pt9 = P (20,0);
-	assert (judge_inclusion2(pt1, shape1));
-	assert (!judge_inclusion2(pt2, shape1));
-	assert (judge_inclusion2(pt3, shape1));
-	assert (!judge_inclusion2(pt4, shape1));
+	assert (widing_number(pt1, shape1));
+	assert (!widing_number(pt2, shape1));
+	assert (widing_number(pt3, shape1));
+	assert (!widing_number(pt4, shape1));
 
-	assert (judge_inclusion2(pt5, shape2));
-	assert (judge_inclusion2(pt6, shape2));
+	assert (widing_number(pt5, shape2));
+	assert (widing_number(pt6, shape2));
 
-	assert (!judge_inclusion2(pt7, shape3));
+	assert (!widing_number(pt7, shape3));
 
-	assert (judge_inclusion2(pt8,shape4));
-	assert (judge_inclusion2(pt9,shape4));
+	assert (widing_number(pt8,shape4));
+	assert (widing_number(pt9,shape4));
 }
 ///点の図形に対する内外判定
-bool judge_inclusion (in Vector2i p, in Segment[] segments, bool include_on_line = true) {
+///Crossing Number Algorithm
+bool crossing_number (in Vector2i p, in Segment[] segments, bool include_on_line = true) {
 	size_t cross_cnt;
 	size_t point_cnt;
 	foreach (ref seg; segments) {
@@ -187,11 +190,11 @@ unittest {
 
 	auto shape2 = [P(0,0), P(-10,0), P(-10, 10)].vertexies2shape;
 	auto pt5 = P(10,10);
-	assert (judge_inclusion(pt1, shape1));
-	assert (!judge_inclusion(pt2, shape1));
-	assert (judge_inclusion(pt3, shape1));
-	assert (!judge_inclusion(pt4, shape1));
-	assert (!judge_inclusion(pt5, shape2));
+	assert (crossing_number(pt1, shape1));
+	assert (!crossing_number(pt2, shape1));
+	assert (crossing_number(pt3, shape1));
+	assert (!crossing_number(pt4, shape1));
+	assert (!crossing_number(pt5, shape2));
 }
 
 //枠と図形の当たり判定
@@ -201,14 +204,14 @@ bool is_hit (in Shape frame, in Shape shape) {
 			if (judge_intersected (frame_seg, shape_seg))
 				return true;
 		}
-		if (!judge_inclusion2(shape_seg.start, frame) || !judge_inclusion2(shape_seg.end, frame)) {
+		if (!crossing_number(shape_seg.start, frame) || !crossing_number(shape_seg.end, frame)) {
 			return true;
 		}
 	}
 	//ピースの中を横切る線分の対処
 	//線分の中点がピースの中にあればピースの中を線分が横切っている
 	foreach (seg; frame) {
-		if (judge_inclusion2(mid_point(seg), shape, false)) {
+		if (crossing_number(mid_point(seg), shape, false)) {
 			return true;
 		}
 	}
