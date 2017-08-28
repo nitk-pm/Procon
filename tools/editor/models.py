@@ -82,7 +82,9 @@ class LayerModel(QAbstractItemModel):
             return self.headers[section]
 
     def data_changed(self):
-        pass
+        index = self.createIndex(0, 0)
+        index2 = self.createIndex(len(self.layers), len(self.headers))
+        self.dataChanged.emit(index, index2)
 
 
 class Edge(QGraphicsLineItem):
@@ -232,7 +234,7 @@ class Document(QObject):
         self.source = Node(pos, 4, self.node_layer)
         self.dest = Node(pos, 4, self.node_layer)
         self.edge = Edge(self.source, self.dest, 4, self.edge_layer)
-        self.data_changed()
+        self.layer_model.data_changed()
 
     def merge_nodes(self, nodes=None):
         if nodes is None:
@@ -244,20 +246,15 @@ class Document(QObject):
         else:
             for node in nodes:
                 node.merge()
-        self.data_changed()
+        self.layer_model.data_changed()
 
     def remove_nodes(self, nodes):
         for node in nodes:
             node.remove()
-        self.data_changed()
+        self.layer_model.data_changed()
 
     def save(self, filename):
         pass
 
     def load(self, filename):
         pass
-
-    def data_changed(self):
-        index = self.layer_model.createIndex(0, 0)
-        index2 = self.layer_model.createIndex(1, 2)
-        self.layer_model.dataChanged.emit(index, index2)
