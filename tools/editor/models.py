@@ -3,7 +3,9 @@ from PyQt5.QtCore import (
     QObject,
     QPointF,
     QRectF,
-    pyqtSignal
+    pyqtSignal,
+    QAbstractItemModel,
+    QModelIndex
 )
 from PyQt5.QtWidgets import (
     QGraphicsItem,
@@ -39,6 +41,48 @@ class Layer(QGraphicsItem):
 
     def boundingRect(self):
         return QRectF(0, 0, 0, 0)
+
+
+class LayerModel(QAbstractItemModel):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.headers = 'name', 'number', 'opacity'
+        self.layers = []
+
+    def index(self, row, column, parent=QModelIndex()):
+        return self.createIndex(row, column, None)
+
+    def parent(self, child):
+        return QModelIndex()
+
+    def rowCount(self, parent=QModelIndex()):
+        return len(self.layers)
+
+    def columnCount(self, parent=QModelIndex()):
+        return len(self.headers)
+
+    def data(self, index, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            try:
+                if self.headers[index.column()] == 'name':
+                    return self.layers[index.row()].name
+                elif self.headers[index.column()] == 'number':
+                    return len(self.layers[index.row()].childItems())
+                elif self.headers[index.column()] == 'opacity':
+                    return self.layers[index.row()].opacity()
+            except:
+                return
+        return
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role != Qt.DisplayRole:
+            return
+        if orientation == Qt.Horizontal:
+            return self.headers[section]
+
+    def data_changed(self):
+        pass
 
 
 class Edge(QGraphicsLineItem):
@@ -179,14 +223,16 @@ class Document(QObject):
         self.filename = filename
         self.node_layer = Layer(name='node', z_value=1, opacity=1.0)
         self.edge_layer = Layer(name='edge', z_value=0, opacity=1.0)
-        self.src = None
-        self.dest = None
-        self.edge = None
+
+        self.layer_model = LayerModel(self)
+        self.layer_model.layers.append(self.node_layer)
+        self.layer_model.layers.append(self.edge_layer)
 
     def create_node(self, pos):
         self.source = Node(pos, 4, self.node_layer)
         self.dest = Node(pos, 4, self.node_layer)
         self.edge = Edge(self.source, self.dest, 4, self.edge_layer)
+        self.data_changed()
 
     def merge_nodes(self, nodes=None):
         if nodes is None:
@@ -198,13 +244,20 @@ class Document(QObject):
         else:
             for node in nodes:
                 node.merge()
+        self.data_changed()
 
     def remove_nodes(self, nodes):
         for node in nodes:
             node.remove()
+        self.data_changed()
 
-    def save(self):
+    def save(self, filename):
         pass
 
-    def load(self):
+    def load(self, filename):
         pass
+
+    def data_changed(self):
+        index = self.layer_model.createIndex(0, 0)
+        index2 = self.layer_model.createIndex(1, 2)
+        self.layer_model.dataChanged.emit(index, index2)

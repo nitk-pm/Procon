@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QAction
 )
 from PyQt5 import uic
-from widgets import View, Preview, BoardScene, Board
+from widgets import View, Preview, BoardScene
 from models import Document
 
 
@@ -22,6 +22,8 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.document = Document()
+
+        self.ui.layer_view.setModel(self.document.layer_model)
 
         self.scene = BoardScene(self.document)
         self.scene.setup_actions({
@@ -37,8 +39,8 @@ class MainWindow(QMainWindow):
         self.preview.setScene(self.scene)
 
         self.ui.action_preview.triggered.connect(self.preview.show_preview)
-        self.ui.action_save.triggered.connect(self.save)
         self.ui.action_screenshot.triggered.connect(self.screenshot)
+        self.ui.action_save.triggered.connect(self.save)
 
     def closeEvent(self, event):
         super().closeEvent(event)
@@ -50,12 +52,11 @@ class MainWindow(QMainWindow):
         from PyQt5.QtGui import QPainter, QImage
         filename = QFileDialog.getSaveFileName(
             self,
-            'save file',
+            'Save to screenshot',
             '',
-            'jpg (*.jpg)'
+            'png (*.png)'
         )
-        w = self.scene.width()
-        h = self.scene.height()
+        w, h = self.scene.width(), self.scene.height()
         image = QImage(w, h, QImage.Format_ARGB32)
         with QPainter(image) as painter:
             self.scene.render(painter)
@@ -63,9 +64,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def save(self):
-        from PyQt5.QtWidgets import QFileDialog
-        filename = QFileDialog.getSaveFileName()
-        Controller().save(filename[0])
+        pass
 
 
 if __name__ == '__main__':
