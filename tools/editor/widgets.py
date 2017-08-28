@@ -4,6 +4,7 @@ from PyQt5.QtCore import (
     QTimer,
     QTimeLine,
     pyqtSlot,
+    pyqtSignal,
     QPointF,
     QRectF
 )
@@ -46,24 +47,26 @@ class Board(QGraphicsPixmapItem):
         self.setPixmap(pixmap)
         self.area = QRectF(1, 1, self.width - 1, self.height - 1)
 
-    def map_from_grid(self, pos):
+    def map_to_grid(self, pos):
         b = QPointF(self.base / 2, self.base / 2)
         p = self.mapFromScene(pos - b) / self.base
         return QPointF(int(p.x()), int(p.y()))
 
-    def map_to_grid(self, pos):
+    def map_from_grid(self, pos):
         p = self.mapToScene(pos * self.base)
         return p + QPointF(self.base, self.base) * 1.075
 
     def snap_to_grid(self, pos):
-        p = self.map_from_grid(pos)
-        return self.map_to_grid(p)
+        p = self.map_to_grid(pos)
+        return self.map_from_grid(p)
 
     def contains(self, pos):
         return self.area.contains(pos)
 
 
 class BoardScene(QGraphicsScene):
+
+    show_message = pyqtSignal(str)
 
     def __init__(self, document, parent=None):
         super().__init__(parent)
@@ -95,12 +98,23 @@ class BoardScene(QGraphicsScene):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
+            self.grid_pos = self.board.map_to_grid(event.scenePos())
+            pos = self.board.map_from_grid(self.grid_pos)
             if self.actions.checkedAction().text() == 'edge':
-                pos = self.board.snap_to_grid(event.scenePos())
                 self.document.create_node(pos)
             elif self.actions.checkedAction().text() == 'select':
                 pass
         super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.LeftButton and len(self.selectedItems()) != 0:
+            p = self.board.map_to_grid(event.scenePos())
+            d = p - self.grid_pos
+            self.show_message.emit(
+                'pos: {0}, {1}  delta: {2}, {3}'
+                .format(p.x(), p.y(), d.x(), d.y())
+            )
+        super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -109,6 +123,7 @@ class BoardScene(QGraphicsScene):
                 self.clearSelection()
             elif self.actions.checkedAction().text() == 'select':
                 self.document.merge_nodes(self.selectedItems())
+        self.show_message.emit('')
         super().mouseReleaseEvent(event)
 
     @pyqtSlot()

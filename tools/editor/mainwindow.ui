@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
-    <height>768</height>
+    <width>1280</width>
+    <height>720</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <property name="styleSheet">
    <string notr="true"/>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+  <widget class="QWidget" name="central_widget">
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
     <property name="spacing">
      <number>0</number>
     </property>
@@ -35,6 +35,9 @@
     </property>
     <item>
      <widget class="View" name="view">
+      <property name="mouseTracking">
+       <bool>false</bool>
+      </property>
       <property name="styleSheet">
        <string notr="true">background-color: rgb(66, 66, 66);</string>
       </property>
@@ -68,17 +71,17 @@
      <widget class="QWidget" name="widget" native="true">
       <property name="minimumSize">
        <size>
-        <width>210</width>
+        <width>0</width>
         <height>0</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>210</width>
+        <width>16777215</width>
         <height>16777215</height>
        </size>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="1,10,1,40">
        <property name="spacing">
         <number>5</number>
        </property>
@@ -98,13 +101,13 @@
         <widget class="QLabel" name="label">
          <property name="font">
           <font>
-           <pointsize>12</pointsize>
+           <pointsize>14</pointsize>
            <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
          <property name="frameShape">
-          <enum>QFrame::Box</enum>
+          <enum>QFrame::NoFrame</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Plain</enum>
@@ -145,7 +148,7 @@
          </property>
          <property name="font">
           <font>
-           <pointsize>11</pointsize>
+           <pointsize>10</pointsize>
           </font>
          </property>
          <property name="frameShape">
@@ -161,16 +164,58 @@
           <bool>false</bool>
          </property>
          <property name="animated">
+          <bool>false</bool>
+         </property>
+         <attribute name="headerCascadingSectionResizes">
+          <bool>true</bool>
+         </attribute>
+         <attribute name="headerDefaultSectionSize">
+          <number>80</number>
+         </attribute>
+         <attribute name="headerMinimumSectionSize">
+          <number>80</number>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="font">
+          <font>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Node List</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTreeView" name="node_view">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="indentation">
+          <number>0</number>
+         </property>
+         <property name="itemsExpandable">
+          <bool>false</bool>
+         </property>
+         <property name="allColumnsShowFocus">
+          <bool>true</bool>
+         </property>
+         <property name="wordWrap">
           <bool>true</bool>
          </property>
          <attribute name="headerCascadingSectionResizes">
           <bool>true</bool>
          </attribute>
          <attribute name="headerDefaultSectionSize">
-          <number>65</number>
-         </attribute>
-         <attribute name="headerMinimumSectionSize">
-          <number>65</number>
+          <number>125</number>
          </attribute>
         </widget>
        </item>
@@ -179,7 +224,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QToolBar" name="toolBar">
+  <widget class="QToolBar" name="tool_bar">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
      <horstretch>0</horstretch>
@@ -252,7 +297,13 @@ border-color: rgb(255, 255, 255);</string>
    <addaction name="action_undo"/>
    <addaction name="action_redo"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="status">
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+  </widget>
   <action name="action_new">
    <property name="enabled">
     <bool>false</bool>

@@ -26,6 +26,8 @@ class MainWindow(QMainWindow):
         self.ui.layer_view.setModel(self.document.layer_model)
         self.ui.layer_view.setItemDelegate(LayerDelegate())
 
+        self.ui.node_view.setModel(self.document.node_model)
+
         self.scene = BoardScene(self.document)
         self.scene.setup_actions({
             'mode': [
@@ -34,6 +36,7 @@ class MainWindow(QMainWindow):
             ],
             'delete': self.ui.action_delete
         })
+        self.scene.show_message.connect(self.ui.status.showMessage)
         self.ui.view.setScene(self.scene)
 
         self.preview = Preview()

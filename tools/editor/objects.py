@@ -81,13 +81,13 @@ class Board(QGraphicsPixmapItem):
         self.setPixmap(pixmap)
         self.area = QRectF(1, 1, self.width - 1, self.height - 1)
 
-    def map_from_grid(self, pos):
+    def map_to_grid(self, pos):
         b = QPointF(self.base / 2, self.base / 2)
         p = self.mapFromScene(pos - b) / self.base
         return QPointF(int(p.x()), int(p.y()))
 
-    def map_to_grid(self, pos):
-        p = self.map_from_grid(pos)
+    def map_from_grid(self, pos):
+        p = self.map_to_grid(pos)
         p = self.mapToScene(p * self.base)
         return p + QPointF(self.base, self.base) * 1.075
 
@@ -206,8 +206,8 @@ class Object(QGraphicsPolygonItem):
             return
         self.guide.setLine(QLineF(start, pos))
         from controllers import Controller
-        _pos = self.document.board.map_from_grid(pos) 
-        _start = self.document.board.map_from_grid(start) 
+        _pos = self.document.board.map_to_grid(pos) 
+        _start = self.document.board.map_to_grid(start) 
         dif = _pos - _start
         Controller().show_message('x:%f, y:%f' % (dif.x(), dif.y()))
 
@@ -264,12 +264,12 @@ class Object(QGraphicsPolygonItem):
         length = len(self.vertexes) - 1
         data = []
         for i in range(length):
-            data.append(self.document.board.map_from_grid(self.vertexes[i]))
+            data.append(self.document.board.map_to_grid(self.vertexes[i]))
 
         offset = QPointF(0, 0)
         if offset_flag and self.object_type == 'piece':
             offset = self.boundingRect().topLeft()
-            offset = self.document.board.map_from_grid(offset)
+            offset = self.document.board.map_to_grid(offset)
         serial = '%d ' % length
         for i in range(length):
             p = data[i] - offset

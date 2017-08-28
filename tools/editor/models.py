@@ -224,6 +224,20 @@ class Node(QGraphicsEllipseItem):
         for edge in remove_list:
             edge.remove()
 
+    def grid_pos(self):
+        return self.scene().board.map_to_grid(self.pos())
+
+    def next_nodes_pos(self):
+        nodes = []
+        for edge in self.edges:
+            if edge.source is self:
+                p = self.scene().board.map_to_grid(edge.dest.pos())
+                nodes.append(p)
+            else:
+                p = self.scene().board.map_to_grid(edge.source.pos())
+                nodes.append(p)
+        return nodes
+
     def itemChange(self, change, value):
         if self.scene() is not None:
             if change == QGraphicsItem.ItemPositionHasChanged:
@@ -252,6 +266,54 @@ class Node(QGraphicsEllipseItem):
         super().hoverLeaveEvent(event)
 
 
+class NodeModel(QAbstractItemModel):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.headers = 'pos', 'link nodes'
+        self.nodes = []
+
+    def index(self, row, column, parent=QModelIndex()):
+        return self.createIndex(row, column, None)
+
+    def parent(self, child):
+        return QModelIndex()
+
+    def rowCount(self, parent=QModelIndex()):
+        return len(self.nodes)
+
+    def columnCount(self, parent=QModelIndex()):
+        return len(self.headers)
+
+    def data(self, index, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            try:
+                if self.headers[index.column()] == 'pos':
+                    pos = self.nodes[index.row()].grid_pos()
+                    return '{0}, {1}'.format(pos.x(), pos.y())
+                elif self.headers[index.column()] == 'link nodes':
+                    nodes = self.nodes[index.row()].next_nodes_pos()
+                    nodes = ['({0}, {1})'.format(p.x(), p.y()) for p in nodes]
+                    return ','.join(nodes)
+            except:
+                return
+        return
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role != Qt.DisplayRole:
+            return
+        if orientation == Qt.Horizontal:
+            return self.headers[section]
+
+    def flags(self, index):
+        return super().flags(index) | Qt.ItemIsEditable
+
+    def data_changed(self, nodes):
+        self.beginResetModel()
+        self.nodes = nodes
+        self.endResetModel()
+
+
 class Document(QObject):
 
     def __init__(self, filename='new document', parent=None):
@@ -260,6 +322,7 @@ class Document(QObject):
         self.node_layer = Layer(name='node', z_value=1, opacity=1.0)
         self.edge_layer = Layer(name='edge', z_value=0, opacity=1.0)
 
+        self.node_model = NodeModel(self)
         self.layer_model = LayerModel(self)
         self.layer_model.layers.append(self.node_layer)
         self.layer_model.layers.append(self.edge_layer)
@@ -269,6 +332,7 @@ class Document(QObject):
         self.dest = Node(pos, 4, self.node_layer)
         self.edge = Edge(self.source, self.dest, 4, self.edge_layer)
         self.layer_model.data_changed()
+        self.node_model.data_changed(self.node_layer.childItems())
 
     def merge_nodes(self, nodes=None):
         if nodes is None:
@@ -281,11 +345,13 @@ class Document(QObject):
             for node in nodes:
                 node.merge()
         self.layer_model.data_changed()
+        self.node_model.data_changed(self.node_layer.childItems())
 
     def remove_nodes(self, nodes):
         for node in nodes:
             node.remove()
         self.layer_model.data_changed()
+        self.node_model.data_changed(self.node_layer.childItems())
 
     def save(self, filename):
         pass
