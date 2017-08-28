@@ -94,7 +94,7 @@ class BoardScene(QGraphicsScene):
             self.clearSelection()
 
     def mousePressEvent(self, event):
-        if len(self.selectedItems()) == 0:
+        if event.button() == Qt.LeftButton:
             if self.actions.checkedAction().text() == 'edge':
                 pos = self.board.snap_to_grid(event.scenePos())
                 self.document.create_node(pos)
@@ -103,11 +103,12 @@ class BoardScene(QGraphicsScene):
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
-        if self.actions.checkedAction().text() == 'edge':
-            self.document.merge_nodes()
-            self.clearSelection()
-        elif self.actions.checkedAction().text() == 'select':
-            self.document.merge_nodes(self.selectedItems())
+        if event.button() == Qt.LeftButton:
+            if self.actions.checkedAction().text() == 'edge':
+                self.document.merge_nodes()
+                self.clearSelection()
+            elif self.actions.checkedAction().text() == 'select':
+                self.document.merge_nodes(self.selectedItems())
         super().mouseReleaseEvent(event)
 
     @pyqtSlot()

@@ -17,7 +17,10 @@
    <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout" rowstretch="1">
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="5,1">
+    <property name="spacing">
+     <number>0</number>
+    </property>
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -30,10 +33,7 @@
     <property name="bottomMargin">
      <number>0</number>
     </property>
-    <property name="spacing">
-     <number>0</number>
-    </property>
-    <item row="0" column="0">
+    <item>
      <widget class="View" name="view">
       <property name="styleSheet">
        <string notr="true">background-color: rgb(66, 66, 66);</string>
@@ -63,6 +63,9 @@
        <enum>QGraphicsView::NoAnchor</enum>
       </property>
      </widget>
+    </item>
+    <item>
+     <widget class="QListView" name="listView"/>
     </item>
    </layout>
   </widget>
@@ -130,6 +133,8 @@ border-color: rgb(255, 255, 255);</string>
    <addaction name="action_close"/>
    <addaction name="separator"/>
    <addaction name="action_preview"/>
+   <addaction name="action_screenshot"/>
+   <addaction name="separator"/>
    <addaction name="action_select"/>
    <addaction name="action_edge"/>
    <addaction name="separator"/>
@@ -323,37 +328,19 @@ border-color: rgb(255, 255, 255);</string>
     <string>Shift+P</string>
    </property>
   </action>
-  <action name="action_copy">
+  <action name="action_screenshot">
    <property name="icon">
-    <iconset>
-     <normaloff>:/actions/icons/copy.png</normaloff>:/actions/icons/copy.png</iconset>
+    <iconset resource="resource.qrc">
+     <normaloff>:/actions/icons/screenshot.png</normaloff>:/actions/icons/screenshot.png</iconset>
    </property>
    <property name="text">
-    <string>copy</string>
+    <string>screenshot</string>
    </property>
    <property name="toolTip">
-    <string>copy object</string>
+    <string>screenshot</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+C</string>
-   </property>
-  </action>
-  <action name="action_cut">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>:/actions/icons/cut.png</normaloff>:/actions/icons/cut.png</iconset>
-   </property>
-   <property name="text">
-    <string>cut</string>
-   </property>
-   <property name="toolTip">
-    <string>cut object</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+X</string>
+    <string>Ctrl+Shift+S</string>
    </property>
   </action>
  </widget>
