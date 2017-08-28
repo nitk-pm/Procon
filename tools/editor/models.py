@@ -10,7 +10,9 @@ from PyQt5.QtCore import (
 from PyQt5.QtWidgets import (
     QGraphicsItem,
     QGraphicsEllipseItem,
-    QGraphicsLineItem
+    QGraphicsLineItem,
+    QStyledItemDelegate,
+    QDoubleSpinBox
 )
 from PyQt5.QtGui import (
     QColor,
@@ -47,7 +49,7 @@ class LayerModel(QAbstractItemModel):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.headers = 'name', 'number', 'opacity'
+        self.headers = 'name', 'opacity', 'number'
         self.layers = []
 
     def index(self, row, column, parent=QModelIndex()):
@@ -67,10 +69,10 @@ class LayerModel(QAbstractItemModel):
             try:
                 if self.headers[index.column()] == 'name':
                     return self.layers[index.row()].name
-                elif self.headers[index.column()] == 'number':
-                    return len(self.layers[index.row()].childItems())
                 elif self.headers[index.column()] == 'opacity':
                     return self.layers[index.row()].opacity()
+                elif self.headers[index.column()] == 'number':
+                    return len(self.layers[index.row()].childItems())
             except:
                 return
         return
@@ -81,10 +83,42 @@ class LayerModel(QAbstractItemModel):
         if orientation == Qt.Horizontal:
             return self.headers[section]
 
+    def flags(self, index):
+        return super().flags(index) | Qt.ItemIsEditable
+
+    def setData(self, index, value, role=Qt.EditRole):
+        if role == Qt.EditRole:
+            if self.headers[index.column()] == 'opacity':
+                self.layers[index.row()].setOpacity(value)
+                return True
+        return False
+
     def data_changed(self):
-        index = self.createIndex(0, 0)
-        index2 = self.createIndex(len(self.layers), len(self.headers))
-        self.dataChanged.emit(index, index2)
+        top_left = self.createIndex(0, 0)
+        bottom_right = self.createIndex(len(self.layers), len(self.headers))
+        self.dataChanged.emit(top_left, bottom_right)
+
+
+class LayerDelegate(QStyledItemDelegate):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def createEditor(self, parent, option, index):
+        if index.model().headers[index.column()] == 'opacity':
+            spinbox = QDoubleSpinBox(parent)
+            spinbox.setRange(0.0, 1.0)
+            spinbox.setSingleStep(0.1)
+            return spinbox
+        return None
+
+    def setEditorData(self, editor, index):
+        value = index.model().data(index, Qt.DisplayRole)
+        if isinstance(editor, QDoubleSpinBox):
+            editor.setValue(value)
+
+    def setModelData(self, editor, model, index):
+        model.setData(index, editor.value())
 
 
 class Edge(QGraphicsLineItem):
