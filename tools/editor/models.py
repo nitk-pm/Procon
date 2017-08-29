@@ -13,7 +13,8 @@ from PyQt5.QtWidgets import (
     QGraphicsEllipseItem,
     QGraphicsLineItem,
     QStyledItemDelegate,
-    QDoubleSpinBox
+    QDoubleSpinBox,
+    QUndoStack
 )
 from PyQt5.QtGui import (
     QColor,
@@ -98,6 +99,13 @@ class LayerModel(QAbstractItemModel):
         top_left = self.createIndex(0, 0)
         bottom_right = self.createIndex(len(self.layers), len(self.headers))
         self.dataChanged.emit(top_left, bottom_right)
+
+    def update_layers(self, layers):
+        self.beginResetModel()
+        self.layers.clear()
+        for layer in layers:
+            self.layers.append(layer)
+        self.endResetModel()
 
 
 class LayerDelegate(QStyledItemDelegate):
@@ -214,15 +222,15 @@ class Node(QGraphicsEllipseItem):
                 item.remove()
             elif isinstance(item, Edge) and item not in self.edges:
                 item.split(self)
-        remove_list = []
+        from itertools import product
+        remove_list = {}
         length = len(self.edges)
-        for i in range(length - 1):
-            if self.edges[i].equal(self.edges[i + 1]):
-                remove_list.append(self.edges[i])
-            elif self.edges[i].line().length() == 0:
-                remove_list.append(self.edges[i])
-
-        for edge in remove_list:
+        for i, j in product(range(length), range(length)):
+            if i != j and i not in remove_list and j not in remove_list:
+                if self.edges[i].equal(self.edges[j]):
+                    remove_list[i] = self.edges[i]
+        
+        for edge in remove_list.values():
             edge.remove()
 
     def grid_pos(self):
@@ -343,9 +351,10 @@ class NodeDelegate(QStyledItemDelegate):
 
 class Document(QObject):
 
-    def __init__(self, filename='new document', parent=None):
+    def __init__(self, project_name='new document', parent=None):
         super().__init__(parent)
-        self.filename = filename
+        self.project_name = project_name
+        self.history = QUndoStack(self)
         self.node_layer = Layer(name='node', z_value=1, opacity=1.0)
         self.edge_layer = Layer(name='edge', z_value=0, opacity=1.0)
 
@@ -358,8 +367,6 @@ class Document(QObject):
         self.source = Node(pos, 4, self.node_layer)
         self.dest = Node(pos, 4, self.node_layer)
         self.edge = Edge(self.source, self.dest, 4, self.edge_layer)
-        # self.layer_model.data_changed()
-        # self.node_model.data_changed(self.node_layer.childItems())
 
     def merge_nodes(self, nodes=None):
         if nodes is None:
@@ -371,17 +378,46 @@ class Document(QObject):
         else:
             for node in nodes:
                 node.merge()
-        self.layer_model.data_changed()
-        self.node_model.data_changed(self.node_layer.childItems())
+        self.update_models()
 
     def remove_nodes(self, nodes):
         for node in nodes:
             node.remove()
-        self.layer_model.data_changed()
-        self.node_model.data_changed(self.node_layer.childItems())
+        self.update_models()
 
-    def save(self, filename):
+    def remove_all(self):
+        for node in self.node_layer.childItems():
+            node.remove()
+        self.update_models()
+
+    def to_dict(self):
+        items = []
+        for node in self.node_layer.childItems():
+            items.append({
+                'pos': node.pos(),
+                'linked_nodes': [n.pos() for n in node.linked_nodes()]
+            })
+        project_data = {
+            'name': self.project_name,
+            'items': items
+        }
+        return project_data
+
+    def restore(self, items):
+        self.remove_all()
+        for item in items:
+            source = Node(item['pos'], 4, self.node_layer)
+            for p in item['linked_nodes']:
+                dest = Node(p, 4, self.node_layer)
+                Edge(source, dest, 4, self.edge_layer)
+        self.merge_nodes(self.node_layer.childItems())
+
+    def update_models(self):
+        self.node_model.data_changed(self.node_layer.childItems())
+        self.layer_model.data_changed()
+
+    def save_to_file(self, filename):
         pass
 
-    def load(self, filename):
+    def load_to_file(self, filename):
         pass
