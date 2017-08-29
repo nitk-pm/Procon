@@ -3,6 +3,7 @@ from PyQt5.QtCore import (
     QObject,
     QPointF,
     QRectF,
+    QLineF,
     pyqtSignal,
     QAbstractItemModel,
     QModelIndex
@@ -49,7 +50,7 @@ class LayerModel(QAbstractItemModel):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.headers = 'name', 'opacity', 'number'
+        self.headers = 'name', 'number', 'opacity'
         self.layers = []
 
     def index(self, row, column, parent=QModelIndex()):
@@ -227,15 +228,17 @@ class Node(QGraphicsEllipseItem):
     def grid_pos(self):
         return self.scene().board.map_to_grid(self.pos())
 
-    def next_nodes_pos(self):
+    def to_str(self):
+        p = self.grid_pos()
+        return '({:.0f}, {:.0f})'.format(p.x(), p.y())
+
+    def linked_nodes(self):
         nodes = []
         for edge in self.edges:
             if edge.source is self:
-                p = self.scene().board.map_to_grid(edge.dest.pos())
-                nodes.append(p)
+                nodes.append(edge.dest)
             else:
-                p = self.scene().board.map_to_grid(edge.source.pos())
-                nodes.append(p)
+                nodes.append(edge.source)
         return nodes
 
     def itemChange(self, change, value):
@@ -259,6 +262,8 @@ class Node(QGraphicsEllipseItem):
 
     def hoverEnterEvent(self, event):
         self.setPen(self.enter_pen)
+        p = self.scene().board.map_to_grid(event.scenePos())
+        self.setToolTip('{0:.0f}, {1:.0f}'.format(p.x(), p.y()))
         super().hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event):
@@ -270,7 +275,7 @@ class NodeModel(QAbstractItemModel):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.headers = 'pos', 'link nodes'
+        self.headers = 'pos', 'linked nodes'
         self.nodes = []
 
     def index(self, row, column, parent=QModelIndex()):
@@ -289,12 +294,19 @@ class NodeModel(QAbstractItemModel):
         if role == Qt.DisplayRole:
             try:
                 if self.headers[index.column()] == 'pos':
-                    pos = self.nodes[index.row()].grid_pos()
-                    return '{0}, {1}'.format(pos.x(), pos.y())
-                elif self.headers[index.column()] == 'link nodes':
-                    nodes = self.nodes[index.row()].next_nodes_pos()
-                    nodes = ['({0}, {1})'.format(p.x(), p.y()) for p in nodes]
-                    return ','.join(nodes)
+                    return self.nodes[index.row()].to_str()
+                elif self.headers[index.column()] == 'linked nodes':
+                    nodes = self.nodes[index.row()].linked_nodes()
+                    nodes = [node.to_str() for node in nodes]
+                    return ', '.join(nodes)
+            except:
+                return
+        if role == Qt.ToolTipRole:
+            try:
+                if self.headers[index.column()] == 'linked nodes':
+                    nodes = self.nodes[index.row()].linked_nodes()
+                    nodes = [node.to_str() for node in nodes]
+                    return ', '.join(nodes)
             except:
                 return
         return
@@ -314,6 +326,21 @@ class NodeModel(QAbstractItemModel):
         self.endResetModel()
 
 
+class NodeDelegate(QStyledItemDelegate):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def createEditor(self, parent, option, index):
+        return None
+
+    def setEditorData(self, editor, index):
+        pass
+
+    def setModelData(self, editor, model, index):
+        pass
+
+
 class Document(QObject):
 
     def __init__(self, filename='new document', parent=None):
@@ -331,8 +358,8 @@ class Document(QObject):
         self.source = Node(pos, 4, self.node_layer)
         self.dest = Node(pos, 4, self.node_layer)
         self.edge = Edge(self.source, self.dest, 4, self.edge_layer)
-        self.layer_model.data_changed()
-        self.node_model.data_changed(self.node_layer.childItems())
+        # self.layer_model.data_changed()
+        # self.node_model.data_changed(self.node_layer.childItems())
 
     def merge_nodes(self, nodes=None):
         if nodes is None:

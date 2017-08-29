@@ -111,8 +111,14 @@ class BoardScene(QGraphicsScene):
             p = self.board.map_to_grid(event.scenePos())
             d = p - self.grid_pos
             self.show_message.emit(
-                'pos: {0}, {1}  delta: {2}, {3}'
+                'pos: ({:.0f}, {:.0f})  delta: ({:.0f}, {:.0f})'
                 .format(p.x(), p.y(), d.x(), d.y())
+            )
+        else:
+            p = self.board.map_to_grid(event.scenePos())
+            self.show_message.emit(
+                'pos: ({:.0f}, {:.0f})'
+                .format(p.x(), p.y())
             )
         super().mouseMoveEvent(event)
 

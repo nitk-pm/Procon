@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5 import uic
 from widgets import View, Preview, BoardScene
-from models import Document, LayerDelegate
+from models import Document, LayerDelegate, NodeDelegate
 
 
 class MainWindow(QMainWindow):
@@ -27,6 +27,7 @@ class MainWindow(QMainWindow):
         self.ui.layer_view.setItemDelegate(LayerDelegate())
 
         self.ui.node_view.setModel(self.document.node_model)
+        self.ui.node_view.setItemDelegate(NodeDelegate())
 
         self.scene = BoardScene(self.document)
         self.scene.setup_actions({
