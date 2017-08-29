@@ -112,7 +112,7 @@ class Document(QObject):
         self.is_editing = False
         self.exist_frame = False
 
-    def setup_actions(self, undo: QAction, redo: QAction):
+    def set_actions(self, undo: QAction, redo: QAction):
         undo.triggered.connect(self.undo_stack.undo)
         self.undo_stack.canUndoChanged.connect(undo.setEnabled)
         redo.triggered.connect(self.undo_stack.redo)

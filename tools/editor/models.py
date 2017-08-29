@@ -353,6 +353,8 @@ class Document(QObject):
 
     def __init__(self, project_name='new document', parent=None):
         super().__init__(parent)
+        self.full_path = ''
+        self.dir_path = ''
         self.project_name = project_name
         self.history = QUndoStack(self)
         self.node_layer = Layer(name='node', z_value=1, opacity=1.0)
@@ -394,20 +396,27 @@ class Document(QObject):
         items = []
         for node in self.node_layer.childItems():
             items.append({
-                'pos': node.pos(),
-                'linked_nodes': [n.pos() for n in node.linked_nodes()]
+                'pos': node.to_str(),
+                'linked_nodes': [n.to_str() for n in node.linked_nodes()]
             })
         project_data = {
             'name': self.project_name,
             'items': items
         }
+        s = self.node_layer.scene().board.map_from_str(items[0]['pos'])
         return project_data
 
-    def restore(self, items):
+    def restore(self, project_data):
         self.remove_all()
-        for item in items:
-            source = Node(item['pos'], 4, self.node_layer)
-            for p in item['linked_nodes']:
+        self.project_name = project_data['name']
+        board = self.node_layer.scene().board
+        for item in project_data['items']:
+            pos = board.map_from_str(item['pos'])
+            pos = board.map_from_grid(pos)
+            source = Node(pos, 4, self.node_layer)
+            for p_str in item['linked_nodes']:
+                p = board.map_from_str(p_str)
+                p = board.map_from_grid(p)
                 dest = Node(p, 4, self.node_layer)
                 Edge(source, dest, 4, self.edge_layer)
         self.merge_nodes(self.node_layer.childItems())
@@ -417,7 +426,19 @@ class Document(QObject):
         self.layer_model.data_changed()
 
     def save_to_file(self, filename):
-        pass
+        import os
+        self.full_path = filename
+        self.dir_path, self.project_name = os.path.split(filename)
+        self.project_name = self.project_name.rsplit('.', 1)[0]
+        with open(filename, 'w') as file:
+            import json
+            json.dump(self.to_dict(), file, indent=2)
 
     def load_to_file(self, filename):
-        pass
+        import os
+        self.full_path = filename
+        self.dir_path, self.project_name = os.path.split(filename)
+        self.project_name = self.project_name.rsplit('.', 1)[0]
+        with open(filename, 'r') as file:
+            import json
+            self.restore(json.load(file))

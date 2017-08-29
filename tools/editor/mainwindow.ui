@@ -328,7 +328,7 @@ border-color: rgb(255, 255, 255);</string>
   </widget>
   <action name="action_new">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
@@ -361,7 +361,7 @@ border-color: rgb(255, 255, 255);</string>
   </action>
   <action name="action_open">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">

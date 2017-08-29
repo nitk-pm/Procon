@@ -60,6 +60,11 @@ class Board(QGraphicsPixmapItem):
         p = self.map_to_grid(pos)
         return self.map_from_grid(p)
 
+    def map_from_str(self, data):
+        import re
+        m = re.findall(r'([+-]?[0-9]+\.?[0-9]*)', data)
+        return QPointF(int(m[0]), int(m[1]))
+
     def contains(self, pos):
         return self.area.contains(pos)
 
@@ -68,23 +73,30 @@ class BoardScene(QGraphicsScene):
 
     show_message = pyqtSignal(str)
 
-    def __init__(self, document, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.document = document
-        self.board = Board()
         self.actions = QActionGroup(self)
         self.action_edge = None
         self.action_select = None
         self.action_delete = None
 
+        self.board = Board()
         self.addItem(self.board)
-        self.addItem(self.document.node_layer)
-        self.addItem(self.document.edge_layer)
+
+        self.document = None
 
         self.actions.setExclusive(True)
         self.selectionChanged.connect(self.select_controll)
 
-    def setup_actions(self, actions):
+    def set_document(self, document):
+        if self.document is not None:
+            self.removeItem(self.document.node_layer)
+            self.removeItem(self.document.edge_layer)
+        self.document = document
+        self.addItem(self.document.node_layer)
+        self.addItem(self.document.edge_layer)
+
+    def set_actions(self, actions):
         if 'mode' in actions:
             for action in actions['mode']:
                 self.actions.addAction(action)
@@ -96,13 +108,13 @@ class BoardScene(QGraphicsScene):
         if event.key() == Qt.Key_Escape:
             self.clearSelection()
         if event.key() == Qt.Key_A:
-            self.output = self.document.output_data(remove=True)
+            self.output = self.document.to_dict()
+            self.document.remove_all()
         if event.key() == Qt.Key_B:
-            print('restore')
             self.document.restore(self.output)
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.LeftButton and self.document is not None:
             self.grid_pos = self.board.map_to_grid(event.scenePos())
             pos = self.board.map_from_grid(self.grid_pos)
             if self.actions.checkedAction().text() == 'edge':
@@ -129,7 +141,7 @@ class BoardScene(QGraphicsScene):
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.LeftButton and self.document is not None:
             if self.actions.checkedAction().text() == 'edge':
                 self.document.merge_nodes()
                 self.clearSelection()
