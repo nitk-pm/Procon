@@ -60,7 +60,7 @@ class Board(QGraphicsPixmapItem):
         painter.end()
 
         self.setPixmap(pixmap)
-        self.area = QRectF(1, 1, self.width - 1, self.height - 1)
+        self.area = QRectF(4, 4, self.width - 4, self.height - 4)
 
     def map_to_grid(self, pos):
         b = QPointF(self.base / 2, self.base / 2)
@@ -129,12 +129,14 @@ class Edge(QGraphicsLineItem):
         self.adjust()
 
     def replace(self, old_node, new_node):
-        if old_node == self.source:
+        if old_node is self.source:
             self.source.edges.remove(self)
             self.source = new_node
-        elif old_node == self.dest:
+            self.source.edges.append(self)
+        elif old_node is self.dest:
             self.dest.edges.remove(self)
             self.dest = new_node
+            self.dest.edges.append(self)
 
     def remove(self):
         if self.parentItem() is not None:
@@ -197,7 +199,6 @@ class Node(QGraphicsEllipseItem):
         for item in self.scene().collidingItems(self):
             if isinstance(item, Node):
                 while len(item.edges) != 0:
-                    self.edges.append(item.edges[0])
                     item.edges[0].replace(item, self)
                 item.remove()
             elif isinstance(item, Edge) and item not in self.edges:
@@ -230,17 +231,17 @@ class Node(QGraphicsEllipseItem):
         return nodes
 
     def itemChange(self, change, value):
-        if change == QGraphicsItem.ItemPositionHasChanged:
-            pos = self.document.board.snap_to_grid(value)
-            if self.document.board.contains(pos):
-                self.setPos(pos)
+        if self.scene() is not None:
+            if change == QGraphicsItem.ItemPositionHasChanged:
                 for edge in self.edges:
                     edge.adjust()
 
-        elif change == QGraphicsItem.ItemPositionChange:
-            pos = self.document.board.snap_to_grid(value)
-            if not self.document.board.contains(pos):
-                return self.pos()
+            elif change == QGraphicsItem.ItemPositionChange:
+                pos = self.document.board.snap_to_grid(value)
+                if self.document.board.contains(pos):
+                    return pos
+                else:
+                    return self.pos()
 
         return super().itemChange(change, value)
 
