@@ -59,11 +59,6 @@ class BoardScene(QGraphicsScene):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
             self.clearSelection()
-        if event.key() == Qt.Key_A:
-            self.output = self.document.to_dict()
-            self.document.remove_all()
-        if event.key() == Qt.Key_B:
-            self.document.restore(self.output)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and self.document is not None:
@@ -74,7 +69,6 @@ class BoardScene(QGraphicsScene):
                 self.document.create_node(pos)
             elif self.actions.checkedAction().text() == 'select':
                 pass
-
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
@@ -88,8 +82,7 @@ class BoardScene(QGraphicsScene):
         else:
             p = self.document.board.map_to_grid(event.scenePos())
             self.show_message.emit(
-                'pos: ({:.0f}, {:.0f})'
-                .format(p.x(), p.y())
+                'pos: ({:.0f}, {:.0f})'.format(p.x(), p.y())
             )
         super().mouseMoveEvent(event)
 

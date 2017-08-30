@@ -210,7 +210,6 @@ class Node(QGraphicsEllipseItem):
             if i != j and i not in remove_list and j not in remove_list:
                 if self.edges[i].equal(self.edges[j]):
                     remove_list[i] = self.edges[i]
-
         for edge in remove_list.values():
             edge.remove()
 

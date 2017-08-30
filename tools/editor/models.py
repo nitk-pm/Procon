@@ -149,8 +149,7 @@ class Document(QObject):
         self.layer_model.layers.append(self.node_layer)
         self.layer_model.layers.append(self.edge_layer)
 
-        self.source = None
-        self.dest = None
+        self.is_created = False
 
     def connect_actions(self, undo, redo):
         undo.triggered.connect(self.history.undo)
@@ -166,13 +165,22 @@ class Document(QObject):
         self.history.canRedoChanged.disconnect(redo.setEnabled)
 
     def create_node(self, pos):
-        source = Node(pos, 4, self, self.node_layer)
-        dest = Node(pos, 4, self, self.node_layer)
-        Edge(source, dest, 4, self.edge_layer)
+        self.source = Node(pos, 4, self, self.node_layer)
+        self.dest = Node(pos, 4, self, self.node_layer)
+        Edge(self.source, self.dest, 4, self.edge_layer)
+        self.is_created = True
 
     def merge_nodes(self):
-        for node in self.node_layer.childItems():
-            node.merge()
+        if self.is_created:
+            if self.source.pos() == self.dest.pos():
+                self.dest.remove()
+            else:
+                self.dest.merge()
+            self.source.merge()
+            self.is_created = False
+        else:
+            for node in self.node_layer.childItems():
+                node.merge()
         self.update_models()
 
     def remove_nodes(self, nodes):
