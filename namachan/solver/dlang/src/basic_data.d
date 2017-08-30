@@ -6,8 +6,6 @@ import std.algorithm.iteration : uniq;
 import std.algorithm.sorting : sort;
 import std.conv : to;
 import std.format : format;
-import std.math : abs;
-import std.numeric : gcd;
 import std.range : array;
 
 ///線分
