@@ -5,68 +5,22 @@ from PyQt5.QtCore import (
     QTimeLine,
     pyqtSlot,
     pyqtSignal,
-    QPointF,
-    QRectF
 )
 from PyQt5.QtWidgets import (
     QGraphicsView,
     QGraphicsScene,
-    QAction,
     QActionGroup,
-    QGraphicsPixmapItem,
+    QStyledItemDelegate,
+    QDoubleSpinBox,
+    QMainWindow,
+    QMessageBox,
+    QFileDialog
 )
 from PyQt5.QtGui import (
     QColor
 )
-
-
-class Board(QGraphicsPixmapItem):
-
-    def __init__(self, width=101, height=65, base=1, parent=None):
-        super().__init__(parent)
-        base *= 20
-        self.base = base * 2
-        self.width = (width + 1) * self.base
-        self.height = (height + 1) * self.base
-
-        from PyQt5.QtGui import QImage, QPixmap, QPainter
-        from itertools import product
-        pixmap = QPixmap(self.width, self.height)
-        pixmap.fill()
-
-        painter = QPainter()
-        painter.begin(pixmap)
-        painter.setBrush(Qt.black)
-
-        b = base / 4
-        for y, x in product(range(1, height + 1), range(1, width + 1)):
-            painter.drawEllipse(x * self.base, y * self.base, b, b)
-
-        painter.end()
-
-        self.setPixmap(pixmap)
-        self.area = QRectF(1, 1, self.width - 1, self.height - 1)
-
-    def map_to_grid(self, pos):
-        b = QPointF(self.base / 2, self.base / 2)
-        p = self.mapFromScene(pos - b) / self.base
-        return QPointF(int(p.x()), int(p.y()))
-
-    def map_from_grid(self, pos):
-        p = self.mapToScene(pos * self.base)
-        return p + QPointF(self.base, self.base) * 1.075
-
-    def snap_to_grid(self, pos):
-        p = self.map_to_grid(pos)
-        return self.map_from_grid(p)
-
-    def map_from_str(self, data):
-        import re
-        m = re.findall(r'([+-]?[0-9]+\.?[0-9]*)', data)
-        return QPointF(int(m[0]), int(m[1]))
-
-    def contains(self, pos):
-        return self.area.contains(pos)
+from PyQt5 import uic
+from models import Document
 
 
 class BoardScene(QGraphicsScene):
@@ -79,10 +33,6 @@ class BoardScene(QGraphicsScene):
         self.action_edge = None
         self.action_select = None
         self.action_delete = None
-
-        self.board = Board()
-        self.addItem(self.board)
-
         self.document = None
 
         self.actions.setExclusive(True)
@@ -90,9 +40,11 @@ class BoardScene(QGraphicsScene):
 
     def set_document(self, document):
         if self.document is not None:
+            self.removeItem(self.document.board)
             self.removeItem(self.document.node_layer)
             self.removeItem(self.document.edge_layer)
         self.document = document
+        self.addItem(self.document.board)
         self.addItem(self.document.node_layer)
         self.addItem(self.document.edge_layer)
 
@@ -115,8 +67,9 @@ class BoardScene(QGraphicsScene):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and self.document is not None:
-            self.grid_pos = self.board.map_to_grid(event.scenePos())
-            pos = self.board.map_from_grid(self.grid_pos)
+            self.grid_pos = self.document.board.map_to_grid(event.scenePos())
+            pos = self.document.board.map_from_grid(self.grid_pos)
+            self.document.begin_record()
             if self.actions.checkedAction().text() == 'edge':
                 self.document.create_node(pos)
             elif self.actions.checkedAction().text() == 'select':
@@ -126,14 +79,14 @@ class BoardScene(QGraphicsScene):
 
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.LeftButton and len(self.selectedItems()) != 0:
-            p = self.board.map_to_grid(event.scenePos())
+            p = self.document.board.map_to_grid(event.scenePos())
             d = p - self.grid_pos
             self.show_message.emit(
                 'pos: ({:.0f}, {:.0f})  delta: ({:.0f}, {:.0f})'
                 .format(p.x(), p.y(), d.x(), d.y())
             )
         else:
-            p = self.board.map_to_grid(event.scenePos())
+            p = self.document.board.map_to_grid(event.scenePos())
             self.show_message.emit(
                 'pos: ({:.0f}, {:.0f})'
                 .format(p.x(), p.y())
@@ -146,7 +99,8 @@ class BoardScene(QGraphicsScene):
                 self.document.merge_nodes()
                 self.clearSelection()
             elif self.actions.checkedAction().text() == 'select':
-                self.document.merge_nodes(self.selectedItems())
+                self.document.merge_nodes()
+            self.document.end_record()
         self.show_message.emit('')
         super().mouseReleaseEvent(event)
 
@@ -248,3 +202,143 @@ class Preview(QGraphicsView):
 
     def resizeEvent(self, event):
         self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+
+
+class LayerDelegate(QStyledItemDelegate):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def createEditor(self, parent, option, index):
+        if index.model().headers[index.column()] == 'opacity':
+            spinbox = QDoubleSpinBox(parent)
+            spinbox.setRange(0.0, 1.0)
+            spinbox.setSingleStep(0.1)
+            return spinbox
+        return None
+
+    def setEditorData(self, editor, index):
+        value = index.model().data(index, Qt.DisplayRole)
+        if isinstance(editor, QDoubleSpinBox):
+            editor.setValue(value)
+
+    def setModelData(self, editor, model, index):
+        model.setData(index, editor.value())
+
+
+class NodeDelegate(QStyledItemDelegate):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def createEditor(self, parent, option, index):
+        return None
+
+    def setEditorData(self, editor, index):
+        pass
+
+    def setModelData(self, editor, model, index):
+        pass
+
+
+class MainWindow(QMainWindow):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        Ui = uic.loadUiType('form.ui')[0]
+        self.ui = Ui()
+        self.ui.setupUi(self)
+
+        self.ui.layer_view.setItemDelegate(LayerDelegate())
+        self.ui.node_view.setItemDelegate(NodeDelegate())
+
+        self.scene = BoardScene()
+        self.scene.set_actions({
+            'mode': [
+                self.ui.action_select,
+                self.ui.action_edge
+            ],
+            'delete': self.ui.action_delete
+        })
+        self.scene.show_message.connect(self.ui.status.showMessage)
+        self.ui.view.setScene(self.scene)
+
+        self.preview = Preview()
+        self.preview.setScene(self.scene)
+
+        self.ui.action_new.triggered.connect(self.new_document)
+        self.ui.action_preview.triggered.connect(self.preview.show_preview)
+        self.ui.action_screenshot.triggered.connect(self.screenshot)
+        self.ui.action_open.triggered.connect(self.load)
+        self.ui.action_save.triggered.connect(self.save)
+
+        self.document = None
+        self.new_document()
+
+    def closeEvent(self, event):
+        super().closeEvent(event)
+        self.preview.deleteLater()
+
+    @pyqtSlot()
+    def new_document(self):
+        if self.document is not None:
+            msg_box = QMessageBox(self)
+            msg_box.setText((
+                'Do you want to save change you'
+                'changes you made to Document ?'
+            ))
+            msg_box.setStandardButtons(QMessageBox.Save | QMessageBox.No | QMessageBox.Cancel)
+            msg_box.setDefaultButton(QMessageBox.Save)
+            msg = msg_box.exec()
+            if msg == QMessageBox.Save:
+                self.save()
+            elif msg == QMessageBox.Cancel:
+                return
+            self.document.disconnect_actions(
+                self.ui.action_undo,
+                self.ui.action_redo
+            )
+
+        self.document = Document()
+        self.document.connect_actions(self.ui.action_undo, self.ui.action_redo)
+        self.scene.set_document(self.document)
+        self.ui.layer_view.setModel(self.document.layer_model)
+        self.ui.node_view.setModel(self.document.node_model)
+
+    @pyqtSlot()
+    def screenshot(self):
+        from PyQt5.QtGui import QPainter, QImage
+        filename = QFileDialog.getSaveFileName(
+            self,
+            'Save to screenshot',
+            '',
+            'png (*.png)'
+        )
+        if filename != '':
+            w, h = self.scene.width(), self.scene.height()
+            image = QImage(w, h, QImage.Format_ARGB32)
+            with QPainter(image) as painter:
+                self.scene.render(painter)
+                image.save(filename[0])
+
+    @pyqtSlot()
+    def save(self):
+        filename = QFileDialog.getSaveFileName(
+            self,
+            'Save to file',
+            self.document.project_name,
+            'json (*.json)'
+        )[0]
+        if filename != '':
+            self.document.save_to_file(filename)
+
+    @pyqtSlot()
+    def load(self):
+        filename = QFileDialog.getOpenFileName(
+            self,
+            'Load to file',
+            '',
+            'json (*.json)'
+        )[0]
+        if filename != '':
+            self.document.load_to_file(filename)

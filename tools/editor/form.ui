@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>main_window</class>
+ <widget class="QMainWindow" name="main_window">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -306,7 +306,6 @@ border-color: rgb(255, 255, 255);</string>
    <addaction name="action_new"/>
    <addaction name="action_open"/>
    <addaction name="action_save"/>
-   <addaction name="action_close"/>
    <addaction name="separator"/>
    <addaction name="action_preview"/>
    <addaction name="action_screenshot"/>
@@ -331,7 +330,7 @@ border-color: rgb(255, 255, 255);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="resource.qrc">
+    <iconset resource="editor.qrc">
      <normaloff>:/actions/icons/new.png</normaloff>:/actions/icons/new.png</iconset>
    </property>
    <property name="text">
@@ -346,7 +345,7 @@ border-color: rgb(255, 255, 255);</string>
   </action>
   <action name="action_save">
    <property name="icon">
-    <iconset resource="resource.qrc">
+    <iconset resource="editor.qrc">
      <normaloff>:/actions/icons/save.png</normaloff>:/actions/icons/save.png</iconset>
    </property>
    <property name="text">
@@ -364,7 +363,7 @@ border-color: rgb(255, 255, 255);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="resource.qrc">
+    <iconset resource="editor.qrc">
      <normaloff>:/actions/icons/open.png</normaloff>:/actions/icons/open.png</iconset>
    </property>
    <property name="text">
@@ -379,7 +378,7 @@ border-color: rgb(255, 255, 255);</string>
   </action>
   <action name="action_preview">
    <property name="icon">
-    <iconset resource="resource.qrc">
+    <iconset resource="editor.qrc">
      <normaloff>:/actions/icons/preview.png</normaloff>:/actions/icons/preview.png</iconset>
    </property>
    <property name="text">
@@ -397,7 +396,7 @@ border-color: rgb(255, 255, 255);</string>
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resource.qrc">
+    <iconset resource="editor.qrc">
      <normaloff>:/actions/icons/undo.png</normaloff>:/actions/icons/undo.png</iconset>
    </property>
    <property name="text">
@@ -415,7 +414,7 @@ border-color: rgb(255, 255, 255);</string>
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resource.qrc">
+    <iconset resource="editor.qrc">
      <normaloff>:/actions/icons/redo.png</normaloff>:/actions/icons/redo.png</iconset>
    </property>
    <property name="text">
@@ -428,30 +427,12 @@ border-color: rgb(255, 255, 255);</string>
     <string>Ctrl+Y</string>
    </property>
   </action>
-  <action name="action_close">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resource.qrc">
-     <normaloff>:/actions/icons/close.png</normaloff>:/actions/icons/close.png</iconset>
-   </property>
-   <property name="text">
-    <string>close</string>
-   </property>
-   <property name="toolTip">
-    <string>close document</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+F4</string>
-   </property>
-  </action>
   <action name="action_delete">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resource.qrc">
+    <iconset resource="editor.qrc">
      <normaloff>:/actions/icons/delete.png</normaloff>:/actions/icons/delete.png</iconset>
    </property>
    <property name="text">
@@ -475,7 +456,7 @@ border-color: rgb(255, 255, 255);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="resource.qrc">
+    <iconset resource="editor.qrc">
      <normaloff>:/actions/icons/select.png</normaloff>
      <activeon>:/actions/icons/select_checked.png</activeon>:/actions/icons/select.png</iconset>
    </property>
@@ -497,7 +478,7 @@ border-color: rgb(255, 255, 255);</string>
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resource.qrc">
+    <iconset resource="editor.qrc">
      <normaloff>:/actions/icons/edge.png</normaloff>
      <activeon>:/actions/icons/edge_checked.png</activeon>:/actions/icons/edge.png</iconset>
    </property>
@@ -513,7 +494,7 @@ border-color: rgb(255, 255, 255);</string>
   </action>
   <action name="action_screenshot">
    <property name="icon">
-    <iconset resource="resource.qrc">
+    <iconset resource="editor.qrc">
      <normaloff>:/actions/icons/screenshot.png</normaloff>:/actions/icons/screenshot.png</iconset>
    </property>
    <property name="text">
@@ -535,7 +516,7 @@ border-color: rgb(255, 255, 255);</string>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="resource.qrc"/>
+  <include location="editor.qrc"/>
  </resources>
  <connections/>
 </ui>
