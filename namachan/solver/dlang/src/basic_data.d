@@ -7,6 +7,7 @@ import std.algorithm.sorting : sort;
 import std.conv : to;
 import std.format : format;
 import std.range : array;
+import core.simd;
 
 ///線分
 struct Segment {
@@ -51,3 +52,107 @@ alias P = Vector2i;
 alias S = Segment;
 alias Shape = Segment[];
 alias Piece = Shape[];
+
+struct BitField(alias size) {
+private:
+	enum xmm_length =
+		size % 128 == 0 ? size / 128 : size / 128 + 1;
+	union {
+		ulong2[xmm_length] xmms;
+		ulong[xmm_length * 2] array;
+	}
+
+	template expand_loop (alias times, alias code) {
+		import std.algorithm.iteration : map;
+		import std.range : iota, array;
+		import std.array : join;
+		import std.format : format;
+		//わからん
+		enum expand_loop =
+			(){
+				return times
+					.iota
+					.map!(idx => format(code, idx))
+					.join;
+			}();
+
+	}
+public:
+	@nogc
+	pure bool opIndex (in int idx) const {
+		immutable shift_num = idx % 64;
+		immutable bits = array[(idx-1) / 64];
+		return (bits & (1UL << shift_num)) != 0UL;
+	}
+
+	//@nogc
+	bool opIndexAssign (in bool b, in size_t idx) {
+		immutable shift_num = idx % 64;
+		immutable bits = array[(idx-1)/64];
+		if (b)
+			array[(idx-1)/64] = (bits | (1UL << shift_num));
+		else
+			array[(idx-1)/64] = (bits & !(1UL << shift_num));
+		return b;
+	}
+
+	BitField!size opBinary (string op)(in BitField!size field) {
+		BitField!size ymm;
+		static if (op == "|") {
+			mixin(expand_loop!(xmm_length, "ymm.xmms[%1$s] = xmms[%1$s] | field.xmms[%1$s];"));
+		}
+		else static if (op == "&") {
+			mixin(expand_loop!(xmm_length, "ymm.xmms[%1$s] = xmms[%1$s] & field.xmms[%1$s];"));
+		}
+		return ymm;
+	}
+
+	BitField!size opOpAssign (string op)(in BitField!size field) {
+		BitField!size ymm;
+		static if (op == "|") {
+			mixin(expand_loop!(xmm_length, "xmms[%1$s] = xmms[%1$s] | field.xmms[%1$s];"));
+		}
+		else static if (op == "&") {
+			mixin(expand_loop!(xmm_length, "xmms[%1$s] = xmms[%1$s] & field.xmms[%1$s];"));
+		}
+		return ymm;
+	}
+
+	pure string toString () {
+		string str;
+		for (int idx = array.length - 1; idx >= 0; --idx) {
+			str ~= format ("%064b", array[idx]);
+		}
+		return format("BitField!(%d)[%s]", size, str);
+	}
+}
+unittest {
+	BitField!256 bf256;
+	static assert (bf256.xmms.length == 2);
+	BitField!5 bf5;
+	static assert (bf5.xmms.length == 1);
+
+	bf256[1] = true;
+	bf256[2] = true;
+	assert (bf256[1]);
+	assert (bf256[2]);
+	assert (!bf256[0]);
+
+	bf256[128] = true;
+	assert (bf256[128]);
+
+	bf256[256] = true;
+	assert (bf256[256]);
+
+	bf256[132] = true;
+	assert (bf256[132]);
+
+	bf256[256] = false;
+	assert (!bf256[256]);
+
+	BitField!256 bf256_2;
+	bf256_2[132] = true;
+	assert ((bf256_2 | bf256) == bf256);
+
+	assert ((bf256_2 & bf256) == bf256_2);
+}
