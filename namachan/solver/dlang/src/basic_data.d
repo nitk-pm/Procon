@@ -81,18 +81,19 @@ public:
 	@nogc
 	pure bool opIndex (in int idx) const {
 		immutable shift_num = idx % 64;
-		immutable bits = array[(idx-1) / 64];
+		immutable bits = array[idx / 64];
 		return (bits & (1UL << shift_num)) != 0UL;
 	}
 
 	//@nogc
 	bool opIndexAssign (in bool b, in size_t idx) {
 		immutable shift_num = idx % 64;
-		immutable bits = array[(idx-1)/64];
+		immutable elem_idx = idx / 64;
+		immutable bits = array[elem_idx];
 		if (b)
-			array[(idx-1)/64] = (bits | (1UL << shift_num));
+			array[elem_idx] = (bits | (1UL << shift_num));
 		else
-			array[(idx-1)/64] = (bits & !(1UL << shift_num));
+			array[elem_idx] = (bits & !(1UL << shift_num));
 		return b;
 	}
 
@@ -141,14 +142,14 @@ unittest {
 	bf256[128] = true;
 	assert (bf256[128]);
 
-	bf256[256] = true;
-	assert (bf256[256]);
+	bf256[255] = true;
+	assert (bf256[255]);
 
 	bf256[132] = true;
 	assert (bf256[132]);
 
-	bf256[256] = false;
-	assert (!bf256[256]);
+	bf256[255] = false;
+	assert (!bf256[255]);
 
 	BitField!256 bf256_2;
 	bf256_2[132] = true;
