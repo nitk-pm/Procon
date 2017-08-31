@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QPointF
+from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPolygonF
 import re
 
@@ -88,7 +88,6 @@ class ClosedGraphDetector(object):
         # 閉路グラフの検出
         for node in self.graph.keys():
             self.bfs(node, node)
-
         # 閉路グラフの性質を満たさないものを削除
         self.correct_paths()
 
@@ -101,7 +100,6 @@ class ClosedGraphDetector(object):
             new_path.append(n)
             queue.append(new_path)
         while len(queue) > 0:
-            logger.debug('queue: {}'.format(queue))
             path = queue.pop(0)
             node = path[-1]
             if node == goal and self.check(path):
@@ -111,23 +109,22 @@ class ClosedGraphDetector(object):
             for n in self.graph[node]:
                 if n not in path:
                     new_path = path[:]
-                    logger.debug('n: {}, path: {}'.format(n, new_path))
                     new_path.append(n)
                     queue.append(new_path)
                 elif n == start:
                     new_path = path[:]
-                    logger.debug('n: {}, path: {}'.format(n, new_path))
                     new_path.append(n)
                     queue.append(new_path)
 
     def check(self, path):
         p = set(path)
-        if path.x() in path[1:-1]:
+        if path[0] in path[1:-1]:
             return False
         return len(path) in range(4, 16) and p not in self.hash
 
     def correct_paths(self):
         self.contains_edge()
+        self.contains_point()
 
     def contains_edge(self):
         from itertools import product
@@ -138,12 +135,28 @@ class ClosedGraphDetector(object):
             if i != j:
                 s = path_set[i] & path_set[j]
                 if s in path_set:
-                    find[i if i > j else j] = True
+                    index = i if len(path_set[i]) > len(path_set[j]) else j
+                    find[index] = True
         paths = []
         for i in range(length):
             if not find[i]:
-                paths.append(path_set[i])
+                paths.append(self.paths[i])
         self.paths = paths
 
     def contains_point(self):
-        pass
+        paths = []
+        for i, path in enumerate(self.paths):
+            polygon = self.to_polygon(path)
+            find = False
+            for pos in self.graph.keys():
+                if pos not in path:
+                    p = convert_from_str(pos)
+                    if polygon.containsPoint(p, Qt.WindingFill):
+                        find = True
+            if not find:
+                paths.append(path)
+        self.paths = paths
+
+    def to_polygon(self, path):
+        points = [convert_from_str(p) for p in path]
+        return QPolygonF(points)

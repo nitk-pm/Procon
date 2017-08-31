@@ -60,6 +60,12 @@ class BoardScene(QGraphicsScene):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
             self.clearSelection()
+        if event.key() == Qt.Key_S:
+            from util import ClosedGraphDetector
+            detector = ClosedGraphDetector(self.document.to_dict())
+            print('search result')
+            for path in detector.search():
+                print(path)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and self.document is not None:
