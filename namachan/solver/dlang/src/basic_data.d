@@ -120,11 +120,12 @@ public:
 	}
 
 	pure string toString () {
-		string str;
+		string[] strs;
+		import std.string;
 		for (int idx = array.length - 1; idx >= 0; --idx) {
-			str ~= format ("%064b", array[idx]);
+			strs ~= [format ("%064b", array[idx])];
 		}
-		return format("BitField!(%d)[%s]", size, str);
+		return format("BitField!(%d)[%s]", size, strs.join("_"));
 	}
 }
 unittest {
