@@ -4,8 +4,7 @@ import re
 
 
 def convert_from_str(p_str):
-    pattern = r'\(\d*, \d*\)'
-    if re.match(pattern, p_str) is None:
+    if re.match(r'\(\d*, \d*\)', p_str) is None:
         return None
     p = re.findall(r'([+-]?[0-9]+\.?[0-9]*)', p_str)
     return QPointF(int(p[0]), int(p[1]))
@@ -15,81 +14,35 @@ def convert_from_point(point):
     return '({:.0f}, {:.0f})'.format(point.x(), point.y())
 
 
-class ConvexHull(object):
-
-    def __init__(self, points=None):
-        self.points = []
-        if points is not None:
-            self.setup(points)
-
-    def setup(self, points):
-        import re
-        self.points.clear()
-        for point in points:
-            p = re.findall(r'([+-]?[0-9]+\.?[0-9]*)', point)
-            self.points.append(QPointF(int(p[0]), int(p[1])))
-
-    def get(self, to_str=True):
-        result = []
-        result.append(self.min_point())
-        result.append(self.min_radian_point(result[-1]))
-        while not self.equal(result[0], result[-1]):
-            result.append(self.min_radian_point(result[-1]))
-        result.pop()
-
-        if to_str:
-            result = ['({:.0f}, {:.0f})'.format(p.x(), p.y()) for p in result]
-        return result
-
-    def min_point(self):
-        m_p = self.points[0]
-        for p in self.points:
-            if m_p.x() > p.x():
-                m_p = p
-            elif m_p.x() == p.x() and m_p.y() > p.y():
-                m_p = p
-        return m_p
-
-    def min_radian_point(self, point):
-        m_p = point
-        for p in self.points:
-            if m_p.x() == p.x() and m_p.y() == p.y():
-                m_p = p
-            else:
-                p1 = m_p - point
-                p2 = p - point
-                v = self.cross(p1, p2)
-                if v > 0 or (v == 0 and self.length(p2) > self.length(p1)):
-                    m_p = p
-        return m_p
-
-    def equal(self, p1, p2):
-        return p1.x() == p2.x() and p1.y() == p2.y()
-
-    def cross(self, p1, p2):
-        return p1.x() * p2.y() - p1.y() * p2.x()
-
-    def length(self, p):
-        import math
-        return math.sqrt(p.x() * p.x() + p.y() * p.y())
-
-
 class ClosedGraphDetector(object):
 
-    def __init__(self, project_data):
-        items = project_data['items']
+    def __init__(self, project_data=None):
+        if project_data is not None:
+            self.setup(project_data)
+
+    def setup(self, project_data):
         self.graph = {}
         self.hash = []
         self.paths = []
-        for node in items:
-            self.graph[node['pos']] = [link for link in node['linked_nodes']]
+        for node in project_data['items']:
+            self.graph[node['node']] = [link for link in node['linked_nodes']]
 
     def search(self):
         # 閉路グラフの検出
         for node in self.graph.keys():
             self.bfs(node, node)
-        # 閉路グラフの性質を満たさないものを削除
-        self.correct_paths()
+
+        # 内部に辺が含まれている閉路グラフを除去
+        self.correct_with_edge()
+
+        # 内部にノードが含まれている閉路グラフを除去
+        self.correct_with_point()
+
+        # 不要なノードを除去
+        self.correct_with_angle()
+
+        # 開始点の調整
+        # self.adjust()
 
         return self.paths
 
@@ -120,13 +73,9 @@ class ClosedGraphDetector(object):
         p = set(path)
         if path[0] in path[1:-1]:
             return False
-        return len(path) in range(4, 16) and p not in self.hash
+        return len(path) > 3 and p not in self.hash
 
-    def correct_paths(self):
-        self.contains_edge()
-        self.contains_point()
-
-    def contains_edge(self):
+    def correct_with_edge(self):
         from itertools import product
         path_set = [set(path) for path in self.paths]
         length = len(path_set)
@@ -143,7 +92,7 @@ class ClosedGraphDetector(object):
                 paths.append(self.paths[i])
         self.paths = paths
 
-    def contains_point(self):
+    def correct_with_point(self):
         paths = []
         for i, path in enumerate(self.paths):
             polygon = self.to_polygon(path)
@@ -153,6 +102,7 @@ class ClosedGraphDetector(object):
                     p = convert_from_str(pos)
                     if polygon.containsPoint(p, Qt.WindingFill):
                         find = True
+                        break
             if not find:
                 paths.append(path)
         self.paths = paths
@@ -160,3 +110,43 @@ class ClosedGraphDetector(object):
     def to_polygon(self, path):
         points = [convert_from_str(p) for p in path]
         return QPolygonF(points)
+
+    def correct_with_angle(self):
+        from PyQt5.QtCore import QLineF
+        for index, path in enumerate(self.paths):
+            length = len(path)
+            find = [False for i in range(length)]
+            for i in range(length - 2):
+                p1 = convert_from_str(path[i])
+                p2 = convert_from_str(path[i + 1])
+                p3 = convert_from_str(path[i + 2])
+                l1, l2 = QLineF(p1, p2), QLineF(p2, p3)
+                if l1.angleTo(l2) == 0.0:
+                    find[i + 1] = True
+            new_path = []
+            for i in range(length):
+                if not find[i]:
+                    new_path.append(path[i])
+            self.paths[index] = new_path
+
+    def adjust(self):
+        for index, path in enumerate(self.paths):
+            new_path = path[1:]
+            m_node = self.min_point(new_path)
+            while m_node == new_path[0]:
+                new_path = new_path[:-1] + new_path[:-1]
+            new_path.append(m_node)
+            self.paths[index] = new_path
+
+    def min_point(self, path):
+        m_p_str = path[0]
+        m_p = convert_from_str(m_p_str)
+        for node in path:
+            p = convert_from_str(node)
+            if m_p.y() > p.y():
+                m_p_str = node
+                m_p = p
+            elif m_p.y() == p.y() and m_p.x() > p.x():
+                m_p_str = node
+                m_p = p
+        return m_p_str

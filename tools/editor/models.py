@@ -15,6 +15,7 @@ from items import (
     Edge,
     Node
 )
+from util import convert_from_str
 from logging import getLogger
 logger = getLogger()
 
@@ -84,7 +85,7 @@ class NodeModel(QAbstractItemModel):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.headers = 'pos', 'linked nodes'
+        self.headers = 'node', 'linked nodes'
         self.nodes = []
 
     def index(self, row, column, parent=QModelIndex()):
@@ -102,7 +103,7 @@ class NodeModel(QAbstractItemModel):
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
             try:
-                if self.headers[index.column()] == 'pos':
+                if self.headers[index.column()] == 'node':
                     return self.nodes[index.row()].to_str()
                 elif self.headers[index.column()] == 'linked nodes':
                     nodes = self.nodes[index.row()].linked_nodes()
@@ -204,7 +205,7 @@ class Document(QObject):
         items = []
         for node in self.node_layer.childItems():
             items.append({
-                'pos': node.to_str(),
+                'node': node.to_str(),
                 'linked_nodes': [n.to_str() for n in node.linked_nodes()]
             })
         project_data = {
@@ -217,11 +218,11 @@ class Document(QObject):
         self.remove_all()
         self.project_name = project_data['name']
         for item in project_data['items']:
-            pos = self.board.map_from_str(item['pos'])
+            pos = convert_from_str(item['node'])
             pos = self.board.map_from_grid(pos)
             source = Node(pos, 4, self, self.node_layer)
             for p_str in item['linked_nodes']:
-                p = self.board.map_from_str(p_str)
+                p = convert_from_str(p_str)
                 p = self.board.map_from_grid(p)
                 dest = Node(p, 4, self, self.node_layer)
                 Edge(source, dest, 4, self.edge_layer)

@@ -2,9 +2,7 @@ import sys
 import logging
 from PyQt5.QtWidgets import QApplication
 from widgets import MainWindow
-from PyQt5.QtCore import QPointF
-from PyQt5.QtGui import QPolygonF
-from util import ConvexHull
+from PyQt5.QtCore import QLineF
 
 logging.basicConfig(
     filename='output.log',
@@ -18,20 +16,11 @@ if __name__ == '__main__':
     window = MainWindow()
     window.show()
 
-    convex = ConvexHull([
-        '(0, 0)',
-        '(2, 0)',
-        '(3, 1)',
-        '(3, 5)',
-        '(0, 5)',
-        '(5, 5)',
-    ])
+    l1 = QLineF(0, 0, 10, 10)
+    l2 = QLineF(10, 10, 20, 20)
+    l3 = QLineF(10, 10, 10, 0)
 
-    print(convex.get())
-
-    from util import convert_from_str
-    print(convert_from_str('(10, 0)'))
-    print(convert_from_str('(10, 12)'))
-    print(convert_from_str('(10 12)'))
+    print(l1.angleTo(l2))
+    print(l1.angleTo(l3))
 
     sys.exit(app.exec())

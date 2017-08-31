@@ -15,6 +15,7 @@ from PyQt5.QtGui import (
     QColor,
     QPen
 )
+from util import convert_from_str
 
 
 class RestoreCommand(QUndoCommand):
@@ -74,11 +75,6 @@ class Board(QGraphicsPixmapItem):
     def snap_to_grid(self, pos):
         p = self.map_to_grid(pos)
         return self.map_from_grid(p)
-
-    def map_from_str(self, data):
-        import re
-        m = re.findall(r'([+-]?[0-9]+\.?[0-9]*)', data)
-        return QPointF(int(m[0]), int(m[1]))
 
     def contains(self, pos):
         return self.area.contains(pos)
