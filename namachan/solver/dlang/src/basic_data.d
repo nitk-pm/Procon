@@ -108,6 +108,23 @@ public:
 		return ymm;
 	}
 
+	BitField!size opShl (in int n) {
+		immutable array_shift = n / 64;
+		immutable elem_shift = n % 64;
+		BitField!size bits;
+		for (size_t i; i + array_shift < xmm_length * 2; ++i) {
+			bits.array[i+array_shift] = array[i];
+		}
+		ulong carry;
+		for (size_t i; i < xmm_length * 2 - 1; ++i) {
+			immutable bits_i = bits.array[i];
+			bits.array[i] = (bits.array[i] << elem_shift) | carry;
+			carry = bits_i >> (64 - elem_shift);
+		}
+		bits.array[$-1] = (bits.array[$-1] << elem_shift) | carry;
+		return bits;
+	}
+
 	BitField!size opOpAssign (string op)(in BitField!size field) {
 		BitField!size ymm;
 		static if (op == "|") {
@@ -157,4 +174,17 @@ unittest {
 	assert ((bf256_2 | bf256) == bf256);
 
 	assert ((bf256_2 & bf256) == bf256_2);
+
+	BitField!1024 bf1024;
+	foreach(i; 0..512) {
+		if (i%2==0)
+			bf1024[i] = true;
+	}
+	bf1024 = bf1024 << 143;
+	BitField!1024 ans;
+	foreach(i; 143..655){
+		if (i%2!=0)
+			ans[i] = true;
+	}
+	assert (bf1024 == ans);
 }
