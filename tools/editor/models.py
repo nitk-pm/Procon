@@ -14,6 +14,8 @@ from items import (
     Edge,
     Node
 )
+from logging import getLogger
+logger = getLogger()
 
 
 class LayerModel(QAbstractItemModel):
@@ -150,6 +152,7 @@ class Document(QObject):
         self.layer_model.layers.append(self.edge_layer)
 
         self.is_created = False
+        self.hash = []
 
     def connect_actions(self, undo, redo):
         undo.triggered.connect(self.history.undo)
@@ -179,8 +182,11 @@ class Document(QObject):
             self.source.merge()
             self.is_created = False
         else:
+            self.hash.clear()
             for node in self.node_layer.childItems():
-                node.merge()
+                if node.to_str() not in self.hash:
+                    node.merge()
+            logger.debug(self.hash)
         self.update_models()
 
     def remove_nodes(self, nodes):

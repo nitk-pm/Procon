@@ -212,6 +212,8 @@ class Node(QGraphicsEllipseItem):
                     remove_list[i] = self.edges[i]
         for edge in remove_list.values():
             edge.remove()
+        if not self.document.is_created:
+            self.document.hash.append(self.to_str())
 
     def grid_pos(self):
         return self.document.board.map_to_grid(self.pos())
@@ -229,6 +231,10 @@ class Node(QGraphicsEllipseItem):
                 nodes.append(edge.source)
         return nodes
 
+    def boundingRect(self):
+        r = self.radius
+        return QRectF(-r * 4, -r * 4, r * 8, r * 8)
+
     def itemChange(self, change, value):
         if self.scene() is not None:
             if change == QGraphicsItem.ItemPositionHasChanged:
@@ -244,13 +250,9 @@ class Node(QGraphicsEllipseItem):
 
         return super().itemChange(change, value)
 
-    def boundingRect(self):
-        r = self.radius
-        return QRectF(-r * 4, -r * 4, r * 8, r * 8)
-
     def hoverEnterEvent(self, event):
         self.setPen(self.enter_pen)
-        p = self.document.board.map_to_grid(event.scenePos())
+        p = self.grid_pos()
         self.setToolTip('{0:.0f}, {1:.0f}'.format(p.x(), p.y()))
         super().hoverEnterEvent(event)
 
