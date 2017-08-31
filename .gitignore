@@ -2,6 +2,12 @@ bin
 
 build
 
+namachan/solver/dlang/\.atom-build\.yml
+namachan/solver/dlang/dub\.selections\.json
+namachan/solver/dlang/procon-solver
+namachan/solver/dlang/procon-solver-test-library
+namachan/solver/dlang/.vscode/
+
 # binary file
 *.o
 *.out
