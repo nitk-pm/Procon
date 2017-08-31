@@ -1,6 +1,7 @@
 from PyQt5.QtCore import (
     Qt,
     QObject,
+    pyqtSlot,
     QAbstractItemModel,
     QModelIndex
 )
@@ -134,6 +135,70 @@ class NodeModel(QAbstractItemModel):
         self.endResetModel()
 
 
+class Graph(object):
+
+    def __init__(self, data):
+        self.graph = {}
+        self.hash = []
+        self.paths = []
+        for node in data:
+            self.graph[node['pos']] = [link for link in node['linked_nodes']]
+
+    def bfs(self, start, goal):
+        queue = []
+        for n in self.graph[start]:
+            new_path = [start]
+            new_path.append(n)
+            queue.append(new_path)
+        while len(queue) > 0:
+            logger.debug('queue: {}'.format(queue))
+            path = queue.pop(0)[:]
+            node = path[-1]
+            if node == goal and self.check(path):
+                self.paths.append(path)
+                self.hash.append(set(path))
+                return
+            for n in self.graph[node]:
+                if n not in path:
+                    new_path = path[:]
+                    logger.debug('n: {}, path: {}'.format(n, new_path))
+                    new_path.append(n)
+                    queue.append(new_path)
+                elif n == start:
+                    new_path = path[:]
+                    logger.debug('n: {}, path: {}'.format(n, new_path))
+                    new_path.append(n)
+                    queue.append(new_path)
+
+    def search(self):
+        for node in self.graph.keys():
+            self.bfs(node, node)
+        self.correct_paths()
+        return self.paths
+
+    def check(self, path):
+        p = set(path)
+        if path[0] in path[1:-1]:
+            return False
+        return len(path) in range(4, 16) and p not in self.hash
+
+    def correct_paths(self):
+        from itertools import product
+        path_set = [set(path) for path in self.paths]
+        length = len(path_set)
+        find = [False for i in range(length)]
+        for i, j in product(range(length), range(length)):
+            if i != j:
+                s = path_set[i] & path_set[j]
+                if s in path_set:
+                    find[i if i > j else j] = True
+        paths = []
+        for i in range(length):
+            if not find[i]:
+                paths.append(path_set[i])
+        self.paths = paths
+
+
 class Document(QObject):
 
     def __init__(self, project_name='new document', parent=None):
@@ -168,9 +233,10 @@ class Document(QObject):
         self.history.canRedoChanged.disconnect(redo.setEnabled)
 
     def create_node(self, pos):
-        self.source = Node(pos, 4, self, self.node_layer)
         self.dest = Node(pos, 4, self, self.node_layer)
+        self.source = Node(pos, 4, self, self.node_layer)
         Edge(self.source, self.dest, 4, self.edge_layer)
+        self.source.setSelected(True)
         self.is_created = True
 
     def merge_nodes(self):
@@ -186,7 +252,6 @@ class Document(QObject):
             for node in self.node_layer.childItems():
                 if node.to_str() not in self.hash:
                     node.merge()
-            logger.debug(self.hash)
         self.update_models()
 
     def remove_nodes(self, nodes):
@@ -210,6 +275,17 @@ class Document(QObject):
             'name': self.project_name,
             'items': items
         }
+        if len(items) >= 3:
+            print('search')
+            graph = Graph(items)
+            paths = graph.search()
+            # for n in items:
+            #     path = graph.bfs(n['pos'], n['pos'])
+            #     if path:
+            #         paths.append(path)
+            #         graph.hash.append(set(path))
+            for path in paths:
+                print(path)
         return project_data
 
     def restore(self, project_data):

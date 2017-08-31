@@ -14,4 +14,10 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
+
+    s1 = ['a', 'b', 'a']
+    print(s1)
+    s2 = set(s1)
+    print(s2)
+    print(s1)
     sys.exit(app.exec())

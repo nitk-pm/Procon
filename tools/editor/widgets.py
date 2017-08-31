@@ -14,10 +14,11 @@ from PyQt5.QtWidgets import (
     QDoubleSpinBox,
     QMainWindow,
     QMessageBox,
-    QFileDialog
+    QFileDialog,
 )
 from PyQt5.QtGui import (
-    QColor
+    QColor,
+    QCursor
 )
 from PyQt5 import uic
 from models import Document
@@ -63,10 +64,10 @@ class BoardScene(QGraphicsScene):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and self.document is not None:
             self.grid_pos = self.document.board.map_to_grid(event.scenePos())
-            pos = self.document.board.map_from_grid(self.grid_pos)
             self.document.begin_record()
             if self.actions.checkedAction().text() == 'edge':
-                self.document.create_node(pos)
+                self.clearSelection()
+                self.document.create_node(event.scenePos())
             elif self.actions.checkedAction().text() == 'select':
                 pass
         super().mousePressEvent(event)
