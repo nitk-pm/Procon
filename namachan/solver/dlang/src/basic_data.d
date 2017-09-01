@@ -97,14 +97,17 @@ public:
 		}
 		return b;
 	}
-
-	BitField!size opBinary (string op)(in BitField!size field) {
+	@nogc
+	pure BitField!size opBinary (string op)(in BitField!size field) const {
 		BitField!size ymm;
 		static if (op == "|") {
 			mixin(expand_loop!(xmm_length, "ymm.xmms[%1$s] = xmms[%1$s] | field.xmms[%1$s];"));
 		}
 		else static if (op == "&") {
 			mixin(expand_loop!(xmm_length, "ymm.xmms[%1$s] = xmms[%1$s] & field.xmms[%1$s];"));
+		}
+		else static if (op == "^") {
+			mixin(expand_loop!(xmm_length, "ymm.xmms[%1$s] = xmms[%1$s] ^ field.xmms[%1$s];"));
 		}
 		return ymm;
 	}
@@ -133,6 +136,9 @@ public:
 		}
 		else static if (op == "&") {
 			mixin(expand_loop!(xmm_length, "xmms[%1$s] = xmms[%1$s] & field.xmms[%1$s];"));
+		}
+		else static if (op == "^") {
+			mixin(expand_loop!(xmm_length, "xmms[%1$s] = xmms[%1$s] ^ field.xmms[%1$s];"));
 		}
 		return ymm;
 	}
