@@ -542,3 +542,12 @@ unittest {
 	assert (judge_collision(c1, c2, P(-1,0), P(0,0)));
 }
 
+bool protrude_frame (in Data data, in Situation situation, in PlacedShape piece) {
+	auto p_bits = data.piece_bits (piece.piece_idx, piece.spin_level);
+	foreach (shape; situation.shapes) {
+		auto f_bits = data.piece_inside_bits (shape.piece_idx, shape.spin_level);
+		if (judge_collision (p_bits, f_bits, P(piece.x, piece.y), P(shape.x, shape.y)))
+			return true;
+	}
+	return false;
+}
