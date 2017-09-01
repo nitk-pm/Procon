@@ -1,6 +1,6 @@
 <RCC>
   <qresource prefix="actions">
-    <file>icons/screenshot.png</file>
+    <file>icons/export.png</file>
     <file>icons/edge.png</file>
     <file>icons/edge_checked.png</file>
     <file>icons/select.png</file>

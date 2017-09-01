@@ -8,6 +8,9 @@ namachan/solver/dlang/procon-solver
 namachan/solver/dlang/procon-solver-test-library
 namachan/solver/dlang/.vscode/
 
+__pycache__
+.vscode
+
 # binary file
 *.o
 *.out

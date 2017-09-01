@@ -288,7 +288,7 @@ border-color: rgb(255, 255, 255);</string>
    <property name="iconSize">
     <size>
      <width>36</width>
-     <height>36</height>
+     <height>42</height>
     </size>
    </property>
    <property name="toolButtonStyle">
@@ -308,7 +308,7 @@ border-color: rgb(255, 255, 255);</string>
    <addaction name="action_save"/>
    <addaction name="separator"/>
    <addaction name="action_preview"/>
-   <addaction name="action_screenshot"/>
+   <addaction name="action_export"/>
    <addaction name="separator"/>
    <addaction name="action_select"/>
    <addaction name="action_edge"/>
@@ -492,19 +492,16 @@ border-color: rgb(255, 255, 255);</string>
     <string>Shift+P</string>
    </property>
   </action>
-  <action name="action_screenshot">
+  <action name="action_export">
    <property name="icon">
     <iconset resource="editor.qrc">
-     <normaloff>:/actions/icons/screenshot.png</normaloff>:/actions/icons/screenshot.png</iconset>
+     <normaloff>:/actions/icons/export.png</normaloff>:/actions/icons/export.png</iconset>
    </property>
    <property name="text">
-    <string>screenshot</string>
+    <string>export</string>
    </property>
    <property name="toolTip">
-    <string>screenshot</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+S</string>
+    <string>export</string>
    </property>
   </action>
  </widget>

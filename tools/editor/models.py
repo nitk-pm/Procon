@@ -240,7 +240,7 @@ class Document(QObject):
         if not all((k, v) in self.begin.items() for (k, v) in end.items()):
             self.history.push(RestoreCommand(self, self.begin, end))
 
-    def save_to_file(self, filename):
+    def save(self, filename):
         import os
         import json
         self.full_path = filename
@@ -249,7 +249,7 @@ class Document(QObject):
         with open(filename, 'w') as file:
             json.dump(self.to_dict(), file, indent=2)
 
-    def load_to_file(self, filename):
+    def load(self, filename):
         import os
         import json
         self.full_path = filename

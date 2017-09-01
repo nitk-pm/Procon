@@ -221,3 +221,35 @@ class FrameDetector(object):
         for i in range(length - 1):
             area += cross(points[i], points[i + 1])
         return area / 2
+
+
+class OfficialFormat(object):
+
+    def __init__(self, pieces, frame):
+        self.pieces = pieces
+        self.frame = frame
+
+    def save(self, filename):
+        pieces = [self.remove_offset(p) for p in self.pieces]
+        pieces = [self.convert_to_official(p) for p in pieces]
+        frame = [convert_from_str(p) for p in self.frame[:-1]]
+        frame = self.convert_to_official(frame)
+        data = '{}:{}:{}'.format(len(pieces), ':'.join(pieces), frame)
+        with open(filename, 'w') as file:
+            file.write(data)
+
+    def remove_offset(self, path):
+        piece = [convert_from_str(p) for p in path[:-1]]
+        offset = QPointF(piece[0])
+        for p in piece:
+            if offset.x() > p.x():
+                offset.setX(p.x())
+            if offset.y() > p.y():
+                offset.setY(p.y())
+        for index in range(len(piece)):
+            piece[index] = piece[index] - offset
+        return piece
+
+    def convert_to_official(self, points):
+        data = ['{:.0f} {:.0f}'.format(p.x(), p.y()) for p in points]
+        return '{} {}'.format(len(points), ' '.join(data))

@@ -22,6 +22,11 @@ from PyQt5.QtGui import (
 )
 from PyQt5 import uic
 from models import Document
+from util import (
+    PieceDetector,
+    FrameDetector,
+    OfficialFormat
+)
 
 
 class BoardScene(QGraphicsScene):
@@ -272,7 +277,7 @@ class MainWindow(QMainWindow):
 
         self.ui.action_new.triggered.connect(self.new_document)
         self.ui.action_preview.triggered.connect(self.preview.show_preview)
-        self.ui.action_screenshot.triggered.connect(self.screenshot)
+        self.ui.action_export.triggered.connect(self.export)
         self.ui.action_open.triggered.connect(self.load)
         self.ui.action_save.triggered.connect(self.save)
 
@@ -291,9 +296,13 @@ class MainWindow(QMainWindow):
                 'Do you want to save change you'
                 'changes you made to Document ?'
             ))
-            msg_box.setStandardButtons(QMessageBox.Save | QMessageBox.No | QMessageBox.Cancel)
+            msg_box.setStandardButtons(
+                QMessageBox.Save |
+                QMessageBox.No |
+                QMessageBox.Cancel
+            )
             msg_box.setDefaultButton(QMessageBox.Save)
-            msg = msg_box.exec()
+            msg = msg_box.exec_()
             if msg == QMessageBox.Save:
                 self.save()
             elif msg == QMessageBox.Cancel:
@@ -310,20 +319,26 @@ class MainWindow(QMainWindow):
         self.ui.node_view.setModel(self.document.node_model)
 
     @pyqtSlot()
-    def screenshot(self):
-        from PyQt5.QtGui import QPainter, QImage
+    def export(self):
         filename = QFileDialog.getSaveFileName(
             self,
             'Save to screenshot',
-            '',
-            'png (*.png)'
+            self.document.project_name,
+            'screen shot (*.png);;official format (*.txt)'
         )
-        if filename != '':
+        if filename[1] == 'screen shot (*.png)':
+            from PyQt5.QtGui import QPainter, QImage
             w, h = self.scene.width(), self.scene.height()
             image = QImage(w, h, QImage.Format_ARGB32)
             with QPainter(image) as painter:
                 self.scene.render(painter)
                 image.save(filename[0])
+        elif filename[1] == 'official format (*.txt)':
+            project_data = self.document.to_dict()
+            pieces = PieceDetector(project_data).search()
+            frame = FrameDetector(project_data).search()
+            official_format = OfficialFormat(pieces, frame)
+            official_format.save(filename[0])
 
     @pyqtSlot()
     def save(self):
@@ -334,7 +349,7 @@ class MainWindow(QMainWindow):
             'json (*.json)'
         )[0]
         if filename != '':
-            self.document.save_to_file(filename)
+            self.document.save(filename)
 
     @pyqtSlot()
     def load(self):
@@ -345,4 +360,4 @@ class MainWindow(QMainWindow):
             'json (*.json)'
         )[0]
         if filename != '':
-            self.document.load_to_file(filename)
+            self.document.load(filename)
