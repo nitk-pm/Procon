@@ -525,3 +525,20 @@ void show (in ShapeBits bits) {
 	}
 }
 
+bool judge_collision (in ShapeBits bits1, in ShapeBits bits2, in P p1, in P p2) {
+	auto dp = p2 - p1;
+	auto didx = bits_idx(dp.x, dp.y);
+	ShapeBits emp;
+	return ((bits2 << didx) & bits1) != emp;
+}
+unittest {
+	import std.stdio;
+	auto s1 = [P(0,0),P(10,0),P(10,10)].vertexies2shape;
+	auto s2 = [P(0,0),P(0,10),P(10,10)].vertexies2shape;
+	auto c1 = cache_make(s1, true);
+	auto c2 = cache_make(s2, false);
+	assert (!judge_collision(c1, c2, P(0,0), P(0,0)));
+	assert (!judge_collision(c1, c2, P(1,0), P(0,0)));
+	assert (judge_collision(c1, c2, P(-1,0), P(0,0)));
+}
+
