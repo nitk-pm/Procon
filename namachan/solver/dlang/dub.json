@@ -1,0 +1,12 @@
+{
+	"name": "procon-solver",
+	"authors": [
+		"Nakano Masaki"
+	],
+	"description": "Procon28's solver",
+	"copyright": "Copyright © 2017, Nakano Masaki",
+	"license": "BSL-1.0",
+	"dependencies" : {
+		"armos":"0.2.3"
+	}
+}
