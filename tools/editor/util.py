@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtCore import Qt, QPointF, QLineF
 from PyQt5.QtGui import QPolygonF
 import re
 import math
@@ -7,7 +7,7 @@ logger = getLogger()
 
 
 def convert_from_str(p_str):
-    if re.match(r'\(\d*, \d*\)', p_str) is None:
+    if re.match(r'\([+-]?\d*, [+-]?\d*\)', p_str) is None:
         return None
     p = re.findall(r'([+-]?[0-9]+\.?[0-9]*)', p_str)
     return QPointF(int(p[0]), int(p[1]))
@@ -162,21 +162,25 @@ class FrameDetector(object):
             self.graph[node['node']] = node['linked-nodes'][:]
 
     def search(self):
-        self.hash, self.path = [], []
+        self.path = []
         self.convex_hull_on_graph()
+        self.adjust_loopwise()
         return self.path
 
     def convex_hull_on_graph(self):
         self.path.append(self.min_point())
-        self.path.append(self.min_radian_point(self.path[0]))
+        self.path.append(self.min_radian_point(self.path[0], '(-1, -1)'))
         while self.path[0] != self.path[-1]:
-            self.path.append(self.min_radian_point(self.path[-1]))
+            p = self.min_radian_point(self.path[-1], self.path[-2])
+            self.path.append(p)
 
     def min_point(self):
         nodes = list(self.graph.keys())
         m_str = nodes[0]
         m_p = convert_from_str(m_str)
         for node in nodes:
+            if len(self.graph[node]) == 0:
+                continue
             n = convert_from_str(node)
             if m_p.y() > n.y():
                 m_str = node
@@ -184,42 +188,30 @@ class FrameDetector(object):
             elif m_p.y() == n.y() and m_p.x() > n.x():
                 m_str = node
                 m_p = convert_from_str(m_str)
-        self.hash.append(m_str)
         return m_str
 
-    def min_radian_point(self, point_str):
-        if len(self.path) > 3:
-            for p in self.graph[point_str]:
-                if p == self.path[0]:
-                    return p
+    def min_radian_point(self, point_str, prev):
         point = convert_from_str(point_str)
-        m_str = self.graph[point_str][-1]
-        for p in self.graph[point_str]:
-            if p not in self.hash:
-                m_str = p
-                break
+        m_str = self.graph[point_str][0]
         m_p = convert_from_str(m_str)
+        prev_p = convert_from_str(prev)
+        m_angle = 360.0
         for node in self.graph[point_str]:
-            if node in self.hash:
-                continue
-            if m_str == point:
+            p = convert_from_str(node)
+            l1 = QLineF(point, prev_p)
+            l2 = QLineF(point, p)
+            angle = l1.angleTo(l2)
+            if angle != 0 and m_angle > angle:
+                m_angle = angle
                 m_str = node
                 m_p = convert_from_str(m_str)
-            else:
-                p = convert_from_str(node)
-                p1, p2 = m_p - point, p - point
-                v = cross(p1, p2)
-                if v > 0 or (v == 0 and self.length(p2) > self.length(p1)):
-                    m_str = node
-                    m_p = convert_from_str(m_str)
-        self.hash.append(m_str)
         return m_str
 
     def length(self, point):
         return math.sqrt(point.x() * point.x() + point.y() * point.y())
 
     def adjust_loopwise(self):
-        if self.signed_area(self.path) < 0:
+        if self.signed_area() < 0:
             self.path.reverse()
 
     def signed_area(self):
