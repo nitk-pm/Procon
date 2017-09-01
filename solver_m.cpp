@@ -36,17 +36,6 @@ std::vector<std::string> split(std::string str, char sep)
 	return v;
 }
 
-
-double sqrt(double s) {
-	double x = s / 2.0;
-	double lastX = 0.0;
-	while (x != lastX) {//数値に変化がなくなるまで継続
-		lastX = x;
-		x = (x + s / x) / 2.0;//相加平均
-	}
-	return x;
-}
-
 //x,y座標のpair
 class Position {
 public:
