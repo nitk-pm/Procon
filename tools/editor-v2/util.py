@@ -31,7 +31,6 @@ class PieceDetector(object):
         self.graph = {}
         self.hash = []
         self.paths = []
-        self.longest = []
         for node in project_data['items']:
             self.graph[node['node']] = node['linked-nodes'][:]
 
@@ -51,8 +50,6 @@ class PieceDetector(object):
 
         # 時計回りに修正
         self.adjust()
-
-        print('longest: {}'.format(self.longest))
 
         return self.paths
 
