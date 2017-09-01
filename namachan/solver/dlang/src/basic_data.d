@@ -190,6 +190,9 @@ unittest {
 	assert (bf256[2]);
 	assert (!bf256[0]);
 
+	bf256[2] = false;
+	assert (bf256[1]);
+
 	bf256[128] = true;
 	assert (bf256[128]);
 
@@ -209,15 +212,21 @@ unittest {
 	assert ((bf256_2 & bf256) == bf256_2);
 
 	BitField!1024 bf1024;
-	foreach(i; 0..512) {
-		if (i%2==0)
-			bf1024[i] = true;
+	foreach(i; 256..512) {
+		bf1024[i] = true;
 	}
-	bf1024 = bf1024 << 143;
-	BitField!1024 ans;
-	foreach(i; 143..655){
-		if (i%2!=0)
-			ans[i] = true;
+	BitField!1024 ans1;
+	foreach(i; 256..512){
+		ans1[i+143] = true;
 	}
-	assert (bf1024 == ans);
+	import std.stdio;
+	assert (bf1024 << 143 == ans1);
+	assert (bf1024 >> -143 == ans1);
+	BitField!1024 ans2;
+	foreach(i; 256..512){
+		ans2[i-143] = true;
+	}
+	assert(bf1024 >> 143 == ans2);
+	assert(bf1024 << -143 == ans2);
+	}
 }
