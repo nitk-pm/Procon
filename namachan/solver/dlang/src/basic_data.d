@@ -58,7 +58,7 @@ private:
 	enum xmm_length =
 		size % 128 == 0 ? size / 128 : size / 128 + 1;
 	union {
-		ulong2[xmm_length] xmms;
+		__vector(ulong[2])[xmm_length] xmms;
 		ulong[xmm_length * 2] array;
 	}
 
