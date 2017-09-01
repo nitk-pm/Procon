@@ -49,7 +49,7 @@ class PieceDetector(object):
         self.correct_with_angle()
 
         # 時計回りに修正
-        self.adjust()
+        self.adjust_loopwise()
 
         return self.paths
 
@@ -136,7 +136,7 @@ class PieceDetector(object):
                     new_path.append(path[i])
             self.paths[index] = new_path
 
-    def adjust(self):
+    def adjust_loopwise(self):
         for i in range(len(self.paths)):
             if self.signed_area(self.paths[i]) < 0:
                 self.paths[i].reverse()
@@ -158,20 +158,19 @@ class FrameDetector(object):
 
     def setup(self, project_data):
         self.graph = {}
-        self.hash = []
-        self.path = []
-        self.m_p = None
         for node in project_data['items']:
             self.graph[node['node']] = node['linked-nodes'][:]
 
     def search(self):
-        self.m_p = self.min_point()
-        self.path.append(self.m_p)
+        self.hash, self.path = [], []
+        self.convex_hull_on_graph()
+        return self.path
+
+    def convex_hull_on_graph(self):
+        self.path.append(self.min_point())
         self.path.append(self.min_radian_point(self.path[0]))
         while self.path[0] != self.path[-1]:
-            logger.debug(self.path)
             self.path.append(self.min_radian_point(self.path[-1]))
-        return self.path
 
     def min_point(self):
         nodes = list(self.graph.keys())
@@ -191,10 +190,10 @@ class FrameDetector(object):
     def min_radian_point(self, point_str):
         if len(self.path) > 3:
             for p in self.graph[point_str]:
-                if p == self.m_p:
+                if p == self.path[0]:
                     return p
         point = convert_from_str(point_str)
-        m_str = None
+        m_str = self.graph[point_str][-1]
         for p in self.graph[point_str]:
             if p not in self.hash:
                 m_str = p
@@ -203,7 +202,7 @@ class FrameDetector(object):
         for node in self.graph[point_str]:
             if node in self.hash:
                 continue
-            if m_str == node:
+            if m_str == point:
                 m_str = node
                 m_p = convert_from_str(m_str)
             else:
@@ -214,8 +213,19 @@ class FrameDetector(object):
                     m_str = node
                     m_p = convert_from_str(m_str)
         self.hash.append(m_str)
-        print('select: {}'.format(m_str))
         return m_str
 
     def length(self, point):
         return math.sqrt(point.x() * point.x() + point.y() * point.y())
+
+    def adjust_loopwise(self):
+        if self.signed_area(self.path) < 0:
+            self.path.reverse()
+
+    def signed_area(self):
+        points = [convert_from_str(node) for node in self.path]
+        length = len(points)
+        area = 0.0
+        for i in range(length - 1):
+            area += cross(points[i], points[i + 1])
+        return area / 2

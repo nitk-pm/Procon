@@ -68,8 +68,8 @@ class BoardScene(QGraphicsScene):
             print('find pieces')
             for path in pieces.search():
                 print(path)
-            # print('find frame')
-            # print(frame.search())
+            print('find frame')
+            print(frame.search())
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and self.document is not None:
