@@ -15,12 +15,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-
-    l1 = QLineF(0, 0, 10, 10)
-    l2 = QLineF(10, 10, 20, 20)
-    l3 = QLineF(10, 10, 10, 0)
-
-    print(l1.angleTo(l2))
-    print(l1.angleTo(l3))
-
-    sys.exit(app.exec())
+    sys.exit(app.exec_())

@@ -14,7 +14,7 @@ def convert_from_point(point):
     return '({:.0f}, {:.0f})'.format(point.x(), point.y())
 
 
-class ClosedGraphDetector(object):
+class PieceDetector(object):
 
     def __init__(self, project_data=None):
         if project_data is not None:
@@ -25,7 +25,7 @@ class ClosedGraphDetector(object):
         self.hash = []
         self.paths = []
         for node in project_data['items']:
-            self.graph[node['node']] = [link for link in node['linked_nodes']]
+            self.graph[node['node']] = node['linked-nodes'][:]
 
     def search(self):
         # 閉路グラフの検出
@@ -41,8 +41,8 @@ class ClosedGraphDetector(object):
         # 不要なノードを除去
         self.correct_with_angle()
 
-        # 開始点の調整
-        # self.adjust()
+        # 時計回りに修正
+        self.adjust()
 
         return self.paths
 
@@ -130,23 +130,34 @@ class ClosedGraphDetector(object):
             self.paths[index] = new_path
 
     def adjust(self):
-        for index, path in enumerate(self.paths):
-            new_path = path[1:]
-            m_node = self.min_point(new_path)
-            while m_node == new_path[0]:
-                new_path = new_path[:-1] + new_path[:-1]
-            new_path.append(m_node)
-            self.paths[index] = new_path
+        for i in range(len(self.paths)):
+            if self.signed_area(self.paths[i]) < 0:
+                self.paths[i].reverse()
 
-    def min_point(self, path):
-        m_p_str = path[0]
-        m_p = convert_from_str(m_p_str)
-        for node in path:
-            p = convert_from_str(node)
-            if m_p.y() > p.y():
-                m_p_str = node
-                m_p = p
-            elif m_p.y() == p.y() and m_p.x() > p.x():
-                m_p_str = node
-                m_p = p
-        return m_p_str
+    def signed_area(self, path):
+        points = [convert_from_str(node) for node in path]
+        length = len(points)
+        area = 0.0
+        for i in range(length - 1):
+            area += self.cross(points[i], points[i + 1])
+        return area / 2
+
+    def cross(self, p1, p2):
+        return p1.x() * p2.y() - p1.y() * p2.x()
+
+
+class FrameDetector(object):
+
+    def __init__(self, project_data=None):
+        pass
+
+    def setup(self, project_data):
+        self.graph = {}
+        for node in project_data['items']:
+            self.graph[node['node']] = node['linked-nodes'][:]
+
+    def search(self):
+        pass
+
+    def min_point(self):
+        pass

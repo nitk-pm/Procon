@@ -206,7 +206,7 @@ class Document(QObject):
         for node in self.node_layer.childItems():
             items.append({
                 'node': node.to_str(),
-                'linked_nodes': [n.to_str() for n in node.linked_nodes()]
+                'linked-nodes': [n.to_str() for n in node.linked_nodes()]
             })
         project_data = {
             'name': self.project_name,
@@ -221,7 +221,7 @@ class Document(QObject):
             pos = convert_from_str(item['node'])
             pos = self.board.map_from_grid(pos)
             source = Node(pos, 4, self, self.node_layer)
-            for p_str in item['linked_nodes']:
+            for p_str in item['linked-nodes']:
                 p = convert_from_str(p_str)
                 p = self.board.map_from_grid(p)
                 dest = Node(p, 4, self, self.node_layer)
