@@ -1,6 +1,9 @@
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPolygonF
 import re
+import math
+from logging import getLogger
+logger = getLogger()
 
 
 def convert_from_str(p_str):
@@ -14,6 +17,10 @@ def convert_from_point(point):
     return '({:.0f}, {:.0f})'.format(point.x(), point.y())
 
 
+def cross(p1, p2):
+    return p1.x() * p2.y() - p1.y() * p2.x()
+
+
 class PieceDetector(object):
 
     def __init__(self, project_data=None):
@@ -24,6 +31,7 @@ class PieceDetector(object):
         self.graph = {}
         self.hash = []
         self.paths = []
+        self.longest = []
         for node in project_data['items']:
             self.graph[node['node']] = node['linked-nodes'][:]
 
@@ -43,6 +51,8 @@ class PieceDetector(object):
 
         # 時計回りに修正
         self.adjust()
+
+        print('longest: {}'.format(self.longest))
 
         return self.paths
 
@@ -139,25 +149,76 @@ class PieceDetector(object):
         length = len(points)
         area = 0.0
         for i in range(length - 1):
-            area += self.cross(points[i], points[i + 1])
+            area += cross(points[i], points[i + 1])
         return area / 2
-
-    def cross(self, p1, p2):
-        return p1.x() * p2.y() - p1.y() * p2.x()
 
 
 class FrameDetector(object):
 
     def __init__(self, project_data=None):
-        pass
+        if project_data is not None:
+            self.setup(project_data)
 
     def setup(self, project_data):
         self.graph = {}
+        self.hash = []
+        self.path = []
+        self.m_p = None
         for node in project_data['items']:
             self.graph[node['node']] = node['linked-nodes'][:]
 
     def search(self):
-        pass
+        self.m_p = self.min_point()
+        self.path.append(self.m_p)
+        self.path.append(self.min_radian_point(self.path[0]))
+        while self.path[0] != self.path[-1]:
+            logger.debug(self.path)
+            self.path.append(self.min_radian_point(self.path[-1]))
+        return self.path
 
     def min_point(self):
-        pass
+        nodes = list(self.graph.keys())
+        m_str = nodes[0]
+        m_p = convert_from_str(m_str)
+        for node in nodes:
+            n = convert_from_str(node)
+            if m_p.y() > n.y():
+                m_str = node
+                m_p = convert_from_str(m_str)
+            elif m_p.y() == n.y() and m_p.x() > n.x():
+                m_str = node
+                m_p = convert_from_str(m_str)
+        self.hash.append(m_str)
+        return m_str
+
+    def min_radian_point(self, point_str):
+        if len(self.path) > 3:
+            for p in self.graph[point_str]:
+                if p == self.m_p:
+                    return p
+        point = convert_from_str(point_str)
+        m_str = None
+        for p in self.graph[point_str]:
+            if p not in self.hash:
+                m_str = p
+                break
+        m_p = convert_from_str(m_str)
+        for node in self.graph[point_str]:
+            if node in self.hash:
+                continue
+            if m_str == node:
+                m_str = node
+                m_p = convert_from_str(m_str)
+            else:
+                p = convert_from_str(node)
+                p1, p2 = m_p - point, p - point
+                v = cross(p1, p2)
+                if v > 0 or (v == 0 and self.length(p2) > self.length(p1)):
+                    m_str = node
+                    m_p = convert_from_str(m_str)
+        self.hash.append(m_str)
+        print('select: {}'.format(m_str))
+        return m_str
+
+    def length(self, point):
+        return math.sqrt(point.x() * point.x() + point.y() * point.y())
