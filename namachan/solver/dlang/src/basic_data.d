@@ -111,8 +111,8 @@ public:
 		}
 		return ymm;
 	}
-
-	BitField!size opShl (in int n) {
+	@nogc
+	pure BitField!size opShl (in int n) const {
 		immutable array_shift = n / 64;
 		immutable elem_shift = n % 64;
 		BitField!size bits;
@@ -122,8 +122,9 @@ public:
 		ulong carry;
 		for (size_t i; i < xmm_length * 2 - 1; ++i) {
 			immutable bits_i = bits.array[i];
-			bits.array[i] = (bits.array[i] << elem_shift) | carry;
-			carry = bits_i >> (64 - elem_shift);
+			bits.array[i] = (bits.array[i] << elem_shift) ^ carry;
+			if (elem_shift > 0)
+				carry =  bits_i >> (64UL - elem_shift);
 		}
 		bits.array[$-1] = (bits.array[$-1] << elem_shift) | carry;
 		return bits;
