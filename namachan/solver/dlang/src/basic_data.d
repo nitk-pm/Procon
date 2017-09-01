@@ -85,15 +85,16 @@ public:
 		return (bits & (1UL << shift_num)) != 0UL;
 	}
 
-	//@nogc
+	@nogc
 	bool opIndexAssign (in bool b, in size_t idx) {
 		immutable shift_num = idx % 64;
 		immutable elem_idx = idx / 64;
-		immutable bits = array[elem_idx];
+		immutable bits = this.array[elem_idx];
 		if (b)
-			array[elem_idx] = (bits | (1UL << shift_num));
-		else
-			array[elem_idx] = (bits & !(1UL << shift_num));
+			this.array[elem_idx] = (bits | (1UL << shift_num));
+		else {
+			this.array[elem_idx] = (bits & ~(1UL << (shift_num)));
+		}
 		return b;
 	}
 
