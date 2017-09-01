@@ -511,3 +511,17 @@ ShapeBits cache_make (in Shape shape, bool include_on_line) {
 	}
 	return bits;
 }
+
+void show (in ShapeBits bits) {
+	import std.stdio;
+	foreach (y; 0..Height) {
+		foreach (x; 0..Width) {
+			if (bits[bits_idx(x,y)])
+				write('o');
+			else
+				write('.');
+		}
+		writeln;
+	}
+}
+
