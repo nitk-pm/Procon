@@ -322,7 +322,7 @@ class MainWindow(QMainWindow):
     def export(self):
         filename = QFileDialog.getSaveFileName(
             self,
-            'Save to screenshot',
+            'Export File',
             self.document.project_name,
             'screen shot (*.png);;official format (*.txt)'
         )
