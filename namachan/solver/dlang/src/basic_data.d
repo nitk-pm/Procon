@@ -113,6 +113,8 @@ public:
 	}
 	@nogc
 	pure BitField!size opShl (in int n) const {
+		if (n < 0)
+			return opShr (-n);
 		immutable array_shift = n / 64;
 		immutable elem_shift = n % 64;
 		BitField!size bits;
@@ -129,7 +131,30 @@ public:
 		bits.array[$-1] = (bits.array[$-1] << elem_shift) | carry;
 		return bits;
 	}
-
+	@nogc
+	pure BitField!size opShr (in int n) const {
+			import std.stdio;
+		if (n < 0)
+			return opShl(-n);
+		immutable array_shift = n / 64;
+		immutable elem_shift = n % 64;
+		BitField!size bits;
+		for (long i = xmm_length * 2 - 1; i - array_shift >= 0; --i) {
+			bits.array[i-array_shift] = array[i];
+		}
+		ulong carry;
+		for (long i = xmm_length * 2 - 1; i >= 1; --i) {
+			immutable bits_i = bits.array[i];
+			bits.array[i] = (bits.array[i] >> elem_shift) | carry;
+			if (elem_shift > 0)
+				carry = bits_i << (64UL - elem_shift);
+			else
+				carry = 0;
+		}
+		bits.array[0] = (bits.array[0] >> elem_shift) | carry;
+		return bits;
+	}
+	@nogc
 	BitField!size opOpAssign (string op)(in BitField!size field) {
 		BitField!size ymm;
 		static if (op == "|") {
