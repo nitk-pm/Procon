@@ -169,7 +169,7 @@ public:
 		return ymm;
 	}
 
-	pure string toString () {
+	pure string toString () const {
 		string[] strs;
 		import std.string;
 		for (int idx = array.length - 1; idx >= 0; --idx) {
