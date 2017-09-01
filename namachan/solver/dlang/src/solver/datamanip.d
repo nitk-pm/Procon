@@ -2,7 +2,7 @@ module procon28.solver.datamanip;
 
 import armos.math.vector;
 
-import procon28.basic_data : Segment, Shape, S, P;
+import procon28.basic_data : Segment, Shape, S, P, PlacedShape, Data, Situation, ShapeBits, Height, Width;
 
 import std.math : approxEqual;
 
@@ -489,4 +489,25 @@ unittest {
 	auto frame2 = [P(0,0), P(-10,0), P(-10, 10)].vertexies2shape;
 	assert (!protrude_frame (frame1, shape1)); 
 	assert (protrude_frame(frame2, shape2));
+}
+
+size_t shape_idx (in size_t piece_idx, in size_t spin_level) {
+	return piece_idx * 8 + spin_level;
+}
+
+int bits_idx (in int x, in int y) {
+	return x * Height + y;
+}
+
+ShapeBits cache_make (in Shape shape, bool include_on_line) {
+	import std.stdio;
+	import procon28.solver.datamanip : crossing_number;
+	ShapeBits bits;
+	foreach (x; 0..Width) {
+		foreach (y; 0..Height) {
+			auto b = widing_number (P(x,y), shape, include_on_line);
+			bits[bits_idx(x,y)] = b;
+		}
+	}
+	return bits;
 }

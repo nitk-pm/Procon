@@ -2,12 +2,17 @@ module procon28.basic_data;
 
 import armos.math.vector;
 
+import procon28.solver.datamanip : shape_idx, bits_idx, cache_make;
+
 import std.algorithm.iteration : uniq;
 import std.algorithm.sorting : sort;
 import std.conv : to;
 import std.format : format;
 import std.range : array;
 import core.simd;
+
+enum Width = 101;
+enum Height = 65;
 
 ///線分
 struct Segment {
@@ -228,5 +233,61 @@ unittest {
 	}
 	assert(bf1024 >> 143 == ans2);
 	assert(bf1024 << -143 == ans2);
+}
+
+
+enum field_size = Width * Height;
+alias ShapeBits = BitField!field_size;
+
+struct PlacedShape {
+	ubyte x;
+	ubyte y;
+	ubyte piece_idx;
+	ubyte spin_level;
+}
+
+struct Situation {
+	PlacedShape[] shapes;
+	BitField!128 used_pieces;
+}
+
+class Data {
+public:
+	const Shape frame;
+	const ShapeBits frame_inside_bits;
+private:
+	const ShapeBits[] pieces_bits;
+	const ShapeBits[] pieces_inside_bits;
+	const Shape[] shapes;
+
+
+public:
+	this (Shape[][] pieces, Shape frame) {
+		Shape[] shapes_tmp;
+		ShapeBits[] pieces_bits_tmp;
+		ShapeBits[] pieces_inside_bits_tmp;
+		this.frame = frame;
+		this.frame_inside_bits = cache_make (frame, false);
+		foreach (piece_idx, piece; pieces) {
+			assert (piece.length == 8, "パターン数は8にしてください");
+			foreach (spin_level, shape; piece) {
+				shapes_tmp[shape_idx(piece_idx, spin_level)] ~= shape;
+				pieces_bits_tmp ~= cache_make (shape, true);
+				pieces_inside_bits_tmp ~= cache_make (shape, false);
+			}
+		}
+		this.pieces_bits = pieces_bits_tmp;
+		this.pieces_inside_bits = pieces_inside_bits_tmp;
+		this.shapes = shapes_tmp;
+	}
+
+	const(Shape) shape (in size_t piece_idx,in size_t spin_level) const {
+		return shapes [shape_idx(piece_idx, spin_level)];
+	}
+	const(ShapeBits) piece_bits (in size_t piece_idx,in size_t spin_level) const {
+		return pieces_bits [shape_idx(piece_idx, spin_level)];
+	}
+	const(ShapeBits) piece_inside_bits (in size_t piece_idx,in size_t spin_level) const {
+		return pieces_inside_bits[shape_idx(piece_idx, spin_level)];
 	}
 }
