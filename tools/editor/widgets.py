@@ -375,6 +375,7 @@ class MainWindow(QMainWindow):
     def confirm_save(self):
         if self.document is not None and self.document.is_edit:
             msg_box = QMessageBox(self)
+            msg_box.setWindowTitle('Confirm')
             msg_box.setText((
                 'Do you want to save change you'
                 'changes you made to Document ?'
