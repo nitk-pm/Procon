@@ -329,7 +329,7 @@ class MainWindow(QMainWindow):
         )
         if filename[1] == 'json (*.json)':
             self.document.save(filename[0])
-            self.set_project_name(False)
+            self.changed_edit_state(False)
 
     @pyqtSlot()
     def load(self):
@@ -351,10 +351,7 @@ class MainWindow(QMainWindow):
     @pyqtSlot(bool)
     def changed_edit_state(self, flag):
         self.document.is_edit = flag
-        self.set_project_name(flag)
-
-    def set_project_name(self, edit_flag):
-        edit = '*' if edit_flag else ''
+        edit = '*' if flag else ''
         self.setWindowTitle(
             '{} - {} {}'
             .format(self.title, self.document.project_name, edit)
@@ -367,7 +364,7 @@ class MainWindow(QMainWindow):
             self.ui.action_redo,
             self
         )
-        self.set_project_name(False)
+        self.changed_edit_state(False)
         self.scene.set_document(self.document)
         self.ui.layer_view.setModel(self.document.layer_model)
         self.ui.node_view.setModel(self.document.node_model)
