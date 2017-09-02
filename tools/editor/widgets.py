@@ -276,42 +276,33 @@ class MainWindow(QMainWindow):
         self.ui.action_open.triggered.connect(self.load)
         self.ui.action_save.triggered.connect(self.save)
 
-        self.document = None
-        self.new_document()
+        self.title = self.windowTitle()
+        self.create_document()
 
     def closeEvent(self, event):
         super().closeEvent(event)
+        msg = self.confirm_save()
+        if msg == QMessageBox.Save:
+            self.save()
+        elif msg == QMessageBox.Cancel:
+            event.ignore()
+            return
         self.preview.deleteLater()
 
     @pyqtSlot()
     def new_document(self):
-        if self.document is not None:
-            msg_box = QMessageBox(self)
-            msg_box.setText((
-                'Do you want to save change you'
-                'changes you made to Document ?'
-            ))
-            msg_box.setStandardButtons(
-                QMessageBox.Save |
-                QMessageBox.No |
-                QMessageBox.Cancel
-            )
-            msg_box.setDefaultButton(QMessageBox.Save)
-            msg = msg_box.exec_()
-            if msg == QMessageBox.Save:
-                self.save()
-            elif msg == QMessageBox.Cancel:
-                return
-            self.document.disconnect_actions(
+        msg = self.confirm_save()
+        if msg == QMessageBox.Save:
+            self.save()
+        elif msg == QMessageBox.No:
+            self.document.disconnect_history(
                 self.ui.action_undo,
-                self.ui.action_redo
+                self.ui.action_redo,
+                self
             )
-
-        self.document = Document()
-        self.document.connect_actions(self.ui.action_undo, self.ui.action_redo)
-        self.scene.set_document(self.document)
-        self.ui.layer_view.setModel(self.document.layer_model)
-        self.ui.node_view.setModel(self.document.node_model)
+        elif msg == QMessageBox.Cancel:
+            return
+        self.create_document()
 
     @pyqtSlot()
     def export(self):
@@ -338,9 +329,15 @@ class MainWindow(QMainWindow):
         )
         if filename[1] == 'json (*.json)':
             self.document.save(filename[0])
+            self.set_project_name(False)
 
     @pyqtSlot()
     def load(self):
+        msg = self.confirm_save()
+        if msg == QMessageBox.Cancel:
+            return
+        elif msg == QMessageBox.Save:
+            self.save()
         filename = QFileDialog.getOpenFileName(
             self,
             'Load to file',
@@ -348,4 +345,45 @@ class MainWindow(QMainWindow):
             'json (*.json)'
         )
         if filename[1] == 'json (*.json)':
+            self.create_document()
             self.document.load(filename[0])
+
+    @pyqtSlot(bool)
+    def changed_edit_state(self, flag):
+        self.document.is_edit = flag
+        self.set_project_name(flag)
+
+    def set_project_name(self, edit_flag):
+        edit = '*' if edit_flag else ''
+        self.setWindowTitle(
+            '{} - {} {}'
+            .format(self.title, self.document.project_name, edit)
+        )
+
+    def create_document(self):
+        self.document = Document()
+        self.document.connect_history(
+            self.ui.action_undo,
+            self.ui.action_redo,
+            self
+        )
+        self.set_project_name(False)
+        self.scene.set_document(self.document)
+        self.ui.layer_view.setModel(self.document.layer_model)
+        self.ui.node_view.setModel(self.document.node_model)
+
+    def confirm_save(self):
+        if self.document is not None and self.document.is_edit:
+            msg_box = QMessageBox(self)
+            msg_box.setText((
+                'Do you want to save change you'
+                'changes you made to Document ?'
+            ))
+            msg_box.setStandardButtons(
+                QMessageBox.Save |
+                QMessageBox.No |
+                QMessageBox.Cancel
+            )
+            msg_box.setDefaultButton(QMessageBox.Save)
+            return msg_box.exec_()
+        return QMessageBox.Abort

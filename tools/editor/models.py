@@ -154,18 +154,21 @@ class Document(QObject):
         self.layer_model.layers.append(self.edge_layer)
 
         self.is_created = False
+        self.is_edit = False
         self.hash = []
 
-    def connect_actions(self, undo, redo):
+    def connect_history(self, undo, redo, widget):
         undo.triggered.connect(self.history.undo)
         self.history.canUndoChanged.connect(undo.setEnabled)
+        self.history.canUndoChanged.connect(widget.changed_edit_state)
         redo.triggered.connect(self.history.redo)
         self.history.canRedoChanged.connect(redo.setEnabled)
 
-    def disconnect_actions(self, undo, redo):
+    def disconnect_history(self, undo, redo, widget):
         self.history.clear()
         undo.triggered.disconnect(self.history.undo)
         self.history.canUndoChanged.disconnect(undo.setEnabled)
+        self.history.canUndoChanged.disconnect(widget.changed_edit_state)
         redo.triggered.disconnect(self.history.redo)
         self.history.canRedoChanged.disconnect(redo.setEnabled)
 
