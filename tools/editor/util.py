@@ -49,7 +49,7 @@ class PieceDetector(object):
         self.correct_with_angle()
 
         # 時計回りに修正
-        self.adjust_loopwise()
+        self.correct_loopwise()
 
         return self.paths
 
@@ -136,7 +136,7 @@ class PieceDetector(object):
                     new_path.append(path[i])
             self.paths[index] = new_path
 
-    def adjust_loopwise(self):
+    def correct_loopwise(self):
         for i in range(len(self.paths)):
             if self.signed_area(self.paths[i]) < 0:
                 self.paths[i].reverse()
@@ -164,7 +164,8 @@ class FrameDetector(object):
     def search(self):
         self.path = []
         self.convex_hull_on_graph()
-        self.adjust_loopwise()
+        self.correct_with_angle()
+        self.correct_loopwise()
         return self.path
 
     def convex_hull_on_graph(self):
@@ -210,7 +211,7 @@ class FrameDetector(object):
     def length(self, point):
         return math.sqrt(point.x() * point.x() + point.y() * point.y())
 
-    def adjust_loopwise(self):
+    def correct_loopwise(self):
         if self.signed_area() < 0:
             self.path.reverse()
 
@@ -221,6 +222,22 @@ class FrameDetector(object):
         for i in range(length - 1):
             area += cross(points[i], points[i + 1])
         return area / 2
+
+    def correct_with_angle(self):
+        length = len(self.path)
+        find = [False for i in range(length)]
+        for i in range(length - 2):
+            p1 = convert_from_str(self.path[i])
+            p2 = convert_from_str(self.path[i + 1])
+            p3 = convert_from_str(self.path[i + 2])
+            l1, l2 = QLineF(p1, p2), QLineF(p2, p3)
+            if l1.angleTo(l2) == 0.0:
+                find[i + 1] = True
+        new_path = []
+        for i in range(length):
+            if not find[i]:
+                new_path.append(self.path[i])
+        self.path = new_path
 
 
 class OfficialFormat(object):
