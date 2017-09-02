@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt, QPointF, QLineF
 from PyQt5.QtGui import QPolygonF
 import re
 import math
+from abc import ABCMeta, abstractmethod
 from logging import getLogger
 logger = getLogger()
 
@@ -21,7 +22,8 @@ def cross(p1, p2):
     return p1.x() * p2.y() - p1.y() * p2.x()
 
 
-class PieceDetector(object):
+class BaseDetector(object):
+    __metaclass__ = ABCMeta
 
     def __init__(self, project_data=None):
         if project_data is not None:
@@ -29,12 +31,19 @@ class PieceDetector(object):
 
     def setup(self, project_data):
         self.graph = {}
-        self.hash = []
-        self.paths = []
         for node in project_data['items']:
             self.graph[node['node']] = node['linked-nodes'][:]
 
+    @abstractmethod
     def search(self):
+        pass
+
+
+class PieceDetector(BaseDetector):
+
+    def search(self):
+        self.hash, self.paths = [], []
+
         # 閉路グラフの検出
         for node in self.graph.keys():
             self.bfs(node, node)
@@ -150,16 +159,7 @@ class PieceDetector(object):
         return area / 2
 
 
-class FrameDetector(object):
-
-    def __init__(self, project_data=None):
-        if project_data is not None:
-            self.setup(project_data)
-
-    def setup(self, project_data):
-        self.graph = {}
-        for node in project_data['items']:
-            self.graph[node['node']] = node['linked-nodes'][:]
+class FrameDetector(BaseDetector):
 
     def search(self):
         self.path = []
@@ -238,6 +238,13 @@ class FrameDetector(object):
             if not find[i]:
                 new_path.append(self.path[i])
         self.path = new_path
+
+
+class BaseFormat(object):
+
+    def __init__(self, pieces, frame):
+        self.pieces = pieces
+        self.frame = frame
 
 
 class OfficialFormat(object):

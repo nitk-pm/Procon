@@ -1,3 +1,4 @@
+import os
 import sys
 import logging
 from PyQt5.QtWidgets import QApplication
@@ -10,6 +11,9 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s:%(filename)s:%(lineno)d:%(message)s'
 )
+
+if not os.path.isfile('editor_rc.py'):
+    os.system('pyrcc5 -o editor_rc.py editor.qrc')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

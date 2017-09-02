@@ -22,5 +22,7 @@ __pycache__
 *.so
 *.dll
 
+*_rc
+
 # log file
 *.log
