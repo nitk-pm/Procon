@@ -15,7 +15,7 @@ from items import (
     Edge,
     Node
 )
-from util import convert_from_str
+from util import convert_from_str, DefaultFormat
 from logging import getLogger
 logger = getLogger()
 
@@ -240,21 +240,16 @@ class Document(QObject):
         if not all((k, v) in self.begin.items() for (k, v) in end.items()):
             self.history.push(RestoreCommand(self, self.begin, end))
 
-    def save(self, filename):
+    def set_project_settings(self, filename):
         import os
-        import json
         self.full_path = filename
         self.dir_path, self.project_name = os.path.split(filename)
         self.project_name = self.project_name.rsplit('.', 1)[0]
-        with open(filename, 'w') as file:
-            json.dump(self.to_dict(), file, indent=2)
 
-    def load(self, filename):
-        import os
-        import json
-        self.full_path = filename
-        self.dir_path, self.project_name = os.path.split(filename)
-        self.project_name = self.project_name.rsplit('.', 1)[0]
-        with open(filename, 'r') as file:
-            self.restore(json.load(file))
-        self.history.clear()
+    def save(self, filename, format=DefaultFormat()):
+        format.setup(self)
+        format.save(filename)
+
+    def load(self, filename, format=DefaultFormat()):
+        format.setup(self)
+        format.load(filename)

@@ -10,6 +10,9 @@
     <height>720</height>
    </rect>
   </property>
+  <property name="cursor">
+   <cursorShape>ArrowCursor</cursorShape>
+  </property>
   <property name="windowTitle">
    <string>Problem Editor</string>
   </property>
@@ -156,6 +159,9 @@
            <pointsize>10</pointsize>
           </font>
          </property>
+         <property name="cursor" stdset="0">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -211,6 +217,9 @@
            <pointsize>10</pointsize>
           </font>
          </property>
+         <property name="cursor" stdset="0">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
          <property name="autoFillBackground">
           <bool>false</bool>
          </property>
@@ -265,6 +274,9 @@
      <bold>false</bold>
      <underline>false</underline>
     </font>
+   </property>
+   <property name="mouseTracking">
+    <bool>false</bool>
    </property>
    <property name="windowTitle">
     <string>toolBar</string>

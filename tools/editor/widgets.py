@@ -22,11 +22,6 @@ from PyQt5.QtGui import (
 )
 from PyQt5 import uic
 from models import Document
-from util import (
-    PieceDetector,
-    FrameDetector,
-    OfficialFormat
-)
 
 
 class BoardScene(QGraphicsScene):
@@ -327,18 +322,11 @@ class MainWindow(QMainWindow):
             'screen shot (*.png);;official format (*.txt)'
         )
         if filename[1] == 'screen shot (*.png)':
-            from PyQt5.QtGui import QPainter, QImage
-            w, h = self.scene.width(), self.scene.height()
-            image = QImage(w, h, QImage.Format_ARGB32)
-            with QPainter(image) as painter:
-                self.scene.render(painter)
-                image.save(filename[0])
+            from util import ScreenShotFormat
+            self.document.save(filename[0], ScreenShotFormat())
         elif filename[1] == 'official format (*.txt)':
-            project_data = self.document.to_dict()
-            pieces = PieceDetector(project_data).search()
-            frame = FrameDetector(project_data).search()
-            official_format = OfficialFormat(pieces, frame)
-            official_format.save(filename[0])
+            from util import OfficialFormat
+            self.document.save(filename[0], OfficialFormat())
 
     @pyqtSlot()
     def save(self):
@@ -347,9 +335,9 @@ class MainWindow(QMainWindow):
             'Save to file',
             self.document.project_name,
             'json (*.json)'
-        )[0]
-        if filename != '':
-            self.document.save(filename)
+        )
+        if filename[1] == 'json (*.json)':
+            self.document.save(filename[0])
 
     @pyqtSlot()
     def load(self):
@@ -358,6 +346,6 @@ class MainWindow(QMainWindow):
             'Load to file',
             '',
             'json (*.json)'
-        )[0]
-        if filename != '':
-            self.document.load(filename)
+        )
+        if filename[1] == 'json (*.json)':
+            self.document.load(filename[0])

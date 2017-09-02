@@ -1,9 +1,11 @@
 from PyQt5.QtCore import Qt, QPointF, QLineF
 from PyQt5.QtGui import QPolygonF
-import re
-import math
 from abc import ABCMeta, abstractmethod
 from logging import getLogger
+import os
+import re
+import json
+import math
 logger = getLogger()
 
 
@@ -241,26 +243,50 @@ class FrameDetector(BaseDetector):
 
 
 class BaseFormat(object):
+    __metaclass__ = ABCMeta
 
-    def __init__(self, pieces, frame):
-        self.pieces = pieces
-        self.frame = frame
+    def setup(self, document):
+        self.document = document
+
+    @abstractmethod
+    def save(self, filename):
+        pass
+
+    @abstractmethod
+    def load(self, filename):
+        pass
 
 
-class OfficialFormat(object):
-
-    def __init__(self, pieces, frame):
-        self.pieces = pieces
-        self.frame = frame
+class DefaultFormat(BaseFormat):
 
     def save(self, filename):
-        pieces = [self.remove_offset(p) for p in self.pieces]
+        self.document.set_project_settings(filename)
+        with open(filename, 'w') as file:
+            json.dump(self.document.to_dict(), file, indent=2)
+
+    def load(self, filename):
+        self.document.set_project_settings(filename)
+        with open(filename, 'r') as file:
+            self.document.restore(json.load(file))
+            self.document.history.clear()
+
+
+class OfficialFormat(BaseFormat):
+
+    def save(self, filename):
+        project_data = self.document.to_dict()
+        pieces = PieceDetector(project_data).search()
+        pieces = [self.remove_offset(p) for p in pieces]
         pieces = [self.convert_to_official(p) for p in pieces]
-        frame = [convert_from_str(p) for p in self.frame[:-1]]
+        frame = FrameDetector(project_data).search()
+        frame = [convert_from_str(p) for p in frame[:-1]]
         frame = self.convert_to_official(frame)
         data = '{}:{}:{}'.format(len(pieces), ':'.join(pieces), frame)
         with open(filename, 'w') as file:
             file.write(data)
+
+    def load(self, filename):
+        pass
 
     def remove_offset(self, path):
         piece = [convert_from_str(p) for p in path[:-1]]
@@ -277,3 +303,18 @@ class OfficialFormat(object):
     def convert_to_official(self, points):
         data = ['{:.0f} {:.0f}'.format(p.x(), p.y()) for p in points]
         return '{} {}'.format(len(points), ' '.join(data))
+
+
+class ScreenShotFormat(BaseFormat):
+
+    def save(self, filename):
+        from PyQt5.QtGui import QPainter, QImage
+        scene = self.document.board.scene()
+        w, h = scene.width(), scene.height()
+        image = QImage(w, h, QImage.Format_ARGB32)
+        with QPainter(image) as painter:
+            scene.render(painter)
+            image.save(filename)
+
+    def load(self, filename):
+        pass
