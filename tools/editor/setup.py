@@ -26,5 +26,5 @@ setup(
     version='1.0',
     description='converter',
     options=options,
-    executables=[Executable('main.py', base=base)]
+    executables=[Executable('app.py', base=base)]
 )
