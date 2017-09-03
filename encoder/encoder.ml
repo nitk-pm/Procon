@@ -72,6 +72,16 @@ let construct_piece_json pieces =
 		))
 	]
 
+let extract_min_pos shape =
+	let folder p min_p = match (p, min_p) with
+		((p_x, p_y), (min_p_x, min_p_y)) ->
+			(min p_x min_p_x, min p_y min_p_y) in
+	Core.List.fold_left shape ~init:(max_int, max_int) ~f:folder
+
+let normalize shape =
+	let (min_x, min_y) = extract_min_pos shape in
+	Core.List.map shape (function (x,y) -> (x - min_x, y - min_y))
+
 let construct_frame_json = construct_shapes_json
 
 let output_pieces pieces =
@@ -79,6 +89,7 @@ let output_pieces pieces =
 	pieces
 	|> Core.List.map ~f:parse_piece
 	|> Core.List.map ~f:add_patterns
+	|> Core.List.map ~f:(Core.List.map ~f:normalize)
 	|> construct_piece_json
 	|> Yojson.to_string
 	|> output_string piece_channel
@@ -87,6 +98,7 @@ let output_frame frame =
 	let frame_channel = open_out "frame.json" in
 	frame
 	|> Core.List.map ~f:parse_piece
+	|> Core.List.map ~f:normalize
 	|> construct_frame_json
 	|> Yojson.to_string
 	|> output_string frame_channel
