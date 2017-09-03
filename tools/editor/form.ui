@@ -318,12 +318,11 @@ border-color: rgb(255, 255, 255);</string>
    <addaction name="action_new"/>
    <addaction name="action_open"/>
    <addaction name="action_save"/>
-   <addaction name="separator"/>
-   <addaction name="action_preview"/>
    <addaction name="action_export"/>
    <addaction name="separator"/>
+   <addaction name="action_preview"/>
    <addaction name="action_select"/>
-   <addaction name="action_edge"/>
+   <addaction name="action_edit"/>
    <addaction name="separator"/>
    <addaction name="action_delete"/>
    <addaction name="action_undo"/>
@@ -349,7 +348,7 @@ border-color: rgb(255, 255, 255);</string>
     <string>new</string>
    </property>
    <property name="toolTip">
-    <string>new</string>
+    <string>new (Ctrl+N)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -364,7 +363,7 @@ border-color: rgb(255, 255, 255);</string>
     <string>save</string>
    </property>
    <property name="toolTip">
-    <string>save</string>
+    <string>save (Ctrl+S)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -382,7 +381,7 @@ border-color: rgb(255, 255, 255);</string>
     <string>open</string>
    </property>
    <property name="toolTip">
-    <string>open</string>
+    <string>open (Ctrl+O)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -397,10 +396,10 @@ border-color: rgb(255, 255, 255);</string>
     <string>preview</string>
    </property>
    <property name="toolTip">
-    <string>preview</string>
+    <string>preview (Shift+V)</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+P</string>
+    <string>Shift+V</string>
    </property>
   </action>
   <action name="action_undo">
@@ -415,7 +414,7 @@ border-color: rgb(255, 255, 255);</string>
     <string>undo</string>
    </property>
    <property name="toolTip">
-    <string>undo</string>
+    <string>undo (Ctrl+Z)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Z</string>
@@ -433,7 +432,7 @@ border-color: rgb(255, 255, 255);</string>
     <string>redo</string>
    </property>
    <property name="toolTip">
-    <string>redo</string>
+    <string>redo (Ctrl+Y)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Y</string>
@@ -451,7 +450,7 @@ border-color: rgb(255, 255, 255);</string>
     <string>delete</string>
    </property>
    <property name="toolTip">
-    <string>delete</string>
+    <string>delete (Del)</string>
    </property>
    <property name="shortcut">
     <string>Del</string>
@@ -476,13 +475,13 @@ border-color: rgb(255, 255, 255);</string>
     <string>select</string>
    </property>
    <property name="toolTip">
-    <string>select</string>
+    <string>select (Shift+S)</string>
    </property>
    <property name="shortcut">
-    <string>Shift+F</string>
+    <string>Shift+S</string>
    </property>
   </action>
-  <action name="action_edge">
+  <action name="action_edit">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -495,13 +494,13 @@ border-color: rgb(255, 255, 255);</string>
      <activeon>:/actions/icons/edge_checked.png</activeon>:/actions/icons/edge.png</iconset>
    </property>
    <property name="text">
-    <string>edge</string>
+    <string>edit</string>
    </property>
    <property name="toolTip">
-    <string>draw edge</string>
+    <string>edit (Shift+E)</string>
    </property>
    <property name="shortcut">
-    <string>Shift+P</string>
+    <string>Shift+E</string>
    </property>
   </action>
   <action name="action_export">
@@ -513,7 +512,10 @@ border-color: rgb(255, 255, 255);</string>
     <string>export</string>
    </property>
    <property name="toolTip">
-    <string>export</string>
+    <string>export (Ctrl+E)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
    </property>
   </action>
  </widget>

@@ -31,7 +31,7 @@ class BoardScene(QGraphicsScene):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.actions = QActionGroup(self)
-        self.action_edge = None
+        self.action_edit = None
         self.action_select = None
         self.action_delete = None
         self.document = None
@@ -60,22 +60,12 @@ class BoardScene(QGraphicsScene):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
             self.clearSelection()
-        if event.key() == Qt.Key_S:
-            from util import PieceDetector, FrameDetector
-            project_data = self.document.to_dict()
-            pieces = PieceDetector(project_data)
-            frame = FrameDetector(project_data)
-            print('find pieces')
-            for path in pieces.search():
-                print(path)
-            print('find frame')
-            print(frame.search())
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and self.document is not None:
             self.grid_pos = self.document.board.map_to_grid(event.scenePos())
             self.document.begin_record()
-            if self.actions.checkedAction().text() == 'edge':
+            if self.actions.checkedAction().text() == 'edit':
                 self.clearSelection()
                 self.document.create_node(event.scenePos())
             elif self.actions.checkedAction().text() == 'select':
@@ -99,7 +89,7 @@ class BoardScene(QGraphicsScene):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton and self.document is not None:
-            if self.actions.checkedAction().text() == 'edge':
+            if self.actions.checkedAction().text() == 'edit':
                 self.document.merge_nodes()
                 self.clearSelection()
             elif self.actions.checkedAction().text() == 'select':
@@ -260,7 +250,7 @@ class MainWindow(QMainWindow):
         self.scene.set_actions({
             'mode': [
                 self.ui.action_select,
-                self.ui.action_edge
+                self.ui.action_edit
             ],
             'delete': self.ui.action_delete
         })
@@ -373,10 +363,9 @@ class MainWindow(QMainWindow):
         if self.document is not None and self.document.is_edit:
             msg_box = QMessageBox(self)
             msg_box.setWindowTitle('Confirm')
-            msg_box.setText((
-                'Do you want to save change you'
-                'changes you made to Document ?'
-            ))
+            msg_box.setText(
+                'Do you want to save change you made to Document ?'
+            )
             msg_box.setStandardButtons(
                 QMessageBox.Save |
                 QMessageBox.No |
