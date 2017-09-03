@@ -375,7 +375,7 @@ class MainWindow(QMainWindow):
             msg_box.setWindowTitle('Confirm')
             msg_box.setText((
                 'Do you want to save change you'
-                'changes you made to Document ?'
+                ' changes you made to Document ?'
             ))
             msg_box.setStandardButtons(
                 QMessageBox.Save |
