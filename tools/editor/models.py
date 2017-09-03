@@ -173,9 +173,9 @@ class Document(QObject):
         self.history.canRedoChanged.disconnect(redo.setEnabled)
 
     def create_node(self, pos):
-        self.dest = Node(pos, 4, self, self.node_layer)
-        self.source = Node(pos, 4, self, self.node_layer)
-        Edge(self.source, self.dest, 4, self.edge_layer)
+        self.dest = Node(pos, self, self.node_layer)
+        self.source = Node(pos, self, self.node_layer)
+        Edge(self.source, self.dest, self, self.edge_layer)
         self.source.setSelected(True)
         self.is_created = True
 
@@ -223,12 +223,12 @@ class Document(QObject):
         for item in project_data['items']:
             pos = convert_from_str(item['node'])
             pos = self.board.map_from_grid(pos)
-            source = Node(pos, 4, self, self.node_layer)
+            source = Node(pos, self, self.node_layer)
             for p_str in item['linked-nodes']:
                 p = convert_from_str(p_str)
                 p = self.board.map_from_grid(p)
-                dest = Node(p, 4, self, self.node_layer)
-                Edge(source, dest, 4, self.edge_layer)
+                dest = Node(p, self, self.node_layer)
+                Edge(source, dest, self, self.edge_layer)
         self.merge_nodes()
 
     def update_models(self):
@@ -236,12 +236,12 @@ class Document(QObject):
         self.layer_model.data_changed()
 
     def begin_record(self):
-        self.begin = self.to_dict()
+        self.before = self.to_dict()
 
     def end_record(self):
-        end = self.to_dict()
-        if not all((k, v) in self.begin.items() for (k, v) in end.items()):
-            self.history.push(RestoreCommand(self, self.begin, end))
+        after = self.to_dict()
+        if not all((k, v) in self.before.items() for (k, v) in after.items()):
+            self.history.push(RestoreCommand(self, self.before, after))
 
     def set_project_settings(self, filename):
         import os

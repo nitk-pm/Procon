@@ -2,7 +2,8 @@ from PyQt5.QtCore import (
     Qt,
     QPointF,
     QRectF,
-    QLineF
+    QLineF,
+    QSizeF
 )
 from PyQt5.QtWidgets import (
     QGraphicsItem,
@@ -20,57 +21,61 @@ from util import convert_from_str
 
 class RestoreCommand(QUndoCommand):
 
-    def __init__(self, document, begin, end, parent=None):
+    def __init__(self, document, before, after, parent=None):
         super().__init__(parent)
         self.document = document
-        self.begin = begin
-        self.end = end
+        self.before = before
+        self.after = after
         self.run = False
 
     def undo(self):
-        self.document.restore(self.begin)
+        self.document.restore(self.before)
         self.run = True
 
     def redo(self):
         if self.run:
-            self.document.restore(self.end)
+            self.document.restore(self.after)
 
 
 class Board(QGraphicsPixmapItem):
 
-    def __init__(self, width=101, height=65, base=1, parent=None):
+    def __init__(self, width=101, height=65, base=40, parent=None):
         super().__init__(parent)
-        base *= 20
-        self.base = base * 2
-        self.width = (width + 1) * self.base
-        self.height = (height + 1) * self.base
+        self.base = base
+        self.radius = base / 10
+        self.center = QPointF(base / 2, base / 2)
+        self.grid_size = QSizeF(width, height)
+        self.image_size = QSizeF(width * base, height * base)
 
         from PyQt5.QtGui import QImage, QPixmap, QPainter
         from itertools import product
-        pixmap = QPixmap(self.width, self.height)
+        pixmap = QPixmap(self.image_size.width(), self.image_size.height())
         pixmap.fill()
 
         painter = QPainter()
         painter.begin(pixmap)
         painter.setBrush(Qt.black)
 
-        b = base / 4
-        for y, x in product(range(1, height + 1), range(1, width + 1)):
-            painter.drawEllipse(x * self.base, y * self.base, b, b)
+        for y, x in product(range(height), range(width)):
+            offset = self.center + QPointF(base * x, base * y)
+            painter.drawEllipse(offset, self.radius, self.radius)
 
         painter.end()
 
         self.setPixmap(pixmap)
-        self.area = QRectF(4, 4, self.width - 4, self.height - 4)
+        self.area = QRectF(
+            0,
+            0,
+            self.image_size.width(),
+            self.image_size.height()
+        )
 
     def map_to_grid(self, pos):
-        b = QPointF(self.base / 2, self.base / 2)
-        p = self.mapFromScene(pos - b) / self.base
+        p = self.mapFromScene(pos) / self.base
         return QPointF(int(p.x()), int(p.y()))
 
     def map_from_grid(self, pos):
-        p = self.mapToScene(pos * self.base)
-        return p + QPointF(self.base, self.base) * 1.075
+        return self.mapToScene(pos * self.base) + self.center
 
     def snap_to_grid(self, pos):
         p = self.map_to_grid(pos)
@@ -107,9 +112,11 @@ class Layer(QGraphicsItem):
 
 class Edge(QGraphicsLineItem):
 
-    def __init__(self, src_node, dest_node, width, parent=None):
+    def __init__(self, src_node, dest_node, document, parent=None):
         super().__init__(parent)
-        self.setPen(QPen(QColor('#000000'), width, cap=Qt.RoundCap))
+        self.document = document
+        self.width = document.board.radius
+        self.setPen(QPen(QColor('#000000'), self.width, cap=Qt.RoundCap))
         self.source = src_node
         self.dest = dest_node
         self.source.edges.append(self)
@@ -147,7 +154,7 @@ class Edge(QGraphicsLineItem):
     def split(self, node):
         self.dest.edges.remove(self)
         node.edges.append(self)
-        Edge(node, self.dest, 4, self.parentItem())
+        Edge(node, self.dest, self.document, self.parentItem())
         self.dest = node
         self.adjust()
 
@@ -163,11 +170,11 @@ class Edge(QGraphicsLineItem):
 
 class Node(QGraphicsEllipseItem):
 
-    def __init__(self, pos, radius, document, parent=None):
+    def __init__(self, pos, document, parent=None):
         super().__init__(parent)
         self.edges = []
-        self.radius = radius
         self.document = document
+        self.radius = document.board.radius
 
         self.setAcceptHoverEvents(True)
         self.setFlag(QGraphicsItem.ItemIsMovable)
@@ -175,10 +182,15 @@ class Node(QGraphicsEllipseItem):
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)
         self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
         self.setPos(pos)
-        self.setRect(QRectF(-radius * 2, -radius * 2, radius * 4, radius * 4))
+        self.setRect(QRectF(
+            -self.radius * 2,
+            -self.radius * 2,
+            self.radius * 4,
+            self.radius * 4
+        ))
 
-        self.normal_pen = QPen(QColor('#000000'), radius / 2, cap=Qt.RoundCap)
-        self.enter_pen = QPen(QColor('#0288D1'), radius / 2, cap=Qt.RoundCap)
+        self.normal_pen = QPen(QColor('#000000'), self.radius / 2, cap=Qt.RoundCap)
+        self.enter_pen = QPen(QColor('#0288D1'), self.radius / 2, cap=Qt.RoundCap)
         self.setPen(self.normal_pen)
         self.setBrush(QColor('#FFFFFF'))
 
@@ -228,8 +240,15 @@ class Node(QGraphicsEllipseItem):
         return nodes
 
     def boundingRect(self):
-        r = self.radius
-        return QRectF(-r * 4, -r * 4, r * 8, r * 8)
+        r = self.document.board.base / 2 - 1
+        return QRectF(-r, -r, r * 2, r * 2)
+
+    def shape(self):
+        from PyQt5.QtGui import QPainterPath
+        path = QPainterPath()
+        r = self.document.board.base / 2 - 1
+        path.addEllipse(QRectF(-r, -r, r * 2, r * 2))
+        return path
 
     def itemChange(self, change, value):
         if self.scene() is not None:
