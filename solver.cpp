@@ -14,6 +14,8 @@ const int INF = 10000000;
 
 //todoなど
 /*
+nothing changed lol
+
 枠のマージを実装 AC
 	->同一座標点の削除と頂点idx+1とidx+2のなす辺にidxがあるときidx+1を削除
 ファイルを分割
