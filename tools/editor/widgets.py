@@ -337,6 +337,7 @@ class MainWindow(QMainWindow):
         if filename[1] == 'json (*.json)':
             self.create_document()
             self.document.load(filename[0])
+            self.changed_edit_state(False)
 
     @pyqtSlot(bool)
     def changed_edit_state(self, flag):
