@@ -195,8 +195,10 @@ class Document(QObject):
         self.update_models()
 
     def remove_nodes(self, nodes):
+        self.begin_record()
         for node in nodes:
             node.remove()
+        self.end_record()
         self.update_models()
 
     def remove_all(self):

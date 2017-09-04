@@ -64,8 +64,8 @@ class BoardScene(QGraphicsScene):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and self.document is not None:
             self.grid_pos = self.document.board.map_to_grid(event.scenePos())
-            self.document.begin_record()
             if self.actions.checkedAction().text() == 'edit':
+                self.document.begin_record()
                 self.clearSelection()
                 self.document.create_node(event.scenePos())
             elif self.actions.checkedAction().text() == 'select':
@@ -91,10 +91,10 @@ class BoardScene(QGraphicsScene):
         if event.button() == Qt.LeftButton and self.document is not None:
             if self.actions.checkedAction().text() == 'edit':
                 self.document.merge_nodes()
+                self.document.end_record()
                 self.clearSelection()
             elif self.actions.checkedAction().text() == 'select':
                 self.document.merge_nodes()
-            self.document.end_record()
         self.show_message.emit('')
         super().mouseReleaseEvent(event)
 

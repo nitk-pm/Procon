@@ -64,31 +64,26 @@ class MainWindow(QMainWindow):
         self.title = self.windowTitle()
         self.converter = Converter()
 
-        self.ui.frame_view.set_polygon(
-            self.converter.to_polygon('4 0 64 100 64 100 0 0 0')
+        from PyQt5.QtWidgets import QFileDialog
+        filename = QFileDialog.getOpenFileName(
+            self,
+            'Read File',
+            '',
+            'official format (*.txt)'
         )
-        self.ui.frame_view.set_scale(6)
 
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 100 0 100 5 5 100 0 100')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
-        self.add_piece('5 0 0 10 0 10 5 5 10 0 10')
+        with open(filename[0]) as file:
+            data = file.read()
+            data_list = data.split(':')
+            count = int(data_list.pop(0))
+            for i in range(count):
+                self.add_piece(data_list[i])
+
+            self.ui.frame_view.set_polygon(
+                self.converter.to_polygon(data_list[-1])
+            )
+
+        self.ui.frame_view.set_scale(6)
 
     def add_piece(self, data):
         item = QListWidgetItem()

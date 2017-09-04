@@ -24,6 +24,11 @@ def cross(p1, p2):
     return p1.x() * p2.y() - p1.y() * p2.x()
 
 
+def to_polygon(path):
+    points = [convert_from_str(p) for p in path]
+    return QPolygonF(points)
+
+
 class BaseDetector(object):
     __metaclass__ = ABCMeta
 
@@ -113,7 +118,7 @@ class PieceDetector(BaseDetector):
     def correct_with_point(self):
         paths = []
         for i, path in enumerate(self.paths):
-            polygon = self.to_polygon(path)
+            polygon = to_polygon(path)
             find = False
             for pos in self.graph.keys():
                 if pos not in path:
@@ -124,10 +129,6 @@ class PieceDetector(BaseDetector):
             if not find:
                 paths.append(path)
         self.paths = paths
-
-    def to_polygon(self, path):
-        points = [convert_from_str(p) for p in path]
-        return QPolygonF(points)
 
     def correct_with_angle(self):
         from PyQt5.QtCore import QLineF
