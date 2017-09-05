@@ -1,8 +1,7 @@
 module procon28.solver.eval;
 
 import procon28.basic_data : P, S, Shape;
-import procon28.solver.collison : is_hit;
-import procon28.solver.data : equal_slope, move, vertexies2shape;
+import procon28.solver.datamanip : equal_slope, move, vertexies2shape, protrude_frame;
 
 /++
  + 線分の角度の一致度と重複した点の数で評価する評価関数
@@ -12,7 +11,7 @@ float angle_and_points (in Shape frame,in Shape piece) {
 	import std.stdio;
 	float val_by_point = 0.0f;
 	float val_by_slope = 0.0f;
-	if (is_hit (frame, piece))
+	if (protrude_frame (frame, piece))
 		return -float.infinity;
 	foreach (piece_seg; piece) {
 		foreach (frame_seg; frame) {
