@@ -103,6 +103,11 @@ class Layer(QGraphicsItem):
             item.setParentItem(None)
             self.scene().removeItem(item)
 
+    def remove_all(self):
+        items = self.childItems()
+        for item in items:
+            self.remove_item(item)
+
     def paint(self, painter, option, widget=None):
         pass
 

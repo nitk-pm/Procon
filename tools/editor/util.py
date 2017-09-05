@@ -24,6 +24,11 @@ def cross(p1, p2):
     return p1.x() * p2.y() - p1.y() * p2.x()
 
 
+def to_polygon(path):
+    points = [convert_from_str(p) for p in path]
+    return QPolygonF(points)
+
+
 class BaseDetector(object):
     __metaclass__ = ABCMeta
 
@@ -45,10 +50,14 @@ class PieceDetector(BaseDetector):
 
     def search(self):
         self.hash, self.paths = [], []
+        self.search_count = 0
 
         # 閉路グラフの検出
-        for node in self.graph.keys():
+        for i, node in enumerate(self.graph.keys()):
+            logger.debug('progress: {}, node: {}'.format(i, node))
             self.bfs(node, node)
+
+        logger.debug('search number of node: {}'.format(self.search_count))
 
         # 内部に辺が含まれている閉路グラフを除去
         self.correct_with_edge()
@@ -65,20 +74,25 @@ class PieceDetector(BaseDetector):
         return self.paths
 
     def bfs(self, start, goal):
+        find_count = 0
         queue = []
         for n in self.graph[start]:
             new_path = [start]
             new_path.append(n)
             queue.append(new_path)
         while len(queue) > 0:
+            self.search_count += 1
             path = queue.pop(0)
             node = path[-1]
             if node == goal and self.check(path):
                 self.paths.append(path)
                 self.hash.append(set(path))
-                return
+                find_count += 1
+                if find_count >= 2:
+                    return
+
             for n in self.graph[node]:
-                if n not in path:
+                if n not in path and len(set(path)) < 16:
                     new_path = path[:]
                     new_path.append(n)
                     queue.append(new_path)
@@ -88,9 +102,9 @@ class PieceDetector(BaseDetector):
                     queue.append(new_path)
 
     def check(self, path):
-        p = set(path)
         if path[0] in path[1:-1]:
             return False
+        p = set(path)
         return len(path) > 3 and p not in self.hash
 
     def correct_with_edge(self):
@@ -113,7 +127,7 @@ class PieceDetector(BaseDetector):
     def correct_with_point(self):
         paths = []
         for i, path in enumerate(self.paths):
-            polygon = self.to_polygon(path)
+            polygon = to_polygon(path)
             find = False
             for pos in self.graph.keys():
                 if pos not in path:
@@ -124,10 +138,6 @@ class PieceDetector(BaseDetector):
             if not find:
                 paths.append(path)
         self.paths = paths
-
-    def to_polygon(self, path):
-        points = [convert_from_str(p) for p in path]
-        return QPolygonF(points)
 
     def correct_with_angle(self):
         from PyQt5.QtCore import QLineF
