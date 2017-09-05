@@ -92,7 +92,7 @@ class PieceDetector(BaseDetector):
                     return
 
             for n in self.graph[node]:
-                if n not in path and len(set(path)) < 15:
+                if n not in path and len(set(path)) < 16:
                     new_path = path[:]
                     new_path.append(n)
                     queue.append(new_path)
