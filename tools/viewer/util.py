@@ -9,6 +9,16 @@ from PyQt5.QtGui import (
 
 class Converter(object):
 
+    def __init__(self, data=None):
+        if data is not None:
+            self.set_data(data)
+
+    def set_data(self, data):
+        data_list = data.split(':')
+        self.number = int(data_list.pop(0))
+        self.pieces = [self.to_polygon(d) for d in data_list[:-1]]
+        self.frame = self.to_polygon(data_list[-1])
+
     def to_points(self, data):
         if not isinstance(data, str):
             return None
