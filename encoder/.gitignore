@@ -1,0 +1,8 @@
+*.json
+*.txt
+.omakedb.lock
+.omakedb
+*.omc
+*.opt
+encoder
+*.cm*
