@@ -91,6 +91,9 @@ class MainWindow(QMainWindow):
             'official format (*.txt)'
         )
 
+        if filename[0] == '':
+            return
+
         with open(filename[0]) as file:
             data = file.read()
             converter = Converter(data)
