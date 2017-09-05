@@ -95,6 +95,7 @@ class MainWindow(QMainWindow):
             data = file.read()
             converter = Converter(data)
 
+            self.ui.piece_view.clear()
             for piece in converter.pieces:
                 self.add_piece(piece)
 
