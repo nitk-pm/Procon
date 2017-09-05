@@ -62,9 +62,13 @@ bool isInFrame(Piece p, std::vector<Frame> frameList) {
 					tb = (c.x - d.x)*(b.y - c.y) + (c.y - d.y)*(c.x - b.x);
 
 				if (ta == 0)
-					wn[j][i] += 99;
+					if (wn[j][i]>80)
+						wn[j][i] -= 99;
+				else wn[j][i] += 99;
 				if (tb == 0)
-					wn[j][i + 1] += 99;
+					if (wn[j][i+1]>80)
+						wn[j][i+1] -= 99;
+					else wn[j][i+1] += 99;
 
 				tmp1 |= ta*tb < 0 && tc*td < 0;
 
