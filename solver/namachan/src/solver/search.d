@@ -3,7 +3,7 @@ module procon28.solver.search;
 import armos.math.vector : Vector2i;
 
 import procon28.basic_data : P, S, Piece, Shape, Segment;
-import procon28.solver.data : shape_xor, move, vertexies2shape;
+import procon28.solver.datamanip : shape_xor, move, vertexies2shape;
 import procon28.solver.eval : angle_and_points;
 
 import std.algorithm.iteration : map;
@@ -96,7 +96,6 @@ body{
 						else {
 							val = EvalFunc (acc.frame, moved);
 							hash[key] = val;
-							stderr.writeln(val);
 						}
 						if (val == -float.infinity){
 							continue;
