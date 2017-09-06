@@ -23,7 +23,8 @@ struct Segment {
 	Vector2i end;
 
 	///等価比較演算子
-	bool opEquals(in Segment seg) const {
+	@safe @nogc
+	nothrow pure bool opEquals(in Segment seg) const {
 		return (this.start == seg.start && this.end == seg.end) || (this.start == seg.end && this.end == seg.start);
 	}
 
@@ -47,8 +48,8 @@ struct Segment {
 	}
 
 	///線分からベクトルを計算
-	@property
-	Vector2i vec () const {
+	@property @nogc @safe
+	nothrow pure Vector2i vec () const {
 		return end - start;
 	}
 }
@@ -83,15 +84,15 @@ private:
 
 	}
 public:
-	@nogc
-	pure bool opIndex (in int idx) const {
+	@safe @nogc
+	nothrow pure bool opIndex (in int idx) const {
 		immutable shift_num = idx % 64;
 		immutable bits = array[idx / 64];
 		return (bits & (1UL << shift_num)) != 0UL;
 	}
 
-	@nogc
-	bool opIndexAssign (in bool b, in size_t idx) {
+	@safe @nogc
+	nothrow bool opIndexAssign (in bool b, in size_t idx) {
 		immutable shift_num = idx % 64;
 		immutable elem_idx = idx / 64;
 		immutable bits = this.array[elem_idx];
@@ -102,8 +103,8 @@ public:
 		}
 		return b;
 	}
-	@nogc
-	pure BitField!size opBinary (string op)(in BitField!size field) const {
+	@safe @nogc
+	nothrow pure BitField!size opBinary (string op)(in BitField!size field) const {
 		BitField!size ymm;
 		static if (op == "|") {
 			mixin(expand_loop!(xmm_length, "ymm.xmms[%1$s] = xmms[%1$s] | field.xmms[%1$s];"));
@@ -116,8 +117,8 @@ public:
 		}
 		return ymm;
 	}
-	@nogc
-	pure BitField!size opShl (in int n) const {
+	@safe @nogc
+	nothrow pure BitField!size opShl (in int n) const {
 		if (n < 0)
 			return opShr (-n);
 		immutable array_shift = n / 64;
@@ -136,8 +137,8 @@ public:
 		bits.array[$-1] = (bits.array[$-1] << elem_shift) | carry;
 		return bits;
 	}
-	@nogc
-	pure BitField!size opShr (in int n) const {
+	@safe @nogc
+	nothrow pure BitField!size opShr (in int n) const {
 			import std.stdio;
 		if (n < 0)
 			return opShl(-n);
@@ -159,8 +160,8 @@ public:
 		bits.array[0] = (bits.array[0] >> elem_shift) | carry;
 		return bits;
 	}
-	@nogc
-	BitField!size opOpAssign (string op)(in BitField!size field) {
+	@safe @nogc
+	nothrow BitField!size opOpAssign (string op)(in BitField!size field) {
 		BitField!size ymm;
 		static if (op == "|") {
 			mixin(expand_loop!(xmm_length, "xmms[%1$s] = xmms[%1$s] | field.xmms[%1$s];"));
@@ -174,6 +175,7 @@ public:
 		return ymm;
 	}
 
+	@safe
 	pure string toString () const {
 		string[] strs;
 		import std.string;
@@ -280,14 +282,16 @@ public:
 		this.pieces_inside_bits = pieces_inside_bits_tmp;
 		this.shapes = shapes_tmp;
 	}
-
-	const(Shape) shape (in size_t piece_idx,in size_t spin_level) const {
+	@safe @nogc
+	nothrow pure const(Shape) shape (in size_t piece_idx,in size_t spin_level) const {
 		return shapes [shape_idx(piece_idx, spin_level)];
 	}
-	const(ShapeBits) piece_bits (in size_t piece_idx,in size_t spin_level) const {
+	@safe @nogc
+	nothrow pure const(ShapeBits) piece_bits (in size_t piece_idx,in size_t spin_level) const {
 		return pieces_bits [shape_idx(piece_idx, spin_level)];
 	}
-	const(ShapeBits) piece_inside_bits (in size_t piece_idx,in size_t spin_level) const {
+	@safe @nogc
+	nothrow pure const(ShapeBits) piece_inside_bits (in size_t piece_idx,in size_t spin_level) const {
 		return pieces_inside_bits[shape_idx(piece_idx, spin_level)];
 	}
 }

@@ -10,7 +10,8 @@ import std.algorithm.iteration : map;
 import std.algorithm.sorting : sort;
 import std.range : array, zip;
 
-int segment_of_line (in Segment seg) {
+@nogc @safe
+nothrow pure int segment_of_line (in Segment seg) {
 	//y = ax + b
 	if (seg.vec.x == 0) {
 		return 0;
@@ -26,7 +27,8 @@ unittest {
 	assert (segment_of_line(S (V(1,1), V(5, 1))) == 1);
 }
 
-Segment[] segment_sort (in Segment[] segs)
+@safe
+nothrow pure Segment[] segment_sort (in Segment[] segs)
 in {
 }
 out (sorted){
@@ -77,8 +79,8 @@ unittest {
 	];
 	assert (segment_sort(segs) == ans);
 }
-
-bool equal_slope (in Vector2i v1, in Vector2i v2) {
+@safe @nogc
+nothrow pure bool equal_slope (in Vector2i v1, in Vector2i v2) {
 	if (v1.x == 0 && v2.x == 0) {
 		return v1.y * v2.y > 0;
 	}
@@ -92,8 +94,8 @@ unittest {
 	assert (equal_slope (V (9, 3), V (3, 1)));
 	assert (!equal_slope (V (100, 99), V(100, 101)));
 }
-
-bool equal_slope (in Segment seg1, in Segment seg2) {
+@safe @nogc
+nothrow pure bool equal_slope (in Segment seg1, in Segment seg2) {
 	return equal_slope (seg1.vec, seg2.vec) || equal_slope (seg1.vec, -seg2.vec);
 }
 unittest {
@@ -105,7 +107,8 @@ unittest {
 }
 
 ///頂点座標の列を線分の集合に変換
-Shape vertexies2shape (Vector2i[] vertexies) {
+@safe
+nothrow pure Shape vertexies2shape (Vector2i[] vertexies) {
 	Shape shape;
 	for (size_t i; i < vertexies.length; ++i) {
 		auto start_idx = i;
@@ -125,7 +128,8 @@ unittest {
 
 
 ///線分のxorを取る。重なって居ない線分同士には使えない
-Segment[2] xor (in Segment seg1, in Segment seg2) {
+@safe
+nothrow pure Segment[2] xor (in Segment seg1, in Segment seg2) {
 	auto xs = [seg1.start.x, seg1.end.x, seg2.start.x, seg2.end.x].dup.sort!"a>b".array;
 	int[] ys;
 	if (seg1.vec.x * seg1.vec.y > 0)
@@ -144,7 +148,8 @@ unittest {
 	import std.stdio;
 }
 
-Shape move (in Shape shape,in Vector2i pos) {
+@safe
+nothrow pure Shape move (in Shape shape,in Vector2i pos) {
 	auto copy = shape.dup;
 	foreach (ref seg; copy) {
 		seg.start += pos;
@@ -153,7 +158,8 @@ Shape move (in Shape shape,in Vector2i pos) {
 	return copy;
 }
 
-Shape zoom (in Shape shape, int rate) {
+@safe
+nothrow pure Shape zoom (in Shape shape, int rate) {
 	auto copy = shape.dup;
 	foreach (ref seg; copy) {
 		seg.start *= rate;
@@ -162,7 +168,8 @@ Shape zoom (in Shape shape, int rate) {
 	return copy;
 }
 
-Shape shape_xor (in Shape shape_origin) {
+@safe
+nothrow pure Shape shape_xor (in Shape shape_origin) {
 	auto shape = shape_origin.dup;
 	import std.stdio;
 	Shape acc;
@@ -223,7 +230,8 @@ unittest {
 }
 
 ///線分が重なっているか判定(交差は重なっていない)
-bool judge_overlap(in Segment seg1, in Segment seg2) {
+@safe @nogc
+nothrow pure bool judge_overlap(in Segment seg1, in Segment seg2) {
 	bool is_overlap (in int x1, in int x2, in int y1, in int y2) {
 		if ((x1 == y1 && x2 == y2) || (x1 == y2 && x2 == y1)) return 0;
 		return
@@ -272,7 +280,8 @@ unittest {
  + 始点と終点が線分に接触していた場合は交差していないとみなす
  + 結構簡単にオーバーフローしてバグを生むので注意
  +/
-bool judge_intersected (in Segment seg1, in Segment seg2) {
+@safe @nogc
+nothrow pure bool judge_intersected (in Segment seg1, in Segment seg2) {
 	auto ta = (seg2.start.x - seg2.end.x) * (seg1.start.y - seg2.start.y) + (seg2.start.y - seg2.end.y) * (seg2.start.x - seg1.start.x);
 	auto tb = (seg2.start.x - seg2.end.x) * (seg1.end.y   - seg2.start.y) + (seg2.start.y - seg2.end.y) * (seg2.start.x - seg1.end.x);
 	auto tc = (seg1.start.x - seg1.end.x) * (seg2.start.y - seg1.start.y) + (seg1.start.y - seg1.end.y) * (seg1.start.x - seg2.start.x);
@@ -292,8 +301,8 @@ unittest {
 	auto seg6 = S(P(0,20),P(20,0));
 	assert (!judge_intersected(seg5, seg6));
 }
-
-bool judge_on_line (in Vector2i p, in Segment seg) {
+@safe @nogc
+nothrow pure bool judge_on_line (in Vector2i p, in Segment seg) {
 	immutable v1 = seg.vec;
 	immutable v2 = p - seg.start;
 	immutable v1_abs_2 = (v1.x^^2+v1.y^^2);
@@ -304,7 +313,8 @@ bool judge_on_line (in Vector2i p, in Segment seg) {
 }
 
 ///heightを高さとする平行線とsegが交差しているかを判定する。
-bool judge_cross_horizontal_line (in Segment seg, in int height) {
+@safe @nogc
+nothrow pure bool judge_cross_horizontal_line (in Segment seg, in int height) {
 	if ((seg.start - seg.end).y == 0) return false;
 	if ((seg.start.y > height && seg.end.y < height) || (seg.start.y < height && seg.end.y > height))
 		return true;
@@ -315,7 +325,8 @@ bool judge_cross_horizontal_line (in Segment seg, in int height) {
  + heightを高さとする水平線とsegを通る直線の一次方程式を解き、交点を返す
  + 解けない場合の動作は未定義
  +/
-Vector2f cross_point_of_horizontal_line (in Segment seg, in int height)  {
+@safe @nogc
+nothrow pure Vector2f cross_point_of_horizontal_line (in Segment seg, in int height)  {
 	if (seg.vec.x == 0)
 		return Vector2f (seg.start.x, height);
 	if (seg.vec.y == 0)
@@ -323,14 +334,15 @@ Vector2f cross_point_of_horizontal_line (in Segment seg, in int height)  {
 	return Vector2f ((height - segment_of_line(seg)) * seg.vec.x / seg.vec.y, height);
 }
 
-
-Vector2i mid_point (in Segment seg) {
+@safe @nogc
+nothrow pure Vector2i mid_point (in Segment seg) {
 	return (seg.start + seg.end) / 2;
 }
 
 ///Widing Number Algorithm
 ///FIXME
-bool widing_number (in Vector2i p, in Segment[] segments, bool include_on_line = true) {
+@safe
+nothrow pure bool widing_number (in Vector2i p, in Segment[] segments, bool include_on_line = true) {
 	int wn;
 	auto sorted = segment_sort(segments);
 	foreach (seg; segments) {
@@ -393,7 +405,8 @@ unittest {
 }
 ///点の図形に対する内外判定
 ///Crossing Number Algorithm
-bool crossing_number (in Vector2i p, in Segment[] segments, bool include_on_line = true) {
+@safe @nogc
+nothrow pure bool crossing_number (in Vector2i p, in Segment[] segments, bool include_on_line = true) {
 	size_t cross_cnt;
 	foreach (ref seg; segments) {
 		if (judge_on_line(p, seg))
@@ -462,7 +475,8 @@ unittest {
 }
 
 //枠と図形の当たり判定
-bool protrude_frame (in Shape frame, in Shape shape_origin) {
+@safe
+nothrow pure bool protrude_frame (in Shape frame, in Shape shape_origin) {
 	auto shape = segment_sort (shape_origin);
 	foreach (shape_seg; shape) {
 		foreach (frame_seg; frame) {
@@ -491,11 +505,13 @@ unittest {
 	assert (protrude_frame(frame2, shape2));
 }
 
-size_t shape_idx (in size_t piece_idx, in size_t spin_level) {
+@safe @nogc
+nothrow pure size_t shape_idx (in size_t piece_idx, in size_t spin_level) {
 	return piece_idx * 8 + spin_level;
 }
 
-int bits_idx (in int x, in int y) {
+@safe @nogc
+nothrow pure int bits_idx (in int x, in int y) {
 	return x * Height + y;
 }
 

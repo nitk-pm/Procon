@@ -8,7 +8,8 @@ import procon28.solver.datamanip : vertexies2shape;
 import std.conv : to;
 import std.json : parseJSON, JSONValue;
 
-Shape decode_shape (in JSONValue json) {
+@system
+pure Shape decode_shape (in JSONValue json) {
 	Vector2i[] vertexies;
 	foreach (pos; json.array) {
 		auto x = pos.object["x"].integer.to!int;
@@ -19,7 +20,8 @@ Shape decode_shape (in JSONValue json) {
 }
 
 ///jsonフォーマットの文字列をShapeにデコード
-Shape decode_frame (in string str) {
+@system
+pure Shape decode_frame (in string str) {
 	auto json = str.parseJSON;
 	Shape shape;
 	foreach (shape_json; json["shapes"].array) {
@@ -29,7 +31,8 @@ Shape decode_frame (in string str) {
 }
 
 ///jsonフォーマットの文字列をPieceの集合にデコード
-Piece[] decode_piece (in string str) {
+@system
+pure Piece[] decode_piece (in string str) {
 	auto json = str.parseJSON;
 	Piece[] piecies;
 	foreach (piece_json; json["pieces"].array) {

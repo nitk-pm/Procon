@@ -36,7 +36,8 @@ struct Procedure {
  + なぜphobosのソートアルゴリズムは破壊的なのか。
  + その謎を探るため我々は南米の奥地へ飛んだ...
  +/
-auto sort(alias compare, T)(inout T[] ops) {
+@safe
+nothrow pure auto sort(alias compare, T)(inout T[] ops) {
 	import std.traits;
 	auto merge (inout T[] ops1, inout T[] ops2) {
 		inout(T)[] merged;
@@ -68,8 +69,8 @@ auto sort(alias compare, T)(inout T[] ops) {
 import std.typecons : Tuple, tuple;
 alias key_t = Tuple!(const size_t, const size_t, const(Segment)[], const int, const int);
 float[key_t] hash;
-
-key_t toHash(in size_t piece_idx, in size_t spin_level, in Shape shape, in Vector2i pos) {
+@safe
+nothrow pure key_t toHash(in size_t piece_idx, in size_t spin_level, in Shape shape, in Vector2i pos) {
 	return tuple(piece_idx, spin_level, shape, pos.x, pos.y);
 }
 
