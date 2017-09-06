@@ -14,6 +14,11 @@ class ChangeHandler(FileSystemEventHandler):
             return
         print('modified: {}'.format(event.src_path))
 
+    def on_moved(self, event):
+        if event.is_directory:
+            return
+        print('moved: {}'.format(event.src_path))
+
     def on_deleted(self, event):
         if event.is_directory:
             return
