@@ -142,6 +142,24 @@ public:
 		}
 		return format("BitField!(%d)[%s]", size, strs.join("_"));
 	}
+
+	///全てのビットが立っているとtrue
+	@safe @nogc
+	pure nothrow all () const {
+		foreach (bits; array) {
+			if (bits != ulong.max) return false;
+		}
+		return true;
+	}
+
+	///一つでもビットが立っていればtrue
+	@safe @nogc
+	pure nothrow any () const {
+		foreach (bits; array) {
+			if (bits != 0) return true;
+		}
+		return false;
+	}
 }
 unittest {
 	BitField!256 bf256;
