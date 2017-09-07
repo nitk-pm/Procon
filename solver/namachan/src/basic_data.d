@@ -2,7 +2,7 @@ module procon28.basic_data;
 
 import armos.math.vector;
 
-import procon28.solver.datamanip : shape_idx, bits_idx, cache_make;
+import procon28.solver.datamanip : shape_idx;
 
 import std.algorithm.iteration : uniq;
 import std.algorithm.sorting : sort;
@@ -117,49 +117,7 @@ public:
 		}
 		return ymm;
 	}
-	@safe @nogc
-	nothrow pure BitField!size opShl (in int n) const {
-		if (n < 0)
-			return opShr (-n);
-		immutable array_shift = n / 64;
-		immutable elem_shift = n % 64;
-		BitField!size bits;
-		for (size_t i; i + array_shift < xmm_length * 2; ++i) {
-			bits.array[i+array_shift] = array[i];
-		}
-		ulong carry;
-		for (size_t i; i < xmm_length * 2 - 1; ++i) {
-			immutable bits_i = bits.array[i];
-			bits.array[i] = (bits.array[i] << elem_shift) ^ carry;
-			if (elem_shift > 0)
-				carry =  bits_i >> (64UL - elem_shift);
-		}
-		bits.array[$-1] = (bits.array[$-1] << elem_shift) | carry;
-		return bits;
-	}
-	@safe @nogc
-	nothrow pure BitField!size opShr (in int n) const {
-			import std.stdio;
-		if (n < 0)
-			return opShl(-n);
-		immutable array_shift = n / 64;
-		immutable elem_shift = n % 64;
-		BitField!size bits;
-		for (long i = xmm_length * 2 - 1; i - array_shift >= 0; --i) {
-			bits.array[i-array_shift] = array[i];
-		}
-		ulong carry;
-		for (long i = xmm_length * 2 - 1; i >= 1; --i) {
-			immutable bits_i = bits.array[i];
-			bits.array[i] = (bits.array[i] >> elem_shift) | carry;
-			if (elem_shift > 0)
-				carry = bits_i << (64UL - elem_shift);
-			else
-				carry = 0;
-		}
-		bits.array[0] = (bits.array[0] >> elem_shift) | carry;
-		return bits;
-	}
+	
 	@safe @nogc
 	nothrow BitField!size opOpAssign (string op)(in BitField!size field) {
 		BitField!size ymm;
@@ -217,29 +175,8 @@ unittest {
 	assert ((bf256_2 | bf256) == bf256);
 
 	assert ((bf256_2 & bf256) == bf256_2);
-
-	BitField!1024 bf1024;
-	foreach(i; 256..512) {
-		bf1024[i] = true;
-	}
-	BitField!1024 ans1;
-	foreach(i; 256..512){
-		ans1[i+143] = true;
-	}
-	import std.stdio;
-	assert (bf1024 << 143 == ans1);
-	assert (bf1024 >> -143 == ans1);
-	BitField!1024 ans2;
-	foreach(i; 256..512){
-		ans2[i-143] = true;
-	}
-	assert(bf1024 >> 143 == ans2);
-	assert(bf1024 << -143 == ans2);
 }
 
-
-enum field_size = Width * Height;
-alias ShapeBits = BitField!field_size;
 
 struct PlacedShape {
 	ubyte x;
@@ -251,47 +188,5 @@ struct PlacedShape {
 struct Situation {
 	PlacedShape[] shapes;
 	BitField!128 used_pieces;
-}
-
-class Data {
-public:
-	const Shape frame;
-	const ShapeBits frame_inside_bits;
-private:
-	const ShapeBits[] pieces_bits;
-	const ShapeBits[] pieces_inside_bits;
-	const Shape[] shapes;
-
-
-public:
-	this (Shape[][] pieces, Shape frame) {
-		Shape[] shapes_tmp;
-		ShapeBits[] pieces_bits_tmp;
-		ShapeBits[] pieces_inside_bits_tmp;
-		this.frame = frame;
-		this.frame_inside_bits = cache_make (frame, false);
-		foreach (piece_idx, piece; pieces) {
-			assert (piece.length == 8, "パターン数は8にしてください");
-			foreach (spin_level, shape; piece) {
-				shapes_tmp[shape_idx(piece_idx, spin_level)] ~= shape;
-				pieces_bits_tmp ~= cache_make (shape, true);
-				pieces_inside_bits_tmp ~= cache_make (shape, false);
-			}
-		}
-		this.pieces_bits = pieces_bits_tmp;
-		this.pieces_inside_bits = pieces_inside_bits_tmp;
-		this.shapes = shapes_tmp;
-	}
-	@safe @nogc
-	nothrow pure const(Shape) shape (in size_t piece_idx,in size_t spin_level) const {
-		return shapes [shape_idx(piece_idx, spin_level)];
-	}
-	@safe @nogc
-	nothrow pure const(ShapeBits) piece_bits (in size_t piece_idx,in size_t spin_level) const {
-		return pieces_bits [shape_idx(piece_idx, spin_level)];
-	}
-	@safe @nogc
-	nothrow pure const(ShapeBits) piece_inside_bits (in size_t piece_idx,in size_t spin_level) const {
-		return pieces_inside_bits[shape_idx(piece_idx, spin_level)];
-	}
+	P[][] frames;
 }

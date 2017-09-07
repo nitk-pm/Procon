@@ -2,7 +2,7 @@ module procon28.solver.datamanip;
 
 import armos.math.vector;
 
-import procon28.basic_data : Segment, Shape, S, P, PlacedShape, Data, Situation, ShapeBits, Height, Width;
+import procon28.basic_data : Segment, Shape, S, P, PlacedShape, Situation, Height, Width;
 
 import std.math : approxEqual;
 
@@ -508,62 +508,4 @@ unittest {
 @safe @nogc
 nothrow pure size_t shape_idx (in size_t piece_idx, in size_t spin_level) {
 	return piece_idx * 8 + spin_level;
-}
-
-@safe @nogc
-nothrow pure int bits_idx (in int x, in int y) {
-	return x * Height + y;
-}
-
-ShapeBits cache_make (in Shape shape, bool include_on_line) {
-	import std.stdio;
-	import procon28.solver.datamanip : crossing_number;
-	ShapeBits bits;
-	foreach (x; 0..Width) {
-		foreach (y; 0..Height) {
-			auto b = widing_number (P(x,y), shape, include_on_line);
-			bits[bits_idx(x,y)] = b;
-		}
-	}
-	return bits;
-}
-
-void show (in ShapeBits bits) {
-	import std.stdio;
-	foreach (y; 0..Height) {
-		foreach (x; 0..Width) {
-			if (bits[bits_idx(x,y)])
-				write('o');
-			else
-				write('.');
-		}
-		writeln;
-	}
-}
-
-bool judge_collision (in ShapeBits bits1, in ShapeBits bits2, in P p1, in P p2) {
-	auto dp = p2 - p1;
-	auto didx = bits_idx(dp.x, dp.y);
-	ShapeBits emp;
-	return ((bits2 << didx) & bits1) != emp;
-}
-unittest {
-	import std.stdio;
-	auto s1 = [P(0,0),P(10,0),P(10,10)].vertexies2shape;
-	auto s2 = [P(0,0),P(0,10),P(10,10)].vertexies2shape;
-	auto c1 = cache_make(s1, true);
-	auto c2 = cache_make(s2, false);
-	assert (!judge_collision(c1, c2, P(0,0), P(0,0)));
-	assert (!judge_collision(c1, c2, P(1,0), P(0,0)));
-	assert (judge_collision(c1, c2, P(-1,0), P(0,0)));
-}
-
-bool protrude_frame (in Data data, in Situation situation, in PlacedShape piece) {
-	auto p_bits = data.piece_bits (piece.piece_idx, piece.spin_level);
-	foreach (shape; situation.shapes) {
-		auto f_bits = data.piece_inside_bits (shape.piece_idx, shape.spin_level);
-		if (judge_collision (p_bits, f_bits, P(piece.x, piece.y), P(shape.x, shape.y)))
-			return true;
-	}
-	return false;
 }
