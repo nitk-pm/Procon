@@ -40,6 +40,8 @@ unittest {
 @safe @nogc
 pure nothrow float eval_basic (in P[] frame, in P[] piece) {
 	float point_conflict = 0.0f;
+	if (protrude_frame (frame, piece))
+		return -float.infinity;
 	foreach (piece_point; piece) {
 		auto frame_point2 = frame[$-1];
 		foreach (frame_point1; frame) {
