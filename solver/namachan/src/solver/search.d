@@ -1,12 +1,11 @@
 module procon28.solver.search;
 
-import armos.math.vector : Vector2i;
-
-import procon28.solver.datamanip : shape_xor, move, vertexies2shape;
-import procon28.solver.eval : angle_and_points;
 import procon28.basic_data : P, S, Piece, Shape, Segment, BitField, Situation, PlacedShape, Pos;
+import procon28.solver.datamanip : merge, move, vertexies2shape;
+import procon28.solver.eval : eval_basic;
 
 import std.algorithm.iteration : map;
+import std.conv;
 import std.range : array;
 import std.stdio;
 import std.array : join;
@@ -74,92 +73,61 @@ nothrow pure key_t toHash(in size_t piece_idx, in size_t spin_level, in Shape sh
 	return tuple(piece_idx, spin_level, shape, pos.x, pos.y);
 }
 
-Procedure[] eval_all(alias EvalFunc)(Piece[] pieces, Procedure acc)
-in {
-	assert (pieces.length == acc.used_mask.length);
-}
-body{
-	Procedure[] procedures;
-	foreach (piece_idx,piece; pieces) {
-		if (acc.used_mask[piece_idx]) continue;
-		foreach (spin_level, pattern; piece) {
-			foreach (piece_seg; pattern) {
-				auto piece_vertex = piece_seg.start;
-				foreach (frame_seg; acc.frame) {
-					foreach (frame_vertex; [frame_seg.start, frame_seg.end]) {
+@safe
+pure const(Situation)[] eval_all(alias EvalFunc)(in P[][][] pieces,in Situation acc) {
+	const(Situation)[] situaions; 
+	foreach (piece_idx, piece; pieces) {
+		if (acc.used_pieces[cast(int)piece_idx]) continue;
+		BitField!128 new_mask = acc.used_pieces;
+		new_mask[piece_idx] = true;
+		foreach (spin_level, shape; piece) {
+			foreach (piece_vertex; shape) {
+				foreach (frame_idx, frame; acc.frames) {
+					foreach (frame_vertex; frame) {
 						auto diff = frame_vertex - piece_vertex;
-						auto key = toHash(piece_idx, spin_level, acc.frame, diff);
-						float val;
-						auto moved = pattern.move(diff);
-						if (key in hash) {
-							continue;
-						}
-						else {
-							val = EvalFunc (acc.frame, moved);
-							hash[key] = val;
-						}
-						if (val == -float.infinity){
-							continue;
-						}
-						auto used_mask_cpy = acc.used_mask.dup;
-						used_mask_cpy[piece_idx] = true;
-						auto merged_frame = shape_xor(acc.frame ~ moved);
-						procedures ~=
-							cast(inout)Procedure (
-								Op(piece_idx, spin_level, pattern, acc.frame, diff, val) ~ acc.ops,
-								used_mask_cpy,
-								merged_frame,
-								acc.val + val);
+						auto moved = shape.move(diff);
+						auto value = EvalFunc (frame, moved);
+						if (value == -float.infinity) continue;
+						auto merged_frames = merge (frame, moved) ~ acc.frames[0..frame_idx] ~ acc.frames[frame_idx+1..$];
+						auto placed_shape = PlacedShape (diff.x.to!byte, diff.y.to!byte, piece_idx.to!ubyte, spin_level.to!ubyte);
+						situaions ~=
+							const(Situation) (acc.shapes ~ placed_shape, new_mask, merged_frames, value);
 					}
 				}
 			}
 		}
 	}
-	return procedures;
+	return situaions;
 }
 
-auto beam_search(alias EvalFunc)(Piece[] pieces, Shape frame, size_t beam_width) {
-	auto sorted = eval_all!EvalFunc(pieces, Procedure([], new bool[pieces.length], frame, 0.0))
+const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, size_t beam_width) {
+	BitField!128 mask_base;
+	foreach (idx; pieces.length..128)
+		mask_base[idx] = true;
+	auto sorted = eval_all!EvalFunc(pieces, Situation([], mask_base, frames, 1.0f))
 		.sort!((a, b) => a.val > b.val)
 		.array;
-	import procon28.visualize.window;
-	auto win = new Window;
-	size_t cnt;
 	for (;;) {
-		import procon28.visualize.window;
-		++cnt;
 		if (sorted.length > beam_width)
 			sorted = sorted[0..beam_width];
-		Procedure before;
 		foreach (procedure; sorted) {
-			if (procedure.frame.length == 0)
-			return procedure;
+			if (procedure.used_pieces.all)
+				return procedure;
 		}
-		sorted = sorted
-			.map!(a => eval_all!EvalFunc(pieces, a))
-			.array
-			.join
-			.sort!((a,b) => a.val > b.val);
+		const(Situation)[] evaled;
+		foreach (situation; sorted) {
+			evaled ~= eval_all!EvalFunc(pieces, situation);
+		}
+		sorted = evaled.sort!((a,b) => a.val > b.val);
 		if (sorted.length == 0) throw new Exception("could'nt solve.");
 	}
 }
 
-/++
- + 探索関数
- + 現在の実装は貪欲法
- +/
-Op[] greedy_search (alias EvalFunc)(in Piece[] pieces, in Shape frame) {
-	auto default_mask = new bool[pieces.length];
-	if (pieces.length == 0) return [];
-	auto sorted = eval_all (pieces, frame).sort;
-	if (sorted[0].val == -float.infinity) return [];
-	auto new_frame = merge (frame, sorted[0].shape.move(sorted[0].pos));
-	return sorted[0] ~ greedy_search!EvalFunc (pieces, new_frame);
-}
 unittest {
-	auto p1 = [[P(0,0), P(0,20), P(20,0)].vertexies2shape];
-	auto p2 = [[P(20,0), P(20,20), P(0,20)].vertexies2shape];
-	auto p3 = [[P(0,0), P(0,20), P(20,20), P (20, 0)].vertexies2shape];
-	auto frame = [P(0,0), P(20,0), P(20,40), P(0,40)].vertexies2shape;
-	auto ops = beam_search!angle_and_points([p1, p2, p3], frame, 1);
+	auto p1 = [[P(0,0), P(20,0), P(0,20)]];
+	auto p2 = [[P(20,0), P(20,20), P(0,20)]];
+	auto p3 = [[P(0,0), P (20, 0), P(20,20),P(0,20)]];
+	auto frames = [[P(0,0), P(20,0), P(20,40), P(0,40)]];
+	auto ops = beam_search!eval_basic([p1, p2, p3], frames, 1);
+	assert (ops.shapes.length == 3);
 }
