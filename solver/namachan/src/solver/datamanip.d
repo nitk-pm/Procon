@@ -327,6 +327,14 @@ nothrow pure Shape move (in Shape shape,in Vector2i pos) {
 }
 
 @safe
+nothrow pure P[] move (in P[] shape, in Vector2i pos) {
+	auto copy =  shape.dup;
+	foreach (ref vertex; copy)
+		vertex += pos;
+	return copy;
+}
+
+@safe
 nothrow pure Shape zoom (in Shape shape, int rate) {
 	auto copy = shape.dup;
 	foreach (ref seg; copy) {
