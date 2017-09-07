@@ -1,8 +1,6 @@
 module procon28.decoder;
 
-import armos.math.vector;
-
-import procon28.basic_data : Segment, Piece, Shape;
+import procon28.basic_data : Segment, Piece, Shape, Pos;
 import procon28.solver.datamanip : vertexies2shape;
 
 import std.conv : to;
@@ -10,11 +8,11 @@ import std.json : parseJSON, JSONValue;
 
 @system
 pure Shape decode_shape (in JSONValue json) {
-	Vector2i[] vertexies;
+	Pos[] vertexies;
 	foreach (pos; json.array) {
 		auto x = pos.object["x"].integer.to!int;
 		auto y = pos.object["y"].integer.to!int;
-		vertexies ~= Vector2i(x, y);
+		vertexies ~= Pos(x, y);
 	}
 	return vertexies2shape(vertexies);
 }

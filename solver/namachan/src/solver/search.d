@@ -2,9 +2,9 @@ module procon28.solver.search;
 
 import armos.math.vector : Vector2i;
 
-import procon28.basic_data : P, S, Piece, Shape, Segment;
 import procon28.solver.datamanip : shape_xor, move, vertexies2shape;
 import procon28.solver.eval : angle_and_points;
+import procon28.basic_data : P, S, Piece, Shape, Segment, BitField, Situation, PlacedShape, Pos;
 
 import std.algorithm.iteration : map;
 import std.range : array;
@@ -20,7 +20,7 @@ struct Op {
 	const Shape shape;
 	const Shape frame;
 	///位置
-	const Vector2i pos;
+	const Pos pos;
 	///評価値
 	const float val;
 }
@@ -70,7 +70,7 @@ import std.typecons : Tuple, tuple;
 alias key_t = Tuple!(const size_t, const size_t, const(Segment)[], const int, const int);
 float[key_t] hash;
 @safe
-nothrow pure key_t toHash(in size_t piece_idx, in size_t spin_level, in Shape shape, in Vector2i pos) {
+nothrow pure key_t toHash(in size_t piece_idx, in size_t spin_level, in Shape shape, in Pos pos) {
 	return tuple(piece_idx, spin_level, shape, pos.x, pos.y);
 }
 

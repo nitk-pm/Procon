@@ -1,7 +1,5 @@
 module procon28.basic_data;
 
-import armos.math.vector;
-
 import procon28.solver.datamanip : shape_idx;
 
 import std.algorithm.iteration : uniq;
@@ -14,13 +12,94 @@ import core.simd;
 enum Width = 101;
 enum Height = 65;
 
+struct Vector (T) {
+public:
+	T x, y;
+	@safe @nogc
+	pure nothrow this (in T x,in T y) const {
+		this.x = x;
+		this.y = y;
+	}
+	
+	@safe @nogc
+	pure nothrow auto opBinary (string op)(in Vector!T p) const {
+		static if (op == "+") {
+			return Vector!T (x+p.x, y+p.y);
+		}
+		else static if (op == "-") {
+			return Vector!T (x-p.x, y-p.y);
+		}
+		else static if (op == "*") {
+			return x*p.x+y*p.y;
+		}
+	}
+
+	@safe @nogc
+	pure nothrow auto opBinary (string op)(in T n) const {
+		static if (op == "+") {
+			return Vector!T (x+n, y+n);
+		}
+		else static if (op == "-") {
+			return Vector!T (x-n, y-n);
+		}
+		else static if (op == "*") {
+			return Vector!T (x*n, y*n);
+		}
+		else static if (op == "/") {
+			return Vector!T (x/n, y/n);
+		}
+	}
+
+	@safe @nogc
+	pure nothrow void opOpAssign (string op)(in Vector!T p) {
+		static if (op == "+") {
+			x += p.x;
+			y += p.y;
+		}
+		else static if (op == "-") {
+			x -= p.x;
+			y -= p.y;
+		}
+	}
+
+	@safe @nogc
+	pure nothrow void opOpAssign (string op)(in T n) {
+		static if (op == "+") {
+			x += n;
+			y += n;
+		}
+		else static if (op == "-") {
+			x -= n;
+			y -= n;
+		}
+		else static if (op == "*") {
+			x *= n;
+			y *= n;
+		}
+		else static if (op == "/") {
+			x /= n;
+			y /= n;
+		}
+	}
+
+	@safe @nogc
+	pure nothrow Pos opUnary (string op)() const {
+		static if (op == "+") {
+			return this;
+		}
+		else static if (op == "-") {
+			return Vector!T (-x, -y);
+		}
+	}
+}
+
 ///線分
 struct Segment {
 
 	///始点
-	Vector2i start;
+	Pos start;
 	///終点
-	Vector2i end;
+	Pos end;
 
 	///等価比較演算子
 	@safe @nogc
@@ -39,7 +118,7 @@ struct Segment {
 			return tuple(end_hash, start_hash).toHash;
 	}
 	unittest {
-		assert (Segment(Vector2i(0, 5), Vector2i(3, 2)).toHash == Segment(Vector2i(3, 2), Vector2i(0, 5)).toHash );
+		assert (Segment(Pos(0, 5), Pos(3, 2)).toHash == Segment(Pos(3, 2), Pos(0, 5)).toHash );
 	}
 	@safe 
 	pure string toString() const {
@@ -49,12 +128,13 @@ struct Segment {
 
 	///線分からベクトルを計算
 	@property @nogc @safe
-	nothrow pure Vector2i vec () const {
+	nothrow pure Pos vec () const {
 		return end - start;
 	}
 }
 
-alias P = Vector2i;
+alias Pos = Vector!int;
+alias P = Pos;
 alias S = Segment;
 alias Shape = Segment[];
 alias Piece = Shape[];
@@ -64,8 +144,8 @@ private:
 	enum xmm_length =
 		size % 128 == 0 ? size / 128 : size / 128 + 1;
 	union {
-		__vector(ulong[2])[xmm_length] xmms;
 		ulong[xmm_length * 2] array;
+		__vector(ulong[2])[xmm_length] xmms;
 	}
 
 	template expand_loop (alias times, alias code) {
@@ -207,4 +287,5 @@ struct Situation {
 	PlacedShape[] shapes;
 	BitField!128 used_pieces;
 	P[][] frames;
+	float val;
 }

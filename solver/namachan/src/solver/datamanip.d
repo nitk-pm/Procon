@@ -1,8 +1,6 @@
 module procon28.solver.datamanip;
 
-import armos.math.vector;
-
-import procon28.basic_data : Segment, Shape, S, P, PlacedShape, Situation, Height, Width;
+import procon28.basic_data : Segment, Shape, S, P, PlacedShape, Situation, Height, Width, Pos, Vector;
 
 import std.math : approxEqual;
 
@@ -21,7 +19,8 @@ nothrow pure int segment_of_line (in Segment seg) {
 }
 unittest {
 	alias S = Segment;
-	alias V = Vector2i;
+	alias V = Pos;
+	
 	assert (segment_of_line(S (V(1,3), V(3, 7))) == 1);
 	assert (segment_of_line(S (V(1,1), V(1, 5))) == 0);
 	assert (segment_of_line(S (V(1,1), V(5, 1))) == 1);
@@ -80,14 +79,14 @@ unittest {
 	assert (segment_sort(segs) == ans);
 }
 @safe @nogc
-nothrow pure bool equal_slope (in Vector2i v1, in Vector2i v2) {
+nothrow pure bool equal_slope (in Pos v1, in Pos v2) {
 	if (v1.x == 0 && v2.x == 0) {
 		return v1.y * v2.y > 0;
 	}
 	return v1.x * v2.y == v2.x * v1.y;
 }
 unittest {
-	alias V = Vector2i;
+	alias V = Pos;
 	assert (equal_slope (V (0,1), V(0,5)));
 	assert (equal_slope (V (1, 0), V (5, 0)));
 	assert (equal_slope (V (2, -1), V (-2, 1)));
@@ -100,7 +99,7 @@ nothrow pure bool equal_slope (in Segment seg1, in Segment seg2) {
 }
 unittest {
 	alias S = Segment;
-	alias V = Vector2i;
+	alias V = Pos;
 	assert (equal_slope(S(V(0, 0), V(2, 2)), S (V(3, 3), V(1, 1))));
 	assert (!equal_slope(S(V(0, 0), V(2, 2)), S (V(3, 4), V(1, 1))));
 	assert (equal_slope(S(V(0,0), V(0,1)),S(V(0,1),V(0,0))));
@@ -108,7 +107,7 @@ unittest {
 
 ///頂点座標の列を線分の集合に変換
 @safe
-nothrow pure Shape vertexies2shape (Vector2i[] vertexies) {
+nothrow pure Shape vertexies2shape (in Pos[] vertexies) {
 	Shape shape;
 	for (size_t i; i < vertexies.length; ++i) {
 		auto start_idx = i;
@@ -119,7 +118,7 @@ nothrow pure Shape vertexies2shape (Vector2i[] vertexies) {
 	return shape;
 }
 unittest {
-	alias V = Vector2i;
+	alias V = Pos;
 	alias S = Segment;
 	assert ([V(0, 0), V(2, 0), V(2, 2), V(0, 2)].vertexies2shape
 		== [S (V(0, 0), V(2, 0)), S (V(2, 0), V(2, 2)), S (V (2, 2), V(0, 2)), S (V (0, 2), V (0, 0))]);
@@ -136,11 +135,11 @@ nothrow pure Segment[2] xor (in Segment seg1, in Segment seg2) {
 		 ys = [seg1.start.y, seg1.end.y, seg2.start.y, seg2.end.y].dup.sort!"a>b".array;
 	else
 		 ys = [seg1.start.y, seg1.end.y, seg2.start.y, seg2.end.y].dup.sort!"a<b".array;
-	return [Segment(Vector2i(xs[0], ys[0]), Vector2i(xs[1], ys[1])), Segment(Vector2i(xs[2], ys[2]), Vector2i(xs[3], ys[3]))];
+	return [Segment(Pos(xs[0], ys[0]), Pos(xs[1], ys[1])), Segment(Pos(xs[2], ys[2]), Pos(xs[3], ys[3]))];
 }
 unittest {
 	alias S = Segment;
-	alias V = Vector2i;
+	alias V = Pos;
 	auto seg1 = S(V(0,0), V(4,4));
 	auto seg2 = S(V(1,1), V(2,2));
 	auto seg3 = S(V(0,0), V(10,10));
@@ -151,20 +150,26 @@ unittest {
 struct Point {
 	P pos;
 	bool is_junction;
+
+	@safe
+	pure string toString() const {
+		import std.format;
+		return format("Point(%s, %s, %s)", pos.x, pos.y, is_junction);
+	}
 }
 
 //頂点座標の配列を、ピースと接触している点と接触していない点からなる頂点座標の配列に
 @safe
 nothrow pure Point[] insert_junction (in P[] frame, in P[] piece) {
-		import std.stdio;
 	Point[] frame_buf;
 	foreach (f_idx; 0..frame.length) {
 		bool point_appended;
 		//始点とピースの頂点の何処かが衝突していた場合追加
 		foreach (p_idx,piece_p; piece) {
-			if (frame[f_idx] == piece_p) {
+			if (frame[f_idx] == piece_p || judge_on_line(frame[f_idx], Segment(piece_p, piece[(p_idx+1)%piece.length]))) {
 				frame_buf ~= Point(frame[f_idx], true);
 				point_appended = true;
+				break;
 			}
 		}
 		//線分の間にピースの頂点があった場合追加
@@ -181,8 +186,9 @@ nothrow pure Point[] insert_junction (in P[] frame, in P[] piece) {
 			}
 		}
 		//衝突してなかった場合、点を追加
-		if (!point_appended)
+		if (!point_appended){
 			frame_buf ~= Point(frame[f_idx], false);
+		}
 	}
 	return frame_buf;
 }
@@ -290,34 +296,37 @@ pure nothrow P[][] merge(in P[] frame, in P[] piece) {
 	P[][] shapes;
 	foreach (frame_point; frame_buf) {
 		if (!frame_point.is_junction) continue;
-		P[] take (in Point start, ref Point[] looking, ref Point[] out_of_looking) {
+		P[] take (in Point start, ref Point[] looking, ref Point[] out_of_looking, in Point before_start) {
 			P[] shape;
 			auto idx = find_junction (looking, start.pos);
 			shape ~= looking[idx].pos;
 			for(;;) {
 				idx = (idx + 1) % looking.length;
+				if (before_start.pos == looking[idx].pos)
+					return shape;
 				if (looking[idx].pos == frame_point.pos)
 					return shape;
 				if (looking[idx].is_junction)
-					return shape ~ take(looking[idx], out_of_looking, looking);
+					return shape ~ take(looking[idx], out_of_looking, looking, start);
 				shape ~= looking[idx].pos;
 			}
 		}
-		auto shape = take (frame_point, piece_buf, frame_buf);
-
+		auto not_exist_point = Point (P(int.max, int.max), false);
+		auto shape = take (frame_point, piece_buf, frame_buf, not_exist_point);
 		if (shape.length > 2)
 			shapes ~= [shape];
 	}
 	return shapes;
 }
 unittest {
-	auto s1 = [P(0,0),P(10,0),P(10,10),P(0,10)];
+	auto s1 = [P(0,0),P(10,0),P(10,20),P(0,20)];
 	auto s2 = [P(0,0),P(10,0),P(0,10)];
-	assert (merge (s1, s2) == [[P(0,10),P(10,0),P(10,10)]]);
+	assert (merge (s1, s2) == [[P(0,10),P(10,0),P(10,20),P(0,20)]]);
+	assert (merge (s1, s1) == []);
 }
 
 @safe
-nothrow pure Shape move (in Shape shape,in Vector2i pos) {
+nothrow pure Shape move (in Shape shape,in Pos pos) {
 	auto copy = shape.dup;
 	foreach (ref seg; copy) {
 		seg.start += pos;
@@ -327,11 +336,16 @@ nothrow pure Shape move (in Shape shape,in Vector2i pos) {
 }
 
 @safe
-nothrow pure P[] move (in P[] shape, in Vector2i pos) {
+nothrow pure P[] move (in P[] shape, in Pos pos) {
 	auto copy =  shape.dup;
 	foreach (ref vertex; copy)
 		vertex += pos;
 	return copy;
+}
+
+@safe
+nothrow pure P[] move (in P[] shape, in int x, in int y) {
+	return shape.move(P(x,y));
 }
 
 @safe
@@ -389,7 +403,7 @@ nothrow pure Shape shape_xor (in Shape shape_origin) {
 unittest {
 	import std.algorithm.searching : any;
 	import procon28.basic_data : S, P;
-	alias V = Vector2i;
+	alias V = Pos;
 	auto s1 = [P(0,0), P(10,0),P(0, 10)].vertexies2shape;
 	auto s2 = [P(0,0), P(10,0),P(0, 10)].vertexies2shape;
 	assert (shape_xor(s1 ~ s2) == []);
@@ -429,7 +443,7 @@ nothrow pure bool judge_overlap(in Segment seg1, in Segment seg2) {
 	}
 }
 unittest {
-	alias V = Vector2i;
+	alias V = Pos;
 	alias S = Segment;
 	auto seg1 = S (V(0,0), V(1,1));
 	auto seg2 = S (V(0,0), V(3,3));
@@ -478,12 +492,12 @@ unittest {
 	assert (!judge_intersected(seg5, seg6));
 }
 @safe @nogc
-nothrow pure bool judge_on_line (in Vector2i p, in Segment seg) {
+nothrow pure bool judge_on_line (in Pos p, in Segment seg) {
 	immutable v1 = seg.vec;
 	immutable v2 = p - seg.start;
 	immutable v1_abs_2 = (v1.x^^2+v1.y^^2);
 	immutable v2_abs_2 = (v2.x^^2+v2.y^^2);
-	immutable dot = v1.dotProduct(v2);
+	immutable dot = v1 * v2;
 	//内積が|v1|*|v2|かつ内積が正(角度が同じ)で、v2の長さがv1より短い(線分の中に含まれている)場合は線の上にあるとみなす。
 	return dot > 0 && dot^^2 == v1_abs_2*v2_abs_2 && v1_abs_2 >= v2_abs_2;
 }
@@ -502,23 +516,23 @@ nothrow pure bool judge_cross_horizontal_line (in Segment seg, in int height) {
  + 解けない場合の動作は未定義
  +/
 @safe @nogc
-nothrow pure Vector2f cross_point_of_horizontal_line (in Segment seg, in int height)  {
+nothrow pure Vector!float cross_point_of_horizontal_line (in Segment seg, in int height)  {
 	if (seg.vec.x == 0)
-		return Vector2f (seg.start.x, height);
+		return Vector!float (seg.start.x, height);
 	if (seg.vec.y == 0)
-		return Vector2f (float.infinity, height);
-	return Vector2f ((height - segment_of_line(seg)) * seg.vec.x / seg.vec.y, height);
+		return Vector!float (float.infinity, height);
+	return Vector!float ((height - segment_of_line(seg)) * seg.vec.x / seg.vec.y, height);
 }
 
 @safe @nogc
-nothrow pure Vector2i mid_point (in Segment seg) {
+nothrow pure Pos mid_point (in Segment seg) {
 	return (seg.start + seg.end) / 2;
 }
 
 ///Widing Number Algorithm
 ///FIXME
 @safe
-nothrow pure bool widing_number (in Vector2i p, in Segment[] segments, bool include_on_line = true) {
+nothrow pure bool widing_number (in Pos p, in Segment[] segments, bool include_on_line = true) {
 	int wn;
 	auto sorted = segment_sort(segments);
 	foreach (seg; segments) {
@@ -582,7 +596,7 @@ unittest {
 ///点の図形に対する内外判定
 ///Crossing Number Algorithm
 @safe @nogc
-nothrow pure bool crossing_number (in Vector2i p, in Segment[] segments, bool include_on_line = true) {
+nothrow pure bool crossing_number (in Pos p, in Segment[] segments, bool include_on_line = true) {
 	size_t cross_cnt;
 	foreach (ref seg; segments) {
 		if (judge_on_line(p, seg))
@@ -694,8 +708,13 @@ unittest {
 	auto frame1 = [P(0,0), P(20,0), P(20,40), P(0,40)];
 	auto shape2 = [P(0,0), P(10,10), P(10,0)];
 	auto frame2 = [P(0,0), P(-10,0), P(-10, 10)];
+	auto frame3 = [P(0,0), P(10,0), P(10,20), P(0,20)];
+	auto shape3 = [P(0,20), P(10,20), P(0,30)];
+	auto shape4 = [P(0,0),P(10,0),P(0,10)];
 	assert (!protrude_frame (frame1, shape1)); 
 	assert (protrude_frame(frame2, shape2));
+	assert (protrude_frame(frame3, shape3));
+	assert (!protrude_frame(frame3, shape4));
 }
 
 @safe @nogc
