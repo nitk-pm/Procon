@@ -674,6 +674,23 @@ unittest {
 }
 
 @safe @nogc
+nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
+	foreach (shape_vertex; shape) {
+		if (!crossing_number(shape_vertex, frame))
+			return true;
+	}
+	return false;
+}
+unittest {
+	auto shape1 = [P(0,0), P(0,20), P(20,0)];
+	auto frame1 = [P(0,0), P(20,0), P(20,40), P(0,40)];
+	auto shape2 = [P(0,0), P(10,10), P(10,0)];
+	auto frame2 = [P(0,0), P(-10,0), P(-10, 10)];
+	assert (!protrude_frame (frame1, shape1)); 
+	assert (protrude_frame(frame2, shape2));
+}
+
+@safe @nogc
 nothrow pure size_t shape_idx (in size_t piece_idx, in size_t spin_level) {
 	return piece_idx * 8 + spin_level;
 }
