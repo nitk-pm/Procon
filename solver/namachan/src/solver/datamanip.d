@@ -148,6 +148,174 @@ unittest {
 	import std.stdio;
 }
 
+struct Point {
+	P pos;
+	bool is_junction;
+}
+
+//頂点座標の配列を、ピースと接触している点と接触していない点からなる頂点座標の配列に
+@safe
+nothrow pure Point[] insert_junction (in P[] frame, in P[] piece) {
+		import std.stdio;
+	Point[] frame_buf;
+	foreach (f_idx; 0..frame.length) {
+		bool point_appended;
+		//始点とピースの頂点の何処かが衝突していた場合追加
+		foreach (p_idx,piece_p; piece) {
+			if (frame[f_idx] == piece_p) {
+				frame_buf ~= Point(frame[f_idx], true);
+				point_appended = true;
+			}
+		}
+		//線分の間にピースの頂点があった場合追加
+		foreach (p_idx,piece_p; piece) {
+			//judge_on_lineは線分の終点を含むので、除外
+			if (frame[(f_idx+1)%frame.length] != piece_p
+				&& judge_on_line(piece_p, Segment(frame[f_idx], frame[(f_idx+1)%frame.length]))) {
+				//まだ始点が追加されてなかった場合追加してから線分の間の点を追加
+				if (!point_appended) {
+					frame_buf ~= Point(frame[f_idx], false);
+					point_appended = true;
+				}
+				frame_buf ~= Point(piece_p, true);
+			}
+		}
+		//衝突してなかった場合、点を追加
+		if (!point_appended)
+			frame_buf ~= Point(frame[f_idx], false);
+	}
+	return frame_buf;
+}
+unittest {
+	auto s1 = [P(0,0), P(10,0), P(10,10), P(0,10)];
+	auto s2 = [P(0,0),P(5,0),P(0,10)];
+	auto ans =
+		[Point(P(0,0),true),Point(P(5,0),true),Point(P(10,0),false),Point(P(10,10),false),Point(P(0,10),true)];
+		import std.stdio;
+	assert (insert_junction(s1,s2)==ans);
+}
+@safe @nogc
+nothrow pure size_t find_junction (in Point[] points, in P target) {
+	foreach (idx, point; points) {
+		if (point.pos == target)
+			return idx;
+	}
+	return 0;
+}
+
+@safe @nogc
+nothrow pure bool judge_cross_horizontal_line (in P p, in P start, in P end) {
+	return (start.y - p.y) * (end.y - p.y) < 0;
+}
+
+@safe @nogc
+pure nothrow crossing_number (in P p, in P[] shape, in bool include_on_line = true) {
+	size_t cross_cnt;
+	foreach (idx, vertex1; shape) {
+		auto vertex2 = shape[(idx+1)%shape.length];
+		if (include_on_line && judge_on_line(p, Segment(vertex1,vertex2)))
+			return true;
+		if (vertex1.y == p.y) {
+			//並行の場合は無視
+			if (vertex1.y == vertex2.y)
+				continue;
+			if (vertex1.y < vertex2.y)
+				++cross_cnt;
+		}
+		else if (vertex2.y == p.y) {
+			//並行の場合は無視
+			if (vertex1.y == vertex2.y)
+				continue;
+			if (vertex1.y > vertex2.y)
+				++cross_cnt;
+		}
+		else if (judge_cross_horizontal_line(p, vertex1, vertex2) && (vertex1.x > p.x || vertex2.x > p.x)) {
+			++cross_cnt;
+		}
+	}
+	return cross_cnt % 2 == 1;
+} 
+unittest {
+	auto shape1 = [
+		P(0, 0),
+		P(0, 2),
+		P(2, 2),
+		P(2, 0),
+
+		P(4, 0),
+		P(4, 4),
+		P(6, 4),
+		P(6, 0)
+	];
+	auto pt1 = P (1, 1);
+	auto pt2 = P (2, 3);
+	auto pt3 = P (5, 2);
+	auto pt4 = P (3, 2);
+
+	auto shape2 = [
+		P(0,0), P(0,3),
+		P(3,0), P(0,3),
+		P(3,0), P(0,0)
+	];
+	auto pt5 = P(2,0);
+	auto pt6 = P(1,1);
+
+	auto shape3 = [P(0,0), P(-10,0), P(-10, 10)];
+	auto pt7 = P(10,10);
+
+	auto shape4 = [S(P (0, 0), P(20, 0)), S(P (20, 0), P(20, 40)), S(P (20, 40), P(0, 40)), S(P (0, 40), P(0, 0))];
+	auto pt8 = P (0,20);
+	auto pt9 = P (20,0);
+	assert (crossing_number(pt1, shape1));
+	assert (!crossing_number(pt2, shape1));
+	assert (crossing_number(pt3, shape1));
+	assert (!crossing_number(pt4, shape1));
+
+	assert (crossing_number(pt5, shape2));
+	assert (crossing_number(pt6, shape2));
+
+	assert (!crossing_number(pt7, shape3));
+
+	assert (crossing_number(pt8,shape4));
+	assert (crossing_number(pt9,shape4));
+}
+
+@safe
+pure nothrow P[][] merge(in P[] frame, in P[] piece) {
+	import std.range : retro, array;
+	Point[] frame_buf;
+	Point[] piece_buf;
+	frame_buf = insert_junction(frame, piece);
+	piece_buf = insert_junction(piece, frame).retro.array;
+	P[][] shapes;
+	foreach (frame_point; frame_buf) {
+		if (!frame_point.is_junction) continue;
+		P[] take (in Point start, ref Point[] looking, ref Point[] out_of_looking) {
+			P[] shape;
+			auto idx = find_junction (looking, start.pos);
+			shape ~= looking[idx].pos;
+			for(;;) {
+				idx = (idx + 1) % looking.length;
+				if (looking[idx].pos == frame_point.pos)
+					return shape;
+				if (looking[idx].is_junction)
+					return shape ~ take(looking[idx], out_of_looking, looking);
+				shape ~= looking[idx].pos;
+			}
+		}
+		auto shape = take (frame_point, piece_buf, frame_buf);
+
+		if (shape.length > 2)
+			shapes ~= [shape];
+	}
+	return shapes;
+}
+unittest {
+	auto s1 = [P(0,0),P(10,0),P(10,10),P(0,10)];
+	auto s2 = [P(0,0),P(10,0),P(0,10)];
+	assert (merge (s1, s2) == [[P(0,10),P(10,0),P(10,10)]]);
+}
+
 @safe
 nothrow pure Shape move (in Shape shape,in Vector2i pos) {
 	auto copy = shape.dup;
