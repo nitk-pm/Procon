@@ -1,13 +1,16 @@
-from watchdog.events import FileSystemEventHandler
+from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
+import subprocess
 
 
-class ChangeHandler(FileSystemEventHandler):
+class ChangeHandler(PatternMatchingEventHandler):
 
     def on_created(self, event):
         if event.is_directory:
             return
         print('created: {}'.format(event.src_path))
+        data = subprocess.run(['zbar/zbarimg', '--verbose=1', event.src_path])
+        print(data)
 
     def on_modified(self, event):
         if event.is_directory:
@@ -26,15 +29,14 @@ class ChangeHandler(FileSystemEventHandler):
 
 
 if __name__ in '__main__':
-    while True:
-        event_handler = ChangeHandler()
-        observer = Observer()
-        observer.schedule(event_handler, './', recursive=True)
-        observer.start()
-        try:
-            import time
-            while True:
-                time.sleep(1)
-        except:
-            observer.stop()
-        observer.join()
+    event_handler = ChangeHandler(patterns='*.png')
+    observer = Observer()
+    observer.schedule(event_handler, './', recursive=True)
+    observer.start()
+    try:
+        import time
+        while True:
+            time.sleep(1)
+    except:
+        observer.stop()
+    observer.join()
