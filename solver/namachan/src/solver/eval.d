@@ -37,7 +37,8 @@ unittest {
 	assert (angle_and_points (frame, shape.move(P (10, 10))) == 3);
 }
 
-float eval_basic (in P[] frame, in P[] piece) {
+@safe @nogc
+pure nothrow float eval_basic (in P[] frame, in P[] piece) {
 	float point_conflict = 0.0f;
 	foreach (piece_point; piece) {
 		auto frame_point2 = frame[$-1];
