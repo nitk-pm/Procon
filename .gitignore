@@ -1,0 +1,28 @@
+bin
+
+build
+
+namachan/solver/dlang/\.atom-build\.yml
+namachan/solver/dlang/dub\.selections\.json
+namachan/solver/dlang/procon-solver
+namachan/solver/dlang/procon-solver-test-library
+namachan/solver/dlang/.vscode/
+
+__pycache__
+.vscode
+
+# binary file
+*.o
+*.out
+*.exe
+
+*.a
+*.lib
+
+*.so
+*.dll
+
+*_rc.py
+
+# log file
+*.log

@@ -1,0 +1,16 @@
+<RCC>
+  <qresource prefix="actions">
+    <file>icons/export.png</file>
+    <file>icons/edge.png</file>
+    <file>icons/edge_checked.png</file>
+    <file>icons/select.png</file>
+    <file>icons/select_checked.png</file>
+    <file>icons/delete.png</file>
+    <file>icons/redo.png</file>
+    <file>icons/undo.png</file>
+    <file>icons/preview.png</file>
+    <file>icons/open.png</file>
+    <file>icons/save.png</file>
+    <file>icons/new.png</file>
+  </qresource>
+</RCC>
