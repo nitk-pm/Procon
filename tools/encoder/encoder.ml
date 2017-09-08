@@ -35,7 +35,7 @@ let rotate_270 = matrix_mul_2x2_2x1 (gen_matrix4rotate (pi *. 1.5))
 let turn_over  = matrix_mul_2x2_2x1 (-1, 0, 0, 1)
 
 let add_turn_over pos_list =
-	[pos_list; Core.List.map pos_list turn_over]
+	[pos_list; pos_list |> Core.List.map ~f:turn_over |> Core.List.rev]
 
 let add_rotated pos_list = [
 		pos_list;
