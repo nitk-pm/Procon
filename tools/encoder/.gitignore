@@ -1,0 +1,17 @@
+# hidden file
+.omakedb
+.omakedb.lock
+
+# cache file
+*.cm*
+OMakefile.omc
+OMakeroot.omc
+
+# binary file
+encoder
+*.o
+*.opt
+
+# problem file
+*.json
+*.txt
