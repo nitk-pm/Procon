@@ -91,7 +91,7 @@ let output_pieces pieces =
 	|> Core.List.map ~f:add_patterns
 	|> Core.List.map ~f:(Core.List.map ~f:normalize)
 	|> construct_piece_json
-	|> Yojson.to_string
+	|> Yojson.pretty_to_string
 	|> output_string piece_channel
 
 let output_frame frame =
@@ -100,7 +100,7 @@ let output_frame frame =
 	|> Core.List.map ~f:parse_piece
 	|> Core.List.map ~f:normalize
 	|> construct_frame_json
-	|> Yojson.to_string
+	|> Yojson.pretty_to_string
 	|> output_string frame_channel
 
 let rec read_all () =
