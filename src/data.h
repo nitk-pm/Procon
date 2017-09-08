@@ -13,9 +13,9 @@ public:
 
         int x, y;
 
-        void renewPosition(double a, double b) { x = a; y = b; return; }
+        void renewPosition(int a, int b) { x = a; y = b; return; }
         Position() {};
-        Position(double xValue, double yValue) { x = xValue; y = yValue; }
+        Position(int xValue, int yValue) { x = xValue; y = yValue; }
 };
 
 bool Position::operator<(const Position& p)const {
@@ -179,6 +179,13 @@ public:
                 lineCalculation();
                 return;
         };
+
+        Frame(Piece p) {
+                //vertexPositionList.reserve(p.vertexPositionList.size());
+                for (int i = 0; i < p.vertexPositionList.size(); ++i)
+                        vertexPositionList.push_back(p.vertexPositionList.at(i));
+                this->lineList = p.lineList;
+        }
 
         void addFrame(Piece p) {
                 for (int k = 0; k < this->vertexPositionList.size() - 1; ++k) {//Frameのなす線分のループ
