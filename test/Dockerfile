@@ -29,3 +29,10 @@ RUN wget https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh -O - |
 ENV OPAMDOWNLOADJOBS 1
 RUN opam init -y -a --comp=4.04.0
 RUN opam install -y yojson omake
+
+RUN echo 'eval `opam config env`' > ~/.bashrc
+
+RUN mkdir ci
+WORKDIR ci
+
+ENTRYPOINT ["bin/bash"]
