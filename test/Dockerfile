@@ -21,7 +21,7 @@ RUN sh ~/dlang/dmd-2.076.0/activate
 RUN apt-get install -qy dub
 RUN apt-get install -qy python3
 RUN apt-get install -qy python-pip
-RUn pip install PyYAML
+RUN pip install PyYAML
 RUN pip install jsonschema
 RUN apt-get install -qy m4
 RUN apt-get install -qy unzip
