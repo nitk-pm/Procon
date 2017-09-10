@@ -3,7 +3,7 @@ PROGRAM = encoder
 USE_OCAMLFIND = true
 
 OCAMLPACKS[] =
-	core
+	str
 	yojson
 
 OCAMLFLAGS += -thread -warn-error A

@@ -6,14 +6,14 @@ type pos_t = int * int
 (*string -> string list*)
 let split_piece str =
 	str
-	|> Core.String.split ~on:':'
+	|> Str.split (Str.regexp ":")
 
 (*空白区切りの文字列を整数のリストに変換*)
 (*string -> int list*)
 let ints_of_string str = str
-	|> Core.String.split ~on:' '
-	|> Core.List.filter ~f:(fun x -> (Core.String.length x) != 0)
-	|> Core.List.map ~f:(fun x -> int_of_string x)
+	|> Str.split (Str.regexp " ")
+	|> List.filter (fun x -> (String.length x) != 0)
+	|> List.map (fun x -> int_of_string x)
 
 (*xとyが交互に並んだリストからpos_tのリストに変換*)
 (*int list -> pos_t list*)
@@ -53,15 +53,15 @@ let turn_over  = matrix_mul_2x2_2x1 (-1, 0, 0, 1)
 (* pos_t list -> pos_t list list*)
 let add_turn_over pos_list =
 	(*反転させた場合、回転方向が逆になるのでリストを逆順にする*)
-	[pos_list; pos_list |> Core.List.map ~f:turn_over |> Core.List.rev]
+	[pos_list; pos_list |> List.map turn_over |> List.rev]
 
 (*形状に90度ずつ回転したものを追加*)
 (* pos_t list -> pos_t list list*)
 let add_rotated pos_list = [
 		pos_list;
-		Core.List.map pos_list rotate_90;
-		Core.List.map pos_list rotate_180;
-		Core.List.map pos_list rotate_270;
+		List.map rotate_90  pos_list;
+		List.map rotate_180 pos_list;
+		List.map rotate_270 pos_list;
 	]
 
 (*裏表、回転4バージョンで計8パターンの回転状態を計算*)
@@ -69,15 +69,15 @@ let add_rotated pos_list = [
 let add_patterns pos_list =
 	pos_list
 	|> add_turn_over
-	|> Core.List.map ~f:add_rotated
-	|> Core.List.join
+	|> List.map add_rotated
+	|> List.flatten
 
 (*形状を表すjson valueを構築*)
 (* pos_t list -> Yojson.json*)
 let construct_shape_json shape =
 	`List (
 		shape
-		|> Core.List.map ~f:(function
+		|> List.map (function
 			(x, y) -> `Assoc [("x", `Int x); ("y", `Int y)])
 	)
 
@@ -86,7 +86,7 @@ let construct_shape_json shape =
 let construct_shapes_json shapes =
 	`Assoc [
 		("shapes", `List (
-			shapes |> Core.List.map ~f:construct_shape_json
+			shapes |> List.map construct_shape_json
 		))
 	]
 
@@ -96,7 +96,7 @@ let construct_piece_json pieces =
 	`Assoc [
 		("pieces", `List (
 			pieces
-			|> Core.List.map ~f:construct_shapes_json
+			|> List.map construct_shapes_json
 		))
 	]
 
@@ -106,13 +106,13 @@ let extract_min_pos shape =
 	let folder p min_p = match (p, min_p) with
 		((p_x, p_y), (min_p_x, min_p_y)) ->
 			(min p_x min_p_x, min p_y min_p_y) in
-	Core.List.fold_left shape ~init:(max_int, max_int) ~f:folder
+	List.fold_left folder (max_int, max_int) shape
 
 (*x,yの座標が必ず正になるように*)
 (*pos_t list -> pos_t list*)
 let normalize shape =
 	let (min_x, min_y) = extract_min_pos shape in
-	Core.List.map shape (function (x,y) -> (x - min_x, y - min_y))
+	List.map (function (x,y) -> (x - min_x, y - min_y)) shape
 
 (*frameを表すjson valueの構築(中身はconstruct_shapes_jsonと同じで良い)*)
 (*pos_t list list -> Yojson.json*)
@@ -122,9 +122,9 @@ let construct_frame_json = construct_shapes_json
 let output_pieces pieces =
 	let piece_channel = open_out "piece.json" in
 	pieces
-	|> Core.List.map ~f:parse_piece
-	|> Core.List.map ~f:add_patterns
-	|> Core.List.map ~f:(Core.List.map ~f:normalize)
+	|> List.map parse_piece
+	|> List.map add_patterns
+	|> List.map (List.map normalize)
 	|> construct_piece_json
 	|> Yojson.pretty_to_string
 	|> output_string piece_channel
@@ -133,11 +133,22 @@ let output_pieces pieces =
 let output_frame frames =
 	let frame_channel = open_out "frame.json" in
 	frames
-	|> Core.List.map ~f:parse_piece
-	|> Core.List.map ~f:normalize
+	|> List.map parse_piece
+	|> List.map normalize
 	|> construct_frame_json
 	|> Yojson.pretty_to_string
 	|> output_string frame_channel
+
+let rec slice l b e =
+	let rec take n = function
+		| [] -> []
+		| h :: t -> if n = 0 then [] else h :: take (n - 1) t
+	in
+	let rec drop n = function
+		| [] -> []
+		| h :: t as l -> if n = 0 then l else drop (n - 1) t
+	in
+	drop b l |> take (e - b + 1)
 
 (*標準入力から読み込み,フレームのリストと形状のリストを分ける*)
 (* unit -> int list list * int list list*)
@@ -146,14 +157,14 @@ let rec read_all () =
 	let splited_input =
 		read_line ()
 		|> split_piece
-		|> Core.List.map ~f:ints_of_string
+		|> List.map ints_of_string
 	in match splited_input with
 	(*グリッド数情報の切り落とし*)
 	| [pieces_num] :: shapes_with_grid_num ->
-		let shapes = Core.List.map shapes_with_grid_num ~f:Core.List.tl_exn in
-		let shape_length = Core.List.length shapes in
-		let pieces = Core.List.slice shapes 0 pieces_num in
-		let frames = Core.List.slice shapes pieces_num shape_length in
+		let shapes = List.map List.tl shapes_with_grid_num in
+		let shape_length = List.length shapes in
+		let pieces = slice shapes 0 pieces_num in
+		let frames = slice shapes pieces_num shape_length in
 		(*まだ入力があれば次の入力の結果と結合*)
 		begin try
 			let (pieces_next, frames_next) = read_all () in
