@@ -31,6 +31,7 @@ RUN opam init -y -a --comp=4.04.0
 RUN opam install -y yojson omake
 
 RUN echo 'eval `opam config env`' > ~/.bashrc
+RUN echo 'source ~/dlang/dmd-2.076.0/activate' >> ~/.bashrc
 
 RUN mkdir ci
 WORKDIR ci
