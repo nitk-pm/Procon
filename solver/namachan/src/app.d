@@ -16,4 +16,5 @@ void main(string[] args){
 	if (piece_file_name == "" || frame_file_name == "") throw new Exception ("solver need piece and frame defination file");
 	auto frame = frame_file_name.readText.decode_frame;
 	auto piece = piece_file_name.readText.decode_piece;
+	beam_search!eval_basic(piece, frame, width);
 }
