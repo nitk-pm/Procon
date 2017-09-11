@@ -16,6 +16,7 @@ RUN apt-get install -qy xz-utils
 RUN apt-get install -qy tar
 RUN apt-get install -qy wget
 RUN apt-get install -qy curl
+RUN apt-get install -qy libcurl4-gnutls-dev
 RUN curl -fsS https://dlang.org/install.sh | bash -s dmd
 RUN sh ~/dlang/dmd-2.076.0/activate
 RUN apt-get install -qy dub
@@ -35,4 +36,4 @@ RUN echo 'eval `opam config env`' > ~/.bashrc
 RUN mkdir ci
 WORKDIR ci
 
-ENTRYPOINT ["bin/bash"]
+ENTRYPOINT ["/bin/bash"]
