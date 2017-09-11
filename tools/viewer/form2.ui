@@ -231,7 +231,12 @@ background-color: rgb(66, 66, 66);</string>
              </property>
              <property name="font">
               <font>
-               <pointsize>18</pointsize>
+               <family>Consolas</family>
+               <pointsize>14</pointsize>
+               <weight>50</weight>
+               <italic>false</italic>
+               <bold>false</bold>
+               <strikeout>false</strikeout>
               </font>
              </property>
              <property name="cursor">
@@ -242,7 +247,17 @@ background-color: rgb(66, 66, 66);</string>
 background-color: rgb(66, 66, 66);</string>
              </property>
              <property name="text">
-              <string>...</string>
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="viewer.qrc">
+               <normaloff>:/icons/icons/reference.png</normaloff>:/icons/icons/reference.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>30</width>
+               <height>30</height>
+              </size>
              </property>
              <property name="autoDefault">
               <bool>false</bool>
@@ -458,6 +473,7 @@ background-color: rgb(66, 66, 66);</string>
         <property name="midLineWidth">
          <number>2</number>
         </property>
+        <layout class="QGridLayout" name="gridLayout_2"/>
        </widget>
       </item>
      </layout>

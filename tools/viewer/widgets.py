@@ -1,7 +1,7 @@
 from PyQt5.QtCore import (
     Qt,
     QSize,
-    pyqtSlot
+    pyqtSlot,
 )
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -9,14 +9,48 @@ from PyQt5.QtWidgets import (
     QFrame,
     QListWidgetItem,
     QStyle,
-    QStyleOption
+    QStyleOption,
+    QPushButton,
+    QGridLayout,
+    QHBoxLayout
 )
 from PyQt5.QtGui import (
     QPainter,
     QPen,
+    QPixmap,
+    QIcon
 )
 from PyQt5 import uic
 from util import Converter
+
+
+class OptionBox(QFrame):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFrameShape(QFrame.NoFrame)
+        self.setFrameShadow(QFrame.Plain)
+        self.box = QHBoxLayout(self)
+        self.box.setContentsMargins(0, 0, 0, 0)
+        self.box.setSpacing(1)
+        self.rotate_right = QPushButton(self)
+        icon_right = QIcon()
+        icon_right.addPixmap(
+            QPixmap(':/icons/icons/rotate-right.png'),
+            QIcon.Normal,
+            QIcon.Off
+        )
+        self.rotate_right.setIcon(icon_right)
+        self.rotate_left = QPushButton(self)
+        icon_left = QIcon()
+        icon_left.addPixmap(
+            QPixmap(':/icons/icons/rotate-left.png'),
+            QIcon.Normal,
+            QIcon.Off
+        )
+        self.rotate_left.setIcon(icon_left)
+        self.box.addWidget(self.rotate_left)
+        self.box.addWidget(self.rotate_right)
 
 
 class PolygonWidget(QFrame):
@@ -32,6 +66,18 @@ class PolygonWidget(QFrame):
         self.polygon = None
         self.scale = 1
         self.margin = 10
+        self.show_option = False
+
+    def create_option(self):
+        import viewer_rc
+        self.grid_layout = QGridLayout(self)
+        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        self.option_box = OptionBox(self)
+        self.grid_layout.addWidget(
+            self.option_box, 0, 1, 1, 1,
+            Qt.AlignTop | Qt.AlignRight
+            )
+        self.option_box.setVisible(self.show_option)
 
     def set_polygon(self, polygon):
         self.polygon = polygon
@@ -50,6 +96,7 @@ class PolygonWidget(QFrame):
         )
 
     def paintEvent(self, event):
+        super().paintEvent(event)
         painter = QPainter(self)
 
         opt = QStyleOption()
@@ -113,6 +160,7 @@ class MainWindow(QMainWindow):
         widget = PolygonWidget()
         widget.set_polygon(piece)
         widget.set_scale(6)
+        widget.create_option()
         s = widget.size()
         s.setWidth(s.width() + widget.margin * 2)
         s.setHeight(s.height() + widget.margin * 2)
