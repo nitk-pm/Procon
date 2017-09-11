@@ -12,6 +12,7 @@ RUN apt-get install -qy git
 RUN apt-get install -qy clang
 RUN apt-get install -qy gcc
 RUN apt-get install -qy curl
+RUN apt-get install -qy libcurl4-gnutls-dev
 RUN apt-get install -qy xz-utils
 RUN apt-get install -qy tar
 RUN apt-get install -qy wget
