@@ -100,7 +100,8 @@ pure const(Situation)[] eval_all(alias EvalFunc)(in P[][][] pieces,in Situation 
 	return situaions;
 }
 
-const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, size_t beam_width) {
+@safe
+pure const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, size_t beam_width) {
 	BitField!128 mask_base;
 	foreach (idx; pieces.length..128)
 		mask_base[idx] = true;
