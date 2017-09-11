@@ -5,6 +5,7 @@ jobs:
       - image: namachan10777/procon:develop
     working_directory: /ci
     steps:
+      - checkout
       - run:
           name: namachan_solver
           command: dub test --root=./solver/namachan/
