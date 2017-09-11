@@ -35,4 +35,4 @@ RUN echo 'eval `opam config env`' > ~/.bashrc
 RUN mkdir ci
 WORKDIR ci
 
-ENTRYPOINT ["bin/bash"]
+ENTRYPOINT ["/bin/bash"]
