@@ -93,51 +93,8 @@ public:
 	}
 }
 
-///線分
-struct Segment {
-
-	///始点
-	Pos start;
-	///終点
-	Pos end;
-
-	///等価比較演算子
-	@safe @nogc
-	nothrow pure bool opEquals(in Segment seg) const {
-		return (this.start == seg.start && this.end == seg.end) || (this.start == seg.end && this.end == seg.start);
-	}
-
-	@safe
-	nothrow size_t toHash () const {
-		import std.typecons;
-		auto start_hash = tuple(start.x, start.y).toHash;
-		auto end_hash = tuple(start.x, start.y).toHash;
-		if (start_hash > end_hash)
-			return tuple(start_hash, end_hash).toHash;
-		else
-			return tuple(end_hash, start_hash).toHash;
-	}
-	unittest {
-		assert (Segment(Pos(0, 5), Pos(3, 2)).toHash == Segment(Pos(3, 2), Pos(0, 5)).toHash );
-	}
-	@safe 
-	pure string toString() const {
-		import std.format : format;
-		return format ("S(V (%d, %d), V(%d, %d))", start.x, start.y, end.x, end.y);
-	}
-
-	///線分からベクトルを計算
-	@property @nogc @safe
-	nothrow pure Pos vec () const {
-		return end - start;
-	}
-}
-
 alias Pos = Vector!int;
 alias P = Pos;
-alias S = Segment;
-alias Shape = Segment[];
-alias Piece = Shape[];
 
 struct BitField(alias size) {
 private:

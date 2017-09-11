@@ -1,7 +1,6 @@
 module procon28.decoder;
 
-import procon28.basic_data : Segment, Piece, Shape, Pos, P;
-import procon28.solver.datamanip : vertexies2shape;
+import procon28.basic_data : Pos, P;
 
 import std.conv : to;
 import std.json : parseJSON, JSONValue;

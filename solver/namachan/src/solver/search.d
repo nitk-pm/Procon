@@ -1,7 +1,7 @@
 module procon28.solver.search;
 
-import procon28.basic_data : P, S, Piece, Shape, Segment, BitField, Situation, PlacedShape, Pos;
-import procon28.solver.datamanip : merge, move, vertexies2shape;
+import procon28.basic_data : P, BitField, Situation, PlacedShape, Pos;
+import procon28.solver.datamanip : merge, move;
 import procon28.solver.eval : eval_basic;
 
 import std.algorithm.iteration : map;
@@ -9,27 +9,6 @@ import std.conv;
 import std.range : array;
 import std.stdio;
 import std.array : join;
-
-///操作を記録する構造体
-struct Op {
-	///ピース番号
-	const size_t piece_idx;
-	const size_t shape_idx;
-	///使われたピースの形状
-	const Shape shape;
-	const Shape frame;
-	///位置
-	const Pos pos;
-	///評価値
-	const float val;
-}
-
-struct Procedure {
-	Op[] ops;
-	bool[] used_mask;
-	Shape frame;
-	float val;
-}
 
 /++
  + なぜphobosのソートアルゴリズムは破壊的なのか。
@@ -63,14 +42,6 @@ nothrow pure auto sort(alias compare, T)(inout T[] ops) {
 	}
 	auto center_idx = ops.length / 2;
 	return merge (sort!compare(ops[0..center_idx]), sort!compare(ops[center_idx..$]));
-}
-
-import std.typecons : Tuple, tuple;
-alias key_t = Tuple!(const size_t, const size_t, const(Segment)[], const int, const int);
-float[key_t] hash;
-@safe
-nothrow pure key_t toHash(in size_t piece_idx, in size_t spin_level, in Shape shape, in Pos pos) {
-	return tuple(piece_idx, spin_level, shape, pos.x, pos.y);
 }
 
 @safe
