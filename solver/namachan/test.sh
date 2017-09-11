@@ -1,3 +1,3 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 dub test --root=`dirname $0`
