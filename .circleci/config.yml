@@ -8,4 +8,4 @@ jobs:
       - checkout
       - run:
           name: namachan_solver
-          command: dub test --root=./solver/namachan/
+          command: ./solver/namachan/test.sh
