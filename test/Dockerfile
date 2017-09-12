@@ -12,6 +12,7 @@ RUN apt-get install -qy git
 RUN apt-get install -qy clang
 RUN apt-get install -qy gcc
 RUN apt-get install -qy curl
+RUN apt-get install -qy libcurl4-gnutls-dev
 RUN apt-get install -qy xz-utils
 RUN apt-get install -qy tar
 RUN apt-get install -qy wget
@@ -32,6 +33,7 @@ RUN opam init -y -a --comp=4.04.0
 RUN opam install -y yojson omake
 
 RUN echo 'eval `opam config env`' > ~/.bashrc
+RUN echo 'source ~/dlang/dmd-2.076.0/activate' >> ~/.bashrc
 
 RUN mkdir ci
 WORKDIR ci
