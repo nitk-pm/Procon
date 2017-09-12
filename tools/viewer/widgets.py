@@ -24,35 +24,6 @@ from PyQt5 import uic
 from models import ProblemData
 
 
-# class OptionBox(QFrame):
-
-#     def __init__(self, parent=None):
-#         super().__init__(parent)
-#         self.setFrameShape(QFrame.NoFrame)
-#         self.setFrameShadow(QFrame.Plain)
-#         self.box = QHBoxLayout(self)
-#         self.box.setContentsMargins(0, 0, 0, 0)
-#         self.box.setSpacing(1)
-#         self.rotate_right = QPushButton(self)
-#         icon_right = QIcon()
-#         icon_right.addPixmap(
-#             QPixmap(':/icons/icons/rotate-right.png'),
-#             QIcon.Normal,
-#             QIcon.Off
-#         )
-#         self.rotate_right.setIcon(icon_right)
-#         self.rotate_left = QPushButton(self)
-#         icon_left = QIcon()
-#         icon_left.addPixmap(
-#             QPixmap(':/icons/icons/rotate-left.png'),
-#             QIcon.Normal,
-#             QIcon.Off
-#         )
-#         self.rotate_left.setIcon(icon_left)
-#         self.box.addWidget(self.rotate_left)
-#         self.box.addWidget(self.rotate_right)
-
-
 class PolygonWidget(QFrame):
 
     def __init__(self, parent=None):
@@ -66,17 +37,6 @@ class PolygonWidget(QFrame):
         self.polygon = None
         self.scale = 1
         self.margin = 10
-
-    # def create_option(self):
-    #     import viewer_rc
-    #     self.grid_layout = QGridLayout(self)
-    #     self.grid_layout.setContentsMargins(0, 0, 0, 0)
-    #     self.option_box = OptionBox(self)
-    #     self.grid_layout.addWidget(
-    #         self.option_box, 0, 1, 1, 1,
-    #         Qt.AlignTop | Qt.AlignRight
-    #         )
-    #     self.option_box.setVisible(self.show_option)
 
     def set_polygon(self, polygon):
         self.polygon = polygon
@@ -122,6 +82,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.ui.open_file.clicked.connect(self.open_file)
+        self.ui.problem_list.currentTextChanged.connect(self.load_data)
 
     @pyqtSlot()
     def open_file(self):
@@ -139,16 +100,24 @@ class MainWindow(QMainWindow):
 
         with open(filename) as file:
             data = file.read()
-            self.problem_data = ProblemData(filename, data)
+            problem_data = ProblemData(filename, data)
+            self.ui.problem_list.addItem(
+                problem_data.display_name,
+                problem_data
+            )
+            self.ui.problem_list.setCurrentText(problem_data.display_name)
 
-            self.ui.piece_view.clear()
-            for piece in self.problem_data.pieces:
-                self.add_piece(piece[0])
+    @pyqtSlot(str)
+    def load_data(self, text):
+        problem_data = self.ui.problem_list.currentData()
+        self.ui.piece_view.clear()
+        for piece in problem_data.pieces:
+            self.add_piece(piece[0])
 
-            self.ui.frame_view.set_polygon(self.problem_data.frame[0])
-            self.ui.frame_view.set_scale(6)
+        self.ui.frame_view.set_polygon(problem_data.frame[0])
+        self.ui.frame_view.set_scale(6)
 
-            self.ui.num_piece.setText('{}'.format(self.problem_data.num_piece))
+        self.ui.num_piece.setText('{}'.format(problem_data.num_piece))
 
     def add_piece(self, piece):
         widget = PolygonWidget()

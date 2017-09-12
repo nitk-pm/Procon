@@ -5,7 +5,9 @@ from util import ProblemDecoder
 class ProblemData(object):
 
     def __init__(self, filename: str, data: str=None):
+        self.full_path = filename
         self.dir_path, self.filename = os.path.split(filename)
+        self.display_name = self.filename.rsplit('.', 1)[0]
         self.decoder = ProblemDecoder()
         if data is not None:
             self.set_data(data)

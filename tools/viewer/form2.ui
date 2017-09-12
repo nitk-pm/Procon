@@ -381,7 +381,7 @@ background-color: rgb(66, 66, 66);</string>
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="filename">
+            <widget class="QComboBox" name="problem_list">
              <property name="font">
               <font>
                <family>Consolas</family>
