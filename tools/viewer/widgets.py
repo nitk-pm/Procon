@@ -21,36 +21,36 @@ from PyQt5.QtGui import (
     QIcon
 )
 from PyQt5 import uic
-from util import Converter
+from models import ProblemData
 
 
-class OptionBox(QFrame):
+# class OptionBox(QFrame):
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setFrameShape(QFrame.NoFrame)
-        self.setFrameShadow(QFrame.Plain)
-        self.box = QHBoxLayout(self)
-        self.box.setContentsMargins(0, 0, 0, 0)
-        self.box.setSpacing(1)
-        self.rotate_right = QPushButton(self)
-        icon_right = QIcon()
-        icon_right.addPixmap(
-            QPixmap(':/icons/icons/rotate-right.png'),
-            QIcon.Normal,
-            QIcon.Off
-        )
-        self.rotate_right.setIcon(icon_right)
-        self.rotate_left = QPushButton(self)
-        icon_left = QIcon()
-        icon_left.addPixmap(
-            QPixmap(':/icons/icons/rotate-left.png'),
-            QIcon.Normal,
-            QIcon.Off
-        )
-        self.rotate_left.setIcon(icon_left)
-        self.box.addWidget(self.rotate_left)
-        self.box.addWidget(self.rotate_right)
+#     def __init__(self, parent=None):
+#         super().__init__(parent)
+#         self.setFrameShape(QFrame.NoFrame)
+#         self.setFrameShadow(QFrame.Plain)
+#         self.box = QHBoxLayout(self)
+#         self.box.setContentsMargins(0, 0, 0, 0)
+#         self.box.setSpacing(1)
+#         self.rotate_right = QPushButton(self)
+#         icon_right = QIcon()
+#         icon_right.addPixmap(
+#             QPixmap(':/icons/icons/rotate-right.png'),
+#             QIcon.Normal,
+#             QIcon.Off
+#         )
+#         self.rotate_right.setIcon(icon_right)
+#         self.rotate_left = QPushButton(self)
+#         icon_left = QIcon()
+#         icon_left.addPixmap(
+#             QPixmap(':/icons/icons/rotate-left.png'),
+#             QIcon.Normal,
+#             QIcon.Off
+#         )
+#         self.rotate_left.setIcon(icon_left)
+#         self.box.addWidget(self.rotate_left)
+#         self.box.addWidget(self.rotate_right)
 
 
 class PolygonWidget(QFrame):
@@ -66,18 +66,17 @@ class PolygonWidget(QFrame):
         self.polygon = None
         self.scale = 1
         self.margin = 10
-        self.show_option = False
 
-    def create_option(self):
-        import viewer_rc
-        self.grid_layout = QGridLayout(self)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
-        self.option_box = OptionBox(self)
-        self.grid_layout.addWidget(
-            self.option_box, 0, 1, 1, 1,
-            Qt.AlignTop | Qt.AlignRight
-            )
-        self.option_box.setVisible(self.show_option)
+    # def create_option(self):
+    #     import viewer_rc
+    #     self.grid_layout = QGridLayout(self)
+    #     self.grid_layout.setContentsMargins(0, 0, 0, 0)
+    #     self.option_box = OptionBox(self)
+    #     self.grid_layout.addWidget(
+    #         self.option_box, 0, 1, 1, 1,
+    #         Qt.AlignTop | Qt.AlignRight
+    #         )
+    #     self.option_box.setVisible(self.show_option)
 
     def set_polygon(self, polygon):
         self.polygon = polygon
@@ -118,14 +117,11 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        Ui = uic.loadUiType('form.ui')[0]
+        Ui = uic.loadUiType('form2.ui')[0]
         self.ui = Ui()
         self.ui.setupUi(self)
-        self.number = 0
-        self.dir_path = ''
-        self.filename = ''
 
-        self.ui.open.clicked.connect(self.open_file)
+        self.ui.open_file.clicked.connect(self.open_file)
 
     @pyqtSlot()
     def open_file(self):
@@ -134,33 +130,30 @@ class MainWindow(QMainWindow):
         filename = QFileDialog.getOpenFileName(
             self,
             'Read File',
-            self.dir_path,
+            '',
             'official format (*.txt)'
-        )
+        )[0]
 
-        if filename[0] == '':
+        if filename == '':
             return
 
-        with open(filename[0]) as file:
+        with open(filename) as file:
             data = file.read()
-            converter = Converter(data)
+            self.problem_data = ProblemData(filename, data)
 
             self.ui.piece_view.clear()
-            for piece in converter.pieces:
-                self.add_piece(piece)
+            for piece in self.problem_data.pieces:
+                self.add_piece(piece[0])
 
-            self.ui.frame_view.set_polygon(converter.frame)
+            self.ui.frame_view.set_polygon(self.problem_data.frame[0])
             self.ui.frame_view.set_scale(6)
 
-            self.dir_path, self.filename = os.path.split(filename[0])
-            self.ui.filename.setText(self.filename)
-            self.ui.pieces.display(converter.number)
+            self.ui.num_piece.setText('{}'.format(self.problem_data.num_piece))
 
     def add_piece(self, piece):
         widget = PolygonWidget()
         widget.set_polygon(piece)
         widget.set_scale(6)
-        widget.create_option()
         s = widget.size()
         s.setWidth(s.width() + widget.margin * 2)
         s.setHeight(s.height() + widget.margin * 2)
