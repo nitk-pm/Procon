@@ -1,51 +1,13 @@
 module procon28.visualize.window;
 
-static import ar = armos;
+import procon28.basic_data : P;
 
-import armos.math.vector : Vector3f;
-
-import procon28.basic_data : Segment;
+import derelict.sdl2.sdl;
 
 static this () {
 	DerelictSDL2.load();
 	SDL_Init(SDL_INIT_EVERYTHING);
 }
-
-///armosを使って作られたデバッグ用簡易ビジュアライザ
-class Visualizer : ar.app.BaseApp {
-private:
-	ar.graphics.Mesh[] lines;
-public:
-	override void setup () {
-	}
-
-	override void update () {
-	}
-
-	override void draw () {
-		foreach (line; lines) {
-			line.drawFill;
-		}
-	}
-
-///描画する線分の集合をセット
-	void addLines (in Segment[] segs) {
-		foreach (seg; segs) {
-			lines ~= ar.graphics.linePrimitive ([
-				Vector3f (seg.start.x, seg.start.y, 0),
-				Vector3f (seg.end.x  , seg.end.y  , 0),
-			]);
-		}
-	}
-}
-
-void launch(in Segment[] segs) {
-	auto win = new Visualizer;
-	win.addLines (segs);
-	ar.app.run(win);
-}
-
-import derelict.sdl2.sdl;
 
 class Window {
 	SDL_Window *win;
@@ -57,13 +19,17 @@ class Window {
 		SDL_CreateWindowAndRenderer (500,500, SDL_WINDOW_SHOWN, &win, &ren);
 		live = true;
 	}
-	void show (in Segment[] segs) {
+	void show (in P[][] shapes) {
 		if (live){
 			SDL_SetRenderDrawColor (ren, 10, 10, 10, 255);
 			SDL_RenderClear (ren);
 			SDL_SetRenderDrawColor (ren, 255, 255, 255, 255);
-			foreach (seg; segs) {
-				SDL_RenderDrawLine (ren, seg.start.x, seg.start.y, seg.end.x, seg.end.y);
+			foreach (shape; shapes) {
+				SDL_Point[256] sdl_points;
+				foreach (idx, pt; shape)
+					sdl_points[idx] = SDL_Point(pt.x + 10, pt.y + 10);
+				sdl_points[shape.length] = SDL_Point(shape[0].x+10, shape[0].y+10);
+				SDL_RenderDrawLines(ren, cast(SDL_Point*)sdl_points, cast(int)shape.length+1);
 			}
 			SDL_RenderPresent(ren);
 			SDL_Event e;

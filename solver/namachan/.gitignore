@@ -4,3 +4,9 @@ __dummy.html
 *.o
 *.obj
 __test__*__
+
+*.log
+*.def
+*.json
+*.txt
+procon-solver
