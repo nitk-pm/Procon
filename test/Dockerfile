@@ -1,6 +1,10 @@
 # set the base image
 FROM ubuntu
 
+# extra metadata
+LABEL version="0.0.1"
+LABEL description="香川高専高松キャンパスprocon28競技部門のテスト用環境です"
+
 # author
 MAINTAINER Nakano Masaki
 
