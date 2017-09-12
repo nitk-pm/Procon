@@ -1,7 +1,7 @@
 from PyQt5.QtCore import (
     Qt,
     QSize,
-    pyqtSlot
+    pyqtSlot,
 )
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -9,14 +9,19 @@ from PyQt5.QtWidgets import (
     QFrame,
     QListWidgetItem,
     QStyle,
-    QStyleOption
+    QStyleOption,
+    QPushButton,
+    QGridLayout,
+    QHBoxLayout
 )
 from PyQt5.QtGui import (
     QPainter,
     QPen,
+    QPixmap,
+    QIcon
 )
 from PyQt5 import uic
-from util import Converter
+from models import ProblemData
 
 
 class PolygonWidget(QFrame):
@@ -50,6 +55,7 @@ class PolygonWidget(QFrame):
         )
 
     def paintEvent(self, event):
+        super().paintEvent(event)
         painter = QPainter(self)
 
         opt = QStyleOption()
@@ -71,14 +77,12 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        Ui = uic.loadUiType('form.ui')[0]
+        Ui = uic.loadUiType('form2.ui')[0]
         self.ui = Ui()
         self.ui.setupUi(self)
-        self.number = 0
-        self.dir_path = ''
-        self.filename = ''
 
-        self.ui.open.clicked.connect(self.open_file)
+        self.ui.open_file.clicked.connect(self.open_file)
+        self.ui.problem_list.currentTextChanged.connect(self.load_data)
 
     @pyqtSlot()
     def open_file(self):
@@ -87,27 +91,33 @@ class MainWindow(QMainWindow):
         filename = QFileDialog.getOpenFileName(
             self,
             'Read File',
-            self.dir_path,
+            '',
             'official format (*.txt)'
-        )
+        )[0]
 
-        if filename[0] == '':
+        if filename == '':
             return
 
-        with open(filename[0]) as file:
+        with open(filename) as file:
             data = file.read()
-            converter = Converter(data)
+            problem_data = ProblemData(filename, data)
+            self.ui.problem_list.addItem(
+                problem_data.display_name,
+                problem_data
+            )
+            self.ui.problem_list.setCurrentText(problem_data.display_name)
 
-            self.ui.piece_view.clear()
-            for piece in converter.pieces:
-                self.add_piece(piece)
+    @pyqtSlot(str)
+    def load_data(self, text):
+        problem_data = self.ui.problem_list.currentData()
+        self.ui.piece_view.clear()
+        for piece in problem_data.pieces:
+            self.add_piece(piece[0])
 
-            self.ui.frame_view.set_polygon(converter.frame)
-            self.ui.frame_view.set_scale(6)
+        self.ui.frame_view.set_polygon(problem_data.frame[0])
+        self.ui.frame_view.set_scale(6)
 
-            self.dir_path, self.filename = os.path.split(filename[0])
-            self.ui.filename.setText(self.filename)
-            self.ui.pieces.display(converter.number)
+        self.ui.num_piece.setText('{}'.format(problem_data.num_piece))
 
     def add_piece(self, piece):
         widget = PolygonWidget()

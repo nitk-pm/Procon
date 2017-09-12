@@ -12,6 +12,9 @@ logging.basicConfig(
     format='%(asctime)s:%(filename)s:%(lineno)d:%(message)s'
 )
 
+if not os.path.isfile('viewer_rc.py'):
+    os.system('pyrcc5 -o viewer_rc.py viewer.qrc')
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
