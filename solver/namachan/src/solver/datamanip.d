@@ -247,6 +247,14 @@ nothrow pure bool judge_on_line (in Pos p, in P start, in P end) {
 
 @safe @nogc
 nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
+	foreach (shape_vertex; shape) {
+		if (!crossing_number(shape_vertex, frame))
+			return true;
+	}
+	foreach (frame_vertex; frame) {
+		if (crossing_number(frame_vertex, shape, false))
+			return true;
+	}
 	for (int p_idx; p_idx < shape.length; ++p_idx) {
 		for (int f_idx; f_idx < frame.length; ++f_idx) {
 			if (judge_intersected (
