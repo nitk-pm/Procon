@@ -39,19 +39,26 @@ class Encoder(object):
 
     # 指定した角度に回転
     def rotate_polygon(self, polygon: QPolygonF, angle: float) -> QPolygonF:
-        c = polygon.boundingRect().center()
         trans = QTransform()
-        trans.translate(c.x(), c.y())
         trans.rotate(angle)
-        trans.translate(-c.x(), -c.y())
-        return trans.map(polygon)
+        poly = trans.map(polygon)
+        return self.adjust(poly)
 
     # 左右反転
     def invert_polygon(self, polygon: QPolygonF) -> QPolygonF:
         width = polygon.boundingRect().width()
-        trans = QTransform(-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
-        trans.translate(-width, 0)
-        return trans.map(polygon)
+        points = []
+        for p in reversed(polygon):
+            points.append(QPointF(-p.x(), p.y()))
+        poly = QPolygonF(points)
+        return self.adjust(poly)
+
+    def adjust(self, polygon: QPolygonF):
+        points = []
+        rect = polygon.boundingRect()
+        for p in polygon:
+            points.append(p - rect.topLeft())
+        return QPolygonF(points)
 
     def to_dict(self, data: str, is_frame: bool=False):
         result = None
