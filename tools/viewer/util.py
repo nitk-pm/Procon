@@ -8,7 +8,7 @@ from PyQt5.QtGui import (
 )
 
 
-class ProblemDecoder(object):
+class Encoder(object):
 
     # 8パターンに展開
     def expand_patterns(self, data: str) -> list:
@@ -21,13 +21,13 @@ class ProblemDecoder(object):
         pattern_list.extend(invert_list)
         return pattern_list
 
-    # 多角形のデータにデコード
+    # 多角形のデータにエンコード
     def to_polygon(self, data: str) -> QPolygonF:
         points = self.to_points(data)
         points.append(points[0])
         return QPolygonF(points)
 
-    # 頂点リストにデコード
+    # 頂点リストにエンコード
     def to_points(self, data: str) -> list:
         data_list = data.split(' ')
         length = int(data_list.pop(0)) * 2
@@ -37,18 +37,18 @@ class ProblemDecoder(object):
             points.append(QPointF(x, y))
         return points
 
-    # 指定した角度に回転
-    def rotate_polygon(self, polygon: QPolygonF, angle: float) -> QPolygonF:
-        c = polygon.boundingRect().center()
-        trans = QTransform()
-        trans.translate(c.x(), c.y())
-        trans.rotate(angle)
-        trans.translate(-c.x(), -c.y())
-        return trans.map(polygon)
-
     # 左右反転
     def invert_polygon(self, polygon: QPolygonF) -> QPolygonF:
         width = polygon.boundingRect().width()
-        trans = QTransform(-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
-        trans.translate(-width, 0)
-        return trans.map(polygon)
+        points = []
+        for p in reversed(polygon):
+            points.append(QPointF(-p.x(), p.y()))
+        poly = QPolygonF(points)
+        return self.adjust(poly)
+
+    def adjust(self, polygon: QPolygonF) -> QPolygonF:
+        points = []
+        rect = polygon.boundingRect()
+        for p in polygon:
+            points.append(p - rect.topLeft())
+        return QPolygonF(points)

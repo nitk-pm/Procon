@@ -1,5 +1,5 @@
 import os
-from util import ProblemDecoder
+from util import Encoder
 
 
 class ProblemData(object):
@@ -8,7 +8,7 @@ class ProblemData(object):
         self.full_path = filename
         self.dir_path, self.filename = os.path.split(filename)
         self.display_name = self.filename.rsplit('.', 1)[0]
-        self.decoder = ProblemDecoder()
+        self.encoder = Encoder()
         if data is not None:
             self.set_data(data)
 
@@ -19,7 +19,7 @@ class ProblemData(object):
         self.set_frame(data_list[self.num_piece:])
 
     def set_piece(self, data_list: list):
-        self.pieces = [self.decoder.expand_patterns(d) for d in data_list]
+        self.pieces = [self.encoder.expand_patterns(d) for d in data_list]
 
     def set_frame(self, data_list: list):
-        self.frame = [self.decoder.to_polygon(d) for d in data_list]
+        self.frame = [self.encoder.to_polygon(d) for d in data_list]
