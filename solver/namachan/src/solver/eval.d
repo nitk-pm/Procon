@@ -8,7 +8,7 @@ import std.typecons : Tuple, tuple;
  + 線分の角度の一致度と重複した点の数で評価する評価関数
  + 衝突していた場合は-float.inifinityを返す
  +/
-@safe @nogc
+@safe
 pure nothrow Tuple!(float, P[][]) eval_basic (in P[] frame, in P[] piece) {
 	float point_conflict = 0.0f;
 	float segment_sum = 0.0f;
