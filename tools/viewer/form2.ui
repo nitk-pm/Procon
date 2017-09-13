@@ -457,7 +457,7 @@ background-color: rgb(66, 66, 66);</string>
        </widget>
       </item>
       <item>
-       <widget class="PolygonWidget" name="frame_view">
+       <widget class="FrameWidget" name="frame_view">
         <property name="styleSheet">
          <string notr="true">background-color: rgb(66, 66, 66);</string>
         </property>
@@ -566,7 +566,7 @@ background-color: rgb(66, 66, 66);</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PolygonWidget</class>
+   <class>FrameWidget</class>
    <extends>QFrame</extends>
    <header>widgets.h</header>
    <container>1</container>

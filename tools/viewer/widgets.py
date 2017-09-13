@@ -34,12 +34,12 @@ class PolygonWidget(QFrame):
         self.setLineWidth(2)
         self.setMidLineWidth(2)
 
-        self.polygon = None
+        self.polygons = []
         self.scale = 1
         self.margin = 10
 
-    def set_polygon(self, polygon):
-        self.polygon = polygon
+    def set_polygons(self, polygons):
+        self.polygons = polygons
         self.update_size()
 
     def set_scale(self, scale):
@@ -47,12 +47,40 @@ class PolygonWidget(QFrame):
         self.update_size()
 
     def update_size(self):
-        w = self.polygon.boundingRect().width()
-        h = self.polygon.boundingRect().height()
+        w = self.polygons[0].boundingRect().width()
+        h = self.polygons[0].boundingRect().height()
+        for polygon in self.polygons[1:]:
+            if w < polygon.boundingRect().width():
+                w = polygon.boundingRect().width()
+            if h < polygon.boundingRect().height():
+                h = polygon.boundingRect().height()
         self.resize(
             w * self.scale + self.margin * 2,
             h * self.scale + self.margin * 2
         )
+
+
+class FrameWidget(PolygonWidget):
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+
+        opt = QStyleOption()
+        opt.initFrom(self)
+        self.style().drawPrimitive(QStyle.PE_Frame, opt, painter, self)
+
+        for polygon in self.polygons:
+            source = polygon.boundingRect()
+            delta_x = self.rect().width() - source.width() * self.scale
+            delta_y = self.rect().height() - source.height() * self.scale
+
+            painter.translate(delta_x / 2, delta_y / 2)
+            painter.scale(self.scale, self.scale)
+            painter.setPen(QPen(Qt.white, 0.5))
+            painter.drawPolygon(polygon)
+
+
+class PieceWidget(PolygonWidget):
 
     def paintEvent(self, event):
         super().paintEvent(event)
@@ -62,15 +90,15 @@ class PolygonWidget(QFrame):
         opt.initFrom(self)
         self.style().drawPrimitive(QStyle.PE_Frame, opt, painter, self)
 
-        if self.polygon is not None:
-            source = self.polygon.boundingRect()
+        if self.polygons[0] is not None:
+            source = self.polygons[0].boundingRect()
             delta_x = self.rect().width() - source.width() * self.scale
             delta_y = self.rect().height() - source.height() * self.scale
 
             painter.translate(delta_x / 2, delta_y / 2)
             painter.scale(self.scale, self.scale)
             painter.setPen(QPen(Qt.white, 0.5))
-            painter.drawPolygon(self.polygon)
+            painter.drawPolygon(self.polygons[0])
 
 
 class MainWindow(QMainWindow):
@@ -112,16 +140,16 @@ class MainWindow(QMainWindow):
         problem_data = self.ui.problem_list.currentData()
         self.ui.piece_view.clear()
         for piece in problem_data.pieces:
-            self.add_piece(piece[0])
+            self.add_piece(piece)
 
-        self.ui.frame_view.set_polygon(problem_data.frame[0])
+        self.ui.frame_view.set_polygons(problem_data.frame)
         self.ui.frame_view.set_scale(6)
 
         self.ui.num_piece.setText('{}'.format(problem_data.num_piece))
 
     def add_piece(self, piece):
-        widget = PolygonWidget()
-        widget.set_polygon(piece)
+        widget = PieceWidget()
+        widget.set_polygons(piece)
         widget.set_scale(6)
         s = widget.size()
         s.setWidth(s.width() + widget.margin * 2)

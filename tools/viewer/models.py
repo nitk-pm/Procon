@@ -1,5 +1,5 @@
 import os
-from util import Encoder
+from encoder import Encoder
 
 
 class ProblemData(object):
