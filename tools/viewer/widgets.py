@@ -82,6 +82,46 @@ class FrameWidget(PolygonWidget):
 
 class PieceWidget(PolygonWidget):
 
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.create_ui()
+        self.index = 0
+
+    def create_ui(self):
+        import viewer_rc
+        self.setLayout(QHBoxLayout(self))
+        self.layout().setContentsMargins(0, 0, 0, 0)
+        self.right = QPushButton(self)
+        self.right.setMaximumSize(QSize(40, 1677225))
+        self.right.setIcon(QIcon(QPixmap(':/icons/icons/right.png')))
+        self.right.setIconSize(QSize(30, 30))
+        self.left = QPushButton(self)
+        self.left.setMaximumSize(QSize(40, 1677225))
+        self.left.setIcon(QIcon(QPixmap(':/icons/icons/left.png')))
+        self.left.setIconSize(QSize(30, 30))
+        self.layout().addWidget(self.left)
+        self.layout().addWidget(self.right)
+        self.right.clicked.connect(self.increment)
+        self.left.clicked.connect(self.decrement)
+
+    @pyqtSlot()
+    def increment(self):
+        self.index += 1
+        if self.index >= 8:
+            self.index = 0
+        self.update()
+
+    @pyqtSlot()
+    def decrement(self):
+        self.index -= 1
+        if self.index <= -1:
+            self.index = 7
+        self.update()
+
+    def resizeEvent(self, event):
+        self.layout().setSpacing(self.width() * 0.85)
+        super().resizeEvent(event)
+
     def paintEvent(self, event):
         super().paintEvent(event)
         painter = QPainter(self)
@@ -90,15 +130,14 @@ class PieceWidget(PolygonWidget):
         opt.initFrom(self)
         self.style().drawPrimitive(QStyle.PE_Frame, opt, painter, self)
 
-        if self.polygons[0] is not None:
-            source = self.polygons[0].boundingRect()
-            delta_x = self.rect().width() - source.width() * self.scale
-            delta_y = self.rect().height() - source.height() * self.scale
+        source = self.polygons[self.index].boundingRect()
+        delta_x = self.rect().width() - source.width() * self.scale
+        delta_y = self.rect().height() - source.height() * self.scale
 
-            painter.translate(delta_x / 2, delta_y / 2)
-            painter.scale(self.scale, self.scale)
-            painter.setPen(QPen(Qt.white, 0.5))
-            painter.drawPolygon(self.polygons[0])
+        painter.translate(delta_x / 2, delta_y / 2)
+        painter.scale(self.scale, self.scale)
+        painter.setPen(QPen(Qt.white, 0.5))
+        painter.drawPolygon(self.polygons[self.index])
 
 
 class MainWindow(QMainWindow):

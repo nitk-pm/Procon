@@ -18,16 +18,15 @@ class Encoder(object):
         for angle in [0, 90, 180, 270]:
             pattern_list.append(self.rotate_polygon(polygon, angle))
             invert_list.append(self.invert_polygon(pattern_list[-1]))
-        pattern_list.extend(invert_list)
-        return pattern_list
+        return pattern_list + invert_list
 
-    # 多角形のデータにデコード
+    # 多角形のデータにエンコード
     def to_polygon(self, data: str) -> QPolygonF:
         points = self.to_points(data)
         points.append(points[0])
         return QPolygonF(points)
 
-    # 頂点リストにデコード
+    # 頂点リストにエンコード
     def to_points(self, data: str) -> list:
         data_list = data.split(' ')
         length = int(data_list.pop(0)) * 2
@@ -53,6 +52,7 @@ class Encoder(object):
         poly = QPolygonF(points)
         return self.adjust(poly)
 
+    # 座標の調整
     def adjust(self, polygon: QPolygonF):
         points = []
         rect = polygon.boundingRect()

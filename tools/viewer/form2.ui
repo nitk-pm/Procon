@@ -473,7 +473,6 @@ background-color: rgb(66, 66, 66);</string>
         <property name="midLineWidth">
          <number>2</number>
         </property>
-        <layout class="QGridLayout" name="gridLayout_2"/>
        </widget>
       </item>
      </layout>
