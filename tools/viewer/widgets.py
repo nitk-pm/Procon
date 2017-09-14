@@ -143,7 +143,6 @@ class PieceWidget(PolygonWidget):
         self.layout().setSpacing(self.width() - button_w)
 
 
-
 class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
