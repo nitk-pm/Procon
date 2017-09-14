@@ -5,7 +5,7 @@ import subprocess
 
 class Handler(FileSystemEventHandler):
 
-    on_read = []
+    callback_list = []
 
     def handler(self, func, *args):
         return func(*args)
@@ -13,20 +13,63 @@ class Handler(FileSystemEventHandler):
     def on_created(self, event):
         if event.is_directory:
             return
-        data = subprocess.run(['zbarimg', event.src_path])
+        print('created')
+        data = subprocess.run(
+            ['zbarimg', event.src_path],
+            stdout=subprocess.PIPE
+        )
 
-        for on_read in self.on_read:
-            self.handler(on_read, data)
+        for callback_list in self.callback_list:
+            self.handler(
+                callback_list,
+                event.src_path,
+                data.stdout.decode('utf-8')
+            )
 
 
 class Watcher(object):
 
-    def __init__(self):
+    def __init__(self, callback=None):
         self.observer = Observer()
         self.handler = Handler()
+        self.watch = None
+        if callback is not None:
+            self.register_callback(callback)
 
     def register_callback(self, func):
-        self.handler.on_read.append(func)
+        self.handler.callback_list.append(func)
 
-    def start(self):
+    def start(self, path):
+        if self.watch is None:
+            self.watch = self.observer.schedule(
+                self.handler,
+                path,
+                recursive=True
+            )
+            self.observer.start()
 
+    def stop(self):
+        if self.watch is not None:
+            self.observer.stop()
+            self.observer.join()
+            self.watch = None
+
+
+class Test(object):
+
+    def callback(self, data):
+        print(data)
+
+
+if __name__ == '__main__':
+    test = Test()
+    watcher = Watcher()
+    watcher.register_callback(test.callback)
+
+    watcher.start('./')
+    try:
+        import time
+        while True:
+            time.sleep(1)
+    except:
+        watcher.stop()

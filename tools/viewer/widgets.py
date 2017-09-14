@@ -24,6 +24,7 @@ from PyQt5.QtGui import (
 )
 from PyQt5 import uic
 from models import ProblemData
+from watcher import Watcher
 
 
 class PolygonWidget(QFrame):
@@ -151,9 +152,31 @@ class MainWindow(QMainWindow):
         self.ui = Ui()
         self.ui.setupUi(self)
 
+        self.watcher = None
+
+        self.ui.dir_path.setText('./')
+
+        self.ui.play.clicked.connect(self.play)
+        self.ui.stop.clicked.connect(self.stop)
         self.ui.reference.clicked.connect(self.reference)
         self.ui.open_file.clicked.connect(self.open_file)
-        self.ui.problem_list.currentTextChanged.connect(self.load_data)
+        self.ui.problem_list.currentTextChanged.connect(self.display)
+
+    def closeEvent(self, event):
+        if self.watcher is not None:
+            self.watcher.stop()
+            del self.watcher
+
+    @pyqtSlot()
+    def play(self):
+        self.watcher = Watcher(self.callback)
+        self.watcher.start(self.ui.dir_path.text())
+
+    @pyqtSlot()
+    def stop(self):
+        self.watcher.stop()
+        del self.watcher
+        self.watcher = None
 
     @pyqtSlot()
     def reference(self):
@@ -162,7 +185,8 @@ class MainWindow(QMainWindow):
             'Reference',
             self.ui.dir_path.text()
         )
-        self.ui.dir_path.setText(path)
+        if path != '':
+            self.ui.dir_path.setText(path)
 
     @pyqtSlot()
     def open_file(self):
@@ -178,15 +202,10 @@ class MainWindow(QMainWindow):
 
         with open(filename) as file:
             data = file.read()
-            problem_data = ProblemData(filename, data)
-            self.ui.problem_list.addItem(
-                problem_data.display_name,
-                problem_data
-            )
-            self.ui.problem_list.setCurrentText(problem_data.display_name)
+            self.load(filename, data)
 
     @pyqtSlot(str)
-    def load_data(self, text):
+    def display(self, text):
         problem_data = self.ui.problem_list.currentData()
         self.ui.piece_view.clear()
         for piece in problem_data.pieces:
@@ -196,6 +215,22 @@ class MainWindow(QMainWindow):
         self.ui.frame_view.set_scale(6)
 
         self.ui.num_piece.setText('{}'.format(problem_data.num_piece))
+
+    def callback(self, filename, data):
+        data_list = [d.replace('QR-Code:', '') for d in data.splitlines()]
+        num = 0
+        for i in range(len(data_list)):
+            num_str, data_list[i] = data_list[i].split(':', 1)
+            num += int(num_str)
+        self.load(filename, '{}:{}'.format(num, ':'.join(data_list)))
+
+    def load(self, filename, data):
+        problem_data = ProblemData(filename, data)
+        self.ui.problem_list.addItem(
+            problem_data.display_name,
+            problem_data
+        )
+        self.ui.problem_list.setCurrentText(problem_data.display_name)
 
     def add_piece(self, piece):
         widget = PieceWidget()
