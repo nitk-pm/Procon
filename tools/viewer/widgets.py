@@ -93,10 +93,12 @@ class PieceWidget(PolygonWidget):
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.right = QPushButton(self)
         self.right.setMaximumSize(QSize(40, 1677225))
+        self.right.setMinimumSize(QSize(40, 0))
         self.right.setIcon(QIcon(QPixmap(':/icons/icons/right.png')))
         self.right.setIconSize(QSize(30, 30))
         self.left = QPushButton(self)
         self.left.setMaximumSize(QSize(40, 1677225))
+        self.left.setMinimumSize(QSize(40, 0))
         self.left.setIcon(QIcon(QPixmap(':/icons/icons/left.png')))
         self.left.setIconSize(QSize(30, 30))
         self.layout().addWidget(self.left)
@@ -119,8 +121,9 @@ class PieceWidget(PolygonWidget):
         self.update()
 
     def resizeEvent(self, event):
-        self.layout().setSpacing(self.width() * 0.85)
         super().resizeEvent(event)
+        button_w = self.right.width() + self.left.width() + self.margin
+        self.layout().setSpacing(self.width() - button_w)
 
     def paintEvent(self, event):
         super().paintEvent(event)
