@@ -91,6 +91,17 @@ public:
 			return Vector!T (-x, -y);
 		}
 	}
+
+	@safe @nogc
+	pure nothrow float norm() const {
+		import std.math : sqrt;
+		return sqrt (cast(float)(x^^2+y^^2));
+	}
+
+	@safe @nogc
+	pure nothrow T norm2() const {
+		return x^^2+y^^2;
+	}
 }
 
 alias Pos = Vector!int;
