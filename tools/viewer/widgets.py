@@ -1,3 +1,4 @@
+import os
 from PyQt5.QtCore import (
     Qt,
     QSize,
@@ -12,7 +13,8 @@ from PyQt5.QtWidgets import (
     QStyleOption,
     QPushButton,
     QGridLayout,
-    QHBoxLayout
+    QHBoxLayout,
+    QFileDialog
 )
 from PyQt5.QtGui import (
     QPainter,
@@ -59,16 +61,21 @@ class PolygonWidget(QFrame):
             h * self.scale + self.margin * 2
         )
 
-
-class FrameWidget(PolygonWidget):
+    def draw_polygon(self, painter):
+        pass
 
     def paintEvent(self, event):
+        super().paintEvent(event)
         painter = QPainter(self)
-
         opt = QStyleOption()
         opt.initFrom(self)
         self.style().drawPrimitive(QStyle.PE_Frame, opt, painter, self)
+        self.draw_polygon(painter)
 
+
+class FrameWidget(PolygonWidget):
+
+    def draw_polygon(self, painter):
         for polygon in self.polygons:
             source = polygon.boundingRect()
             delta_x = self.rect().width() - source.width() * self.scale
@@ -120,19 +127,7 @@ class PieceWidget(PolygonWidget):
             self.index = 7
         self.update()
 
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        button_w = self.right.width() + self.left.width() + self.margin
-        self.layout().setSpacing(self.width() - button_w)
-
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        painter = QPainter(self)
-
-        opt = QStyleOption()
-        opt.initFrom(self)
-        self.style().drawPrimitive(QStyle.PE_Frame, opt, painter, self)
-
+    def draw_polygon(self, painter):
         source = self.polygons[self.index].boundingRect()
         delta_x = self.rect().width() - source.width() * self.scale
         delta_y = self.rect().height() - source.height() * self.scale
@@ -141,6 +136,12 @@ class PieceWidget(PolygonWidget):
         painter.scale(self.scale, self.scale)
         painter.setPen(QPen(Qt.white, 0.5))
         painter.drawPolygon(self.polygons[self.index])
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        button_w = self.right.width() + self.left.width() + self.margin
+        self.layout().setSpacing(self.width() - button_w)
+
 
 
 class MainWindow(QMainWindow):
@@ -151,13 +152,21 @@ class MainWindow(QMainWindow):
         self.ui = Ui()
         self.ui.setupUi(self)
 
+        self.ui.reference.clicked.connect(self.reference)
         self.ui.open_file.clicked.connect(self.open_file)
         self.ui.problem_list.currentTextChanged.connect(self.load_data)
 
     @pyqtSlot()
+    def reference(self):
+        path = QFileDialog.getExistingDirectory(
+            self,
+            'Reference',
+            self.ui.dir_path.text()
+        )
+        self.ui.dir_path.setText(path)
+
+    @pyqtSlot()
     def open_file(self):
-        import os
-        from PyQt5.QtWidgets import QFileDialog
         filename = QFileDialog.getOpenFileName(
             self,
             'Read File',

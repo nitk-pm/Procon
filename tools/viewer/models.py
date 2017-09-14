@@ -4,7 +4,7 @@ from encoder import Encoder
 
 class ProblemData(object):
 
-    def __init__(self, filename: str, data: str=None):
+    def __init__(self, filename: str, data: str):
         self.full_path = filename
         self.dir_path, self.filename = os.path.split(filename)
         self.display_name = self.filename.rsplit('.', 1)[0]
