@@ -169,11 +169,13 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def play(self):
+        self.ui.reference.setEnabled(False)
         self.watcher = Watcher(self.callback)
         self.watcher.start(self.ui.dir_path.text())
 
     @pyqtSlot()
     def stop(self):
+        self.ui.reference.setEnabled(True)
         self.watcher.stop()
         del self.watcher
         self.watcher = None

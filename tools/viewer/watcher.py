@@ -13,7 +13,6 @@ class Handler(FileSystemEventHandler):
     def on_created(self, event):
         if event.is_directory:
             return
-        print('created')
         data = subprocess.run(
             ['zbarimg', event.src_path],
             stdout=subprocess.PIPE
