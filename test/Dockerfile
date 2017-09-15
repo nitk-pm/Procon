@@ -35,17 +35,11 @@ ENV OPAMDOWNLOADJOBS 1
 RUN opam init -y -a --comp=4.04.0
 RUN opam install -y yojson omake
 
-RUN git clone https://github.com/google/googletest
-RUN cd googletest
-
 RUN echo 'eval `opam config env`' > ~/.bashrc
 RUN echo 'source ~/dlang/dmd-2.076.0/activate' >> ~/.bashrc
 
 RUN mkdir ci
 
-RUN cd ci/gtest
-RUN wget https://googletest.googlecode.com/files/gtest-1.7.0.zip
-RUN 
 WORKDIR ci
 
 ENTRYPOINT ["/bin/bash"]
