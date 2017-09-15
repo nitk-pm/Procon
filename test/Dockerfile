@@ -27,9 +27,11 @@ RUN curl -fsS https://dlang.org/install.sh | bash -s dmd
 RUN sh ~/dlang/dmd-2.076.0/activate
 RUN apt-get install -qy dub
 RUN apt-get install -qy python3
-RUN apt-get install -qy python-pip
-RUN pip install PyYAML
-RUN pip install jsonschema
+RUN apt-get install -qy python3-pip
+RUN pip3 install --upgrade pip
+RUN pip3 install PyYAML
+RUN pip3 install jsonschema
+RUN pip3 install pyqt5
 RUN apt-get install -qy m4
 RUN apt-get install -qy unzip
 RUN wget https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh -O - | sh -s /usr/local/bin
@@ -41,6 +43,7 @@ RUN echo 'eval `opam config env`' > ~/.bashrc
 RUN echo 'source ~/dlang/dmd-2.076.0/activate' >> ~/.bashrc
 
 RUN mkdir ci
+
 WORKDIR ci
 
 ENTRYPOINT ["/bin/bash"]

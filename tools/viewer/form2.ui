@@ -302,7 +302,7 @@ background-color: rgb(66, 66, 66);</string>
               </size>
              </property>
              <property name="checkable">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="default">
               <bool>true</bool>
@@ -336,6 +336,12 @@ background-color: rgb(66, 66, 66);</string>
                <width>30</width>
                <height>30</height>
               </size>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
              <attribute name="buttonGroup">
               <string notr="true">monitoring_control</string>
@@ -457,7 +463,7 @@ background-color: rgb(66, 66, 66);</string>
        </widget>
       </item>
       <item>
-       <widget class="PolygonWidget" name="frame_view">
+       <widget class="FrameWidget" name="frame_view">
         <property name="styleSheet">
          <string notr="true">background-color: rgb(66, 66, 66);</string>
         </property>
@@ -473,7 +479,6 @@ background-color: rgb(66, 66, 66);</string>
         <property name="midLineWidth">
          <number>2</number>
         </property>
-        <layout class="QGridLayout" name="gridLayout_2"/>
        </widget>
       </item>
      </layout>
@@ -566,7 +571,7 @@ background-color: rgb(66, 66, 66);</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PolygonWidget</class>
+   <class>FrameWidget</class>
    <extends>QFrame</extends>
    <header>widgets.h</header>
    <container>1</container>
