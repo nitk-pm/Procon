@@ -160,6 +160,7 @@ class MainWindow(QMainWindow):
         self.ui.stop.clicked.connect(self.stop)
         self.ui.reference.clicked.connect(self.reference)
         self.ui.open_file.clicked.connect(self.open_file)
+        self.ui.export.clicked.connect(self.export)
         self.ui.problem_list.currentTextChanged.connect(self.display)
 
     def closeEvent(self, event):
@@ -217,6 +218,17 @@ class MainWindow(QMainWindow):
         self.ui.frame_view.set_scale(6)
 
         self.ui.num_piece.setText('{}'.format(problem_data.num_piece))
+
+    @pyqtSlot()
+    def export(self):
+        import json
+        problem_data = self.ui.problem_list.currentData()
+        piece = problem_data.to_dict_piece()
+        frame = problem_data.to_dict_frame()
+        with open('piece.json', 'w') as file:
+            json.dump(piece, file, indent=2)
+        with open('frame.json', 'w') as file:
+            json.dump(frame, file, indent=2)
 
     def callback(self, filename, data):
         data_list = [d.replace('QR-Code:', '') for d in data.splitlines()]
