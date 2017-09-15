@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run:
           name: namachan_solver
-          command: ./solver/namachan/test.sh
+          command: sh ./solver/namachan/test.sh
       - run:
           name: format
-          command: ./format/test.sh
+          command: sh ./format/test.sh
