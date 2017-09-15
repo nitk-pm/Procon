@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run:
           name: namachan_solver
-          command: ./solver/namachan/test.sh
+          command: sh ./solver/namachan/test.sh
       - run:
           name: pyencoder
-          command: ./tools/pyencoder/test.sh
+          command: sh ./tools/pyencoder/test.sh
