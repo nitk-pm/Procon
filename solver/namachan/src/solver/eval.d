@@ -16,6 +16,13 @@ pure nothrow Tuple!(float, P[][]) eval_basic (in P[] frame, in P[] piece) {
 	if (protrude_frame (frame, piece))
 		return tuple(-float.infinity, cast(P[][])[]);
 	auto merged = merge (frame, piece);
+	foreach (merged_frame; merged) {
+		foreach (f_idx, f_point1; merged_frame) {
+			auto f_point2 = merged_frame[(f_idx+1)%merged_frame.length];
+			segment_sum += (f_point1 - f_point2).norm;
+		}
+	}
+
 	foreach (f_idx, frame_point1; frame) {
 		auto frame_point2 = frame[(f_idx+1)%frame.length];
 		foreach (piece_point; piece) {
@@ -25,5 +32,6 @@ pure nothrow Tuple!(float, P[][]) eval_basic (in P[] frame, in P[] piece) {
 				++point_conflict;
 		}
 	}
-	return tuple(point_conflict, merged);
+	if (point_conflict == 1) return tuple(-float.infinity, cast(P[][])[]);	
+	return tuple(point_conflict - segment_sum / 200.0f, merged);
 }
