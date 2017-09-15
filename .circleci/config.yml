@@ -9,3 +9,6 @@ jobs:
       - run:
           name: namachan_solver
           command: ./solver/namachan/test.sh
+      - run:
+          name: format
+          command: ./format/test.sh
