@@ -27,11 +27,11 @@ unittest {
 struct Point {
 	P pos;
 	bool is_junction;
-
+	bool visited;
 	@safe
 	pure string toString() const {
 		import std.format;
-		return format("Point(%s, %s, %s)", pos.x, pos.y, is_junction);
+		return format("Point(%s, %s, %s, %s)", pos.x, pos.y, is_junction, visited);
 	}
 }
 
@@ -44,7 +44,7 @@ nothrow pure Point[] insert_junction (in P[] frame, in P[] piece) {
 		//始点とピースの頂点の何処かが衝突していた場合追加
 		foreach (p_idx,piece_p; piece) {
 			if (frame[f_idx] == piece_p || judge_on_line(frame[f_idx], piece_p, piece[(p_idx+1)%piece.length])) {
-				frame_buf ~= Point(frame[f_idx], true);
+				frame_buf ~= Point(frame[f_idx], true, false);
 				point_appended = true;
 				break;
 			}
@@ -56,15 +56,15 @@ nothrow pure Point[] insert_junction (in P[] frame, in P[] piece) {
 				&& judge_on_line(piece_p, frame[f_idx], frame[(f_idx+1)%frame.length])) {
 				//まだ始点が追加されてなかった場合追加してから線分の間の点を追加
 				if (!point_appended) {
-					frame_buf ~= Point(frame[f_idx], false);
+					frame_buf ~= Point(frame[f_idx], false, false);
 					point_appended = true;
 				}
-				frame_buf ~= Point(piece_p, true);
+				frame_buf ~= Point(piece_p, true, false);
 			}
 		}
 		//衝突してなかった場合、点を追加
 		if (!point_appended){
-			frame_buf ~= Point(frame[f_idx], false);
+			frame_buf ~= Point(frame[f_idx], false, false);
 		}
 	}
 	return frame_buf;
@@ -73,7 +73,7 @@ unittest {
 	auto s1 = [P(0,0), P(10,0), P(10,10), P(0,10)];
 	auto s2 = [P(0,0),P(5,0),P(0,10)];
 	auto ans =
-		[Point(P(0,0),true),Point(P(5,0),true),Point(P(10,0),false),Point(P(10,10),false),Point(P(0,10),true)];
+		[Point(P(0,0),true,false),Point(P(5,0),true, false),Point(P(10,0),false,false),Point(P(10,10),false,false),Point(P(0,10),true,false)];
 		import std.stdio;
 	assert (insert_junction(s1,s2)==ans);
 }
@@ -177,18 +177,29 @@ pure nothrow P[][] merge(in P[] frame, in P[] piece) {
 			P[] shape;
 			auto idx = find_junction (looking, start.pos);
 			shape ~= looking[idx].pos;
+			looking[idx].visited = true;
 			for(;;) {
 				idx = (idx + 1) % looking.length;
+				// 中止条件 : 2個前のポイントに戻る(==無限ループに陥ったなら中止)
 				if (before_start.pos == looking[idx].pos)
 					return shape;
-				if (looking[idx].pos == frame_point.pos)
-					return shape;
+				// 終了条件 : 始めた場所に戻っていたら先読み
+				if (looking[idx].pos == frame_point.pos) {
+					auto out_of_looking_idx = find_junction (out_of_looking, looking[idx].pos);
+					auto lookahead = out_of_looking[(out_of_looking_idx+1)%out_of_looking.length];
+					//先読みした頂点が衝突しているか、訪れたことがあった場合は閉じていると見なして返す
+					if (lookahead.is_junction || lookahead.visited)
+						return shape;
+				}
+				//フレーム遷移
 				if (looking[idx].is_junction)
 					return shape ~ take(looking[idx], out_of_looking, looking, start);
+
+				looking[idx].visited = true;
 				shape ~= looking[idx].pos;
 			}
 		}
-		auto not_exist_point = Point (P(int.max, int.max), false);
+		auto not_exist_point = Point (P(int.max, int.max), false, false);
 		auto shape = take (frame_point, piece_buf, frame_buf, not_exist_point);
 		if (shape.length > 2)
 			shapes ~= [shape];
@@ -200,6 +211,12 @@ unittest {
 	auto s2 = [P(0,0),P(10,0),P(0,10)];
 	assert (merge (s1, s2) == [[P(0,10),P(10,0),P(10,20),P(0,20)]]);
 	assert (merge (s1, s1) == []);
+	
+	auto square = [P(0,0),P(10,0),P(10,10),P(0,10)];
+	auto triangle1 = [P(0,5),P(5,3),P(5,7)];
+	assert (merge (square,triangle1) == [[P(0, 5), P(5, 7), P(5, 3), P(0, 5), P(0, 0), P(10, 0), P(10, 10), P(0, 10)]]);
+	auto triangle2 = [P(0,5),P(5,0),P(5,7)];
+	assert (merge (square,triangle2) == [[P(5, 0), P(0, 5), P(0, 0)], [P(0, 5), P(5, 7), P(5, 0), P(10, 0), P(10, 10), P(0, 10)]]);
 }
 
 @safe
