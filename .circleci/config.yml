@@ -12,3 +12,6 @@ jobs:
       - run:
           name: pyencoder
           command: bash ./tools/pyencoder/test.sh
+      - run:
+          name: format
+          command: bash ./format/test.sh
