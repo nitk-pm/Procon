@@ -1,5 +1,5 @@
 # Procon 28 競技部門
-[![CircleCI](https://circleci.com/gh/nitk-pm/Procon/tree/develop.svg?style=svg)](https://circleci.com/gh/nitk-pm/Procon/tree/develop)
+[![CircleCI](https://circleci.com/gh/nitk-pm/Procon/tree/develop.svg?style=svg&circle-token=5bf4bfbedd7060a698ddc167f054342b3d513f3e)](https://circleci.com/gh/nitk-pm/Procon/tree/develop)
 
 香川高等専門学校高松キャンパスの競技部門チームのリポジトリです
 
