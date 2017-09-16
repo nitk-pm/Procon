@@ -228,38 +228,26 @@ pure nothrow P[][] merge(in P[] frame, in P[] piece) {
 	frame_buf = insert_junction(frame, piece);
 	piece_buf = insert_junction(piece, frame).retro.array;
 	P[][] shapes;
-	foreach (frame_point; frame_buf) {
-		if (!frame_point.is_junction) continue;
-		P[] take (in Point start, ref Point[] looking, ref Point[] out_of_looking, in Point before_start) {
-			P[] shape;
-			auto idx = find_junction (looking, start.pos);
-			shape ~= looking[idx].pos;
+	foreach (f_idx, frame_point; frame_buf) {
+		if (frame_point.is_junction || frame_point.visited) continue;
+		P[] take (size_t start, ref Point[] looking, ref Point[] not_looking) {
+			P[] took;
+			auto idx = start;
 			looking[idx].visited = true;
-			for(;;) {
-				idx = (idx + 1) % looking.length;
-				// 中止条件 : 2個前のポイントに戻る(==無限ループに陥ったなら中止)
-				if (before_start.pos == looking[idx].pos)
-					return shape;
-				// 終了条件 : 始めた場所に戻っていたら先読み
-				if (looking[idx].pos == frame_point.pos) {
-					auto out_of_looking_idx = find_junction (out_of_looking, looking[idx].pos);
-					auto lookahead = out_of_looking[(out_of_looking_idx+1)%out_of_looking.length];
-					//先読みした頂点が衝突しているか、訪れたことがあった場合は閉じていると見なして返す
-					if (lookahead.is_junction || lookahead.visited)
-						return shape;
-				}
-				//フレーム遷移
+			took ~= looking[idx].pos;
+			for (;;) {
+				idx = (idx+1)%looking.length;
 				if (looking[idx].is_junction)
-					return shape ~ take(looking[idx], out_of_looking, looking, start);
-
+					return took ~ take (find_junction(not_looking, looking[idx].pos), not_looking, looking);
+				if (looking[idx].visited)
+					return took;
 				looking[idx].visited = true;
-				shape ~= looking[idx].pos;
+				took ~= looking[idx].pos;
 			}
 		}
-		auto not_exist_point = Point (P(int.max, int.max), false, false);
-		auto shape = take (frame_point, piece_buf, frame_buf, not_exist_point);
-		if (shape.length > 2)
-			shapes ~= [shape];
+		auto took = take (f_idx, frame_buf, piece_buf);
+		if (took.length >= 3)
+			shapes ~= took;
 	}
 	return shapes;
 }
