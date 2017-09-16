@@ -74,7 +74,6 @@ unittest {
 	auto s2 = [P(0,0),P(5,0),P(0,10)];
 	auto ans =
 		[Point(P(0,0),true,false),Point(P(5,0),true, false),Point(P(10,0),false,false),Point(P(10,10),false,false),Point(P(0,10),true,false)];
-		import std.stdio;
 	assert (insert_junction(s1,s2)==ans);
 }
 @safe @nogc
@@ -164,6 +163,64 @@ unittest {
 }
 
 @safe
+pure nothrow bool same(in P[] s1, in P[] s2) {
+	if (s1.length != s2.length) return false;
+	if (s1.length == 0) return true;
+	auto v2 = s2[0];
+	long[] start_points;
+	foreach (idx1, v1; s1) {
+		if (v1 == v2) start_points ~= idx1;
+	}
+	if (start_points.length == 0) return false;
+	bool same_any;
+	foreach (start_idx; start_points) {
+		bool same = true;
+		for (size_t idx2, idx1 = start_idx; idx2 < s2.length; ++idx2, idx1 = (idx1+1)%s1.length) {
+			if (s1[idx1] != s2[idx2]) {
+				same = false;
+				break;
+			}
+		}
+		same_any |= same;
+	}
+	return same_any;
+}
+unittest {
+	auto s1 = [P(0,0), P(5,2), P(8,9)];
+	auto s2 = [P(8,9), P(0,0), P(5,2)];
+	assert (same(s1,s2));
+	auto s3 = [P(0,0), P(5,2), P(8,8)];
+	assert (!same(s1,s3));
+
+	auto s4 = [P(0, 0), P(10, 0), P(10, 10), P(0, 10), P(0, 5), P(5, 7), P(5, 3), P(0, 5)];
+	auto s5 = [P(0, 5), P(5, 7), P(5, 3), P(0, 5), P(0, 0), P(10, 0), P(10, 10), P(0, 10)];
+	assert (same(s4,s5));
+}
+
+@safe
+pure nothrow bool same (in P[][] ss1, in P[][] ss2) {
+	if (ss1.length != ss2.length) return false;
+	auto used_mask = new bool[ss2.length];
+	foreach (s1; ss1) {
+		bool same_found;
+		foreach(s2_idx, s2; ss2) {
+			if (used_mask[s2_idx]) continue;
+			if (same(s1, s2)) {
+				same_found = true;
+				used_mask[s2_idx] = true;
+			}
+		}
+		if (!same_found) return false;
+	}
+	return true;
+}
+unittest {
+	auto ss1 = [[P(0,0), P(5,2), P(8,9)], [P(4,2),P(1,1),P(31,4)]];
+	auto ss2 = [[P(4,2),P(1,1),P(31,4)], [P(8,9), P(0,0), P(5,2)]];
+	assert (same(ss1,ss2));
+}
+
+@safe
 pure nothrow P[][] merge(in P[] frame, in P[] piece) {
 	import std.range : retro, array;
 	Point[] frame_buf;
@@ -209,14 +266,14 @@ pure nothrow P[][] merge(in P[] frame, in P[] piece) {
 unittest {
 	auto s1 = [P(0,0),P(10,0),P(10,20),P(0,20)];
 	auto s2 = [P(0,0),P(10,0),P(0,10)];
-	assert (merge (s1, s2) == [[P(0,10),P(10,0),P(10,20),P(0,20)]]);
-	assert (merge (s1, s1) == []);
+	assert (same(merge (s1, s2),[[P(0,10),P(10,0),P(10,20),P(0,20)]]));
+	assert (same(merge (s1, s1), []));
 	
 	auto square = [P(0,0),P(10,0),P(10,10),P(0,10)];
 	auto triangle1 = [P(0,5),P(5,3),P(5,7)];
-	assert (merge (square,triangle1) == [[P(0, 5), P(5, 7), P(5, 3), P(0, 5), P(0, 0), P(10, 0), P(10, 10), P(0, 10)]]);
+	assert (same(merge (square,triangle1), [[P(0, 5), P(5, 7), P(5, 3), P(0, 5), P(0, 0), P(10, 0), P(10, 10), P(0, 10)]]));
 	auto triangle2 = [P(0,5),P(5,0),P(5,7)];
-	assert (merge (square,triangle2) == [[P(5, 0), P(0, 5), P(0, 0)], [P(0, 5), P(5, 7), P(5, 0), P(10, 0), P(10, 10), P(0, 10)]]);
+	assert (same(merge (square,triangle2), [[P(5, 0), P(0, 5), P(0, 0)], [P(0, 5), P(5, 7), P(5, 0), P(10, 0), P(10, 10), P(0, 10)]]));
 }
 
 @safe
