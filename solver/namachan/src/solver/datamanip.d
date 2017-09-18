@@ -286,7 +286,7 @@ nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
 		pos_sum += shape[p_idx];
 	}
 	import std.conv : to;
-	immutable gravity_point = pos_sum / shape.length.to!int;
+	immutable gravity_point = pos_sum / cast(int)shape.length;
 	if (crossing_number(gravity_point, shape) && !crossing_number(gravity_point, frame))
 		return true;
 	return false;
