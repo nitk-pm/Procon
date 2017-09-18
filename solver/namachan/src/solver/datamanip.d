@@ -115,14 +115,14 @@ pure nothrow crossing_number (in P p, in P[] shape, in bool include_on_line = tr
 			//並行の場合は無視
 			if (vertex1.y == vertex2.y)
 				continue;
-			if (vertex1.y < vertex2.y)
+			if (vertex1.y < vertex2.y && vertex1.x <= p.x)
 				++cross_cnt;
 		}
 		else if (vertex2.y == p.y) {
 			//並行の場合は無視
 			if (vertex1.y == vertex2.y)
 				continue;
-			if (vertex1.y > vertex2.y)
+			if (vertex1.y > vertex2.y && vertex2.x <= p.x)
 				++cross_cnt;
 		}
 		else if (judge_cross_horizontal_line(p, vertex1, vertex2) && (vertex1.x > p.x || vertex2.x > p.x)) {
