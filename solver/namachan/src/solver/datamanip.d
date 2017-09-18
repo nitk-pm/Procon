@@ -92,6 +92,19 @@ nothrow pure bool judge_cross_horizontal_line (in P p, in P start, in P end) {
 }
 
 @safe @nogc
+nothrow pure float on_right_side (in P start, in P end, in P p) {
+	if ((p.y - start.y) * (p.y - end.y) > 0) return false;
+	if ((end - start).x == 0) {
+		if (start.x <= p.x) return true;
+		else return false;
+	}
+	immutable a = cast(float)(end.y - start.y) / cast(float)(end.x - start.x);
+	immutable b = end.y - a * end.x;
+	immutable cross_x = (p.y - b) / a;
+	return cross_x <= p.x;
+}
+
+@safe @nogc
 pure nothrow crossing_number (in P p, in P[] shape, in bool include_on_line = true) {
 	size_t cross_cnt;
 	foreach (idx, vertex1; shape) {
