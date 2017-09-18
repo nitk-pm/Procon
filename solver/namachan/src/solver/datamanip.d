@@ -125,9 +125,8 @@ pure nothrow crossing_number (in P p, in P[] shape, in bool include_on_line = tr
 			if (vertex1.y > vertex2.y && vertex2.x <= p.x)
 				++cross_cnt;
 		}
-		else if (judge_cross_horizontal_line(p, vertex1, vertex2) && (vertex1.x > p.x || vertex2.x > p.x)) {
+		else if (on_right_side(vertex1,vertex2, p))
 			++cross_cnt;
-		}
 	}
 	return cross_cnt % 2 == 1;
 } 
