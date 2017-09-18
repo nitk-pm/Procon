@@ -109,8 +109,8 @@ pure nothrow crossing_number (in P p, in P[] shape, in bool include_on_line = tr
 	size_t cross_cnt;
 	foreach (idx, vertex1; shape) {
 		auto vertex2 = shape[(idx+1)%shape.length];
-		if (include_on_line && judge_on_line(p, vertex1,vertex2))
-			return true;
+		if ((judge_on_line(p, vertex1,vertex2)))
+			return include_on_line;
 		if (vertex1.y == p.y) {
 			//並行の場合は無視
 			if (vertex1.y == vertex2.y)
