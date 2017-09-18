@@ -123,22 +123,14 @@ unittest {
 		P(0, 0),
 		P(0, 2),
 		P(2, 2),
-		P(2, 0),
-
-		P(4, 0),
-		P(4, 4),
-		P(6, 4),
-		P(6, 0)
+		P(2, 0)
 	];
 	auto pt1 = P (1, 1);
 	auto pt2 = P (2, 3);
-	auto pt3 = P (5, 2);
 	auto pt4 = P (3, 2);
 
 	auto shape2 = [
-		P(0,0), P(0,3),
-		P(3,0), P(0,3),
-		P(3,0), P(0,0)
+		P(0,0), P(3,0), P(0,3)
 	];
 	auto pt5 = P(2,0);
 	auto pt6 = P(1,1);
@@ -151,7 +143,6 @@ unittest {
 	auto pt9 = P (20,0);
 	assert (crossing_number(pt1, shape1));
 	assert (!crossing_number(pt2, shape1));
-	assert (crossing_number(pt3, shape1));
 	assert (!crossing_number(pt4, shape1));
 
 	assert (crossing_number(pt5, shape2));
