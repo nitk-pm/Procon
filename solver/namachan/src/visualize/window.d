@@ -40,11 +40,13 @@ class Window {
 			SDL_RenderClear (ren);
 			SDL_SetRenderDrawColor (ren, 255, 255, 255, 255);
 			foreach (shape; shapes) {
-				SDL_Point[256] sdl_points;
-				foreach (idx, pt; shape)
-					sdl_points[idx] = SDL_Point(pt.x + 10, pt.y + 10);
-				sdl_points[shape.length] = SDL_Point(shape[0].x+10, shape[0].y+10);
-				SDL_RenderDrawLines(ren, cast(SDL_Point*)sdl_points, cast(int)shape.length+1);
+				if (shape.length < 2) {
+					SDL_Point[256] sdl_points;
+					foreach (idx, pt; shape)
+						sdl_points[idx] = SDL_Point(pt.x + 10, pt.y + 10);
+					sdl_points[shape.length] = SDL_Point(shape[0].x+10, shape[0].y+10);
+					SDL_RenderDrawLines(ren, cast(SDL_Point*)sdl_points, cast(int)shape.length+1);
+				}
 			}
 			SDL_RenderPresent(ren);
 			SDL_Event e;
