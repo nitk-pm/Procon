@@ -19,6 +19,8 @@ RUN apt-get install -qy wget
 RUN apt-get install -qy curl
 RUN apt-get install -qy libcurl4-gnutls-dev
 RUN apt-get install -qy libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-net-dev libsdl2-ttf-dev
+RUN apt-get install -qy cmake
+RUN apt-get install -qy make
 RUN curl -fsS https://dlang.org/install.sh | bash -s dmd
 RUN sh ~/dlang/dmd-2.076.0/activate
 RUN apt-get install -qy dub

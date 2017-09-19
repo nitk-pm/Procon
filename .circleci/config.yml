@@ -18,3 +18,6 @@ jobs:
       - run:
           name: format
           command: bash ./format/test.sh
+      - run:
+          name: problem
+          command: bash ./problems/test.sh
