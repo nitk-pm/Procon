@@ -92,29 +92,41 @@ nothrow pure bool judge_cross_horizontal_line (in P p, in P start, in P end) {
 }
 
 @safe @nogc
+nothrow pure float on_right_side (in P start, in P end, in P p) {
+	if ((p.y - start.y) * (p.y - end.y) > 0) return false;
+	if ((end - start).x == 0) {
+		if (start.x <= p.x) return true;
+		else return false;
+	}
+	immutable a = cast(float)(end.y - start.y) / cast(float)(end.x - start.x);
+	immutable b = end.y - a * end.x;
+	immutable cross_x = (p.y - b) / a;
+	return cross_x <= p.x;
+}
+
+@safe @nogc
 pure nothrow crossing_number (in P p, in P[] shape, in bool include_on_line = true) {
 	size_t cross_cnt;
 	foreach (idx, vertex1; shape) {
 		auto vertex2 = shape[(idx+1)%shape.length];
-		if (include_on_line && judge_on_line(p, vertex1,vertex2))
-			return true;
+		if ((judge_on_line(p, vertex1,vertex2)))
+			return include_on_line;
 		if (vertex1.y == p.y) {
 			//並行の場合は無視
 			if (vertex1.y == vertex2.y)
 				continue;
-			if (vertex1.y < vertex2.y)
+			if (vertex1.y < vertex2.y && vertex1.x <= p.x)
 				++cross_cnt;
 		}
 		else if (vertex2.y == p.y) {
 			//並行の場合は無視
 			if (vertex1.y == vertex2.y)
 				continue;
-			if (vertex1.y > vertex2.y)
+			if (vertex1.y > vertex2.y && vertex2.x <= p.x)
 				++cross_cnt;
 		}
-		else if (judge_cross_horizontal_line(p, vertex1, vertex2) && (vertex1.x > p.x || vertex2.x > p.x)) {
+		else if (on_right_side(vertex1,vertex2, p))
 			++cross_cnt;
-		}
 	}
 	return cross_cnt % 2 == 1;
 } 
@@ -123,22 +135,14 @@ unittest {
 		P(0, 0),
 		P(0, 2),
 		P(2, 2),
-		P(2, 0),
-
-		P(4, 0),
-		P(4, 4),
-		P(6, 4),
-		P(6, 0)
+		P(2, 0)
 	];
 	auto pt1 = P (1, 1);
 	auto pt2 = P (2, 3);
-	auto pt3 = P (5, 2);
 	auto pt4 = P (3, 2);
 
 	auto shape2 = [
-		P(0,0), P(0,3),
-		P(3,0), P(0,3),
-		P(3,0), P(0,0)
+		P(0,0), P(3,0), P(0,3)
 	];
 	auto pt5 = P(2,0);
 	auto pt6 = P(1,1);
@@ -151,7 +155,6 @@ unittest {
 	auto pt9 = P (20,0);
 	assert (crossing_number(pt1, shape1));
 	assert (!crossing_number(pt2, shape1));
-	assert (crossing_number(pt3, shape1));
 	assert (!crossing_number(pt4, shape1));
 
 	assert (crossing_number(pt5, shape2));
@@ -272,6 +275,7 @@ nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
 		if (crossing_number(frame_vertex, shape, false))
 			return true;
 	}
+	P pos_sum;
 	for (int p_idx; p_idx < shape.length; ++p_idx) {
 		for (int f_idx; f_idx < frame.length; ++f_idx) {
 			if (judge_intersected (
@@ -279,9 +283,12 @@ nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
 				shape[p_idx], shape[(p_idx+1)%shape.length]))
 				return true;
 		}
-		if (!crossing_number((shape[p_idx] + shape[(p_idx+1)%shape.length])/2, frame))
-			return true;
+		pos_sum += shape[p_idx];
 	}
+	import std.conv : to;
+	immutable gravity_point = pos_sum / cast(int)shape.length;
+	if (crossing_number(gravity_point, shape) && !crossing_number(gravity_point, frame))
+		return true;
 	return false;
 }
 unittest {
