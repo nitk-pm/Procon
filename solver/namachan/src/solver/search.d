@@ -44,8 +44,13 @@ nothrow pure auto sort(alias compare, T)(inout T[] ops) {
 	return merge (sort!compare(ops[0..center_idx]), sort!compare(ops[center_idx..$]));
 }
 
+import std.typecons : Tuple, tuple;
+
+alias key_t = Tuple!(const(PlacedShape)[], byte, byte, ubyte, ubyte);
+
+ubyte[key_t] memo;
 @safe
-pure const(Situation)[] eval_all(alias EvalFunc)(in P[][][] pieces,in Situation acc) {
+const(Situation)[] eval_all(alias EvalFunc)(in P[][][] pieces,in Situation acc) {
 	const(Situation)[] situaions; 
 	foreach (piece_idx, piece; pieces) {
 		if (acc.used_pieces[cast(int)piece_idx]) continue;
@@ -56,6 +61,9 @@ pure const(Situation)[] eval_all(alias EvalFunc)(in P[][][] pieces,in Situation 
 				foreach (frame_idx, frame; acc.frames) {
 					foreach (frame_vertex; frame) {
 						auto diff = frame_vertex - piece_vertex;
+						auto key = tuple(acc.shapes, diff.x.to!byte, diff.y.to!byte, piece_idx.to!ubyte, spin_level.to!ubyte);
+						if (key in memo) continue;
+						memo[key] = 0;
 						auto moved = shape.move(diff);
 						auto reply = EvalFunc (frame, moved);
 						if (reply[0] == -float.infinity) continue;
@@ -72,7 +80,7 @@ pure const(Situation)[] eval_all(alias EvalFunc)(in P[][][] pieces,in Situation 
 }
 
 @safe
-pure const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, size_t beam_width) {
+const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, size_t beam_width) {
 	BitField!128 mask_base;
 	foreach (idx; pieces.length..128)
 		mask_base[idx] = true;
@@ -87,7 +95,7 @@ pure const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, 
 				return procedure;
 		}
 		const(Situation)[] evaled;
-		foreach (situation; sorted) {
+		foreach (i,situation; sorted) {
 			evaled ~= eval_all!EvalFunc(pieces, situation);
 		}
 		sorted = evaled.sort!((a,b) => a.val > b.val);

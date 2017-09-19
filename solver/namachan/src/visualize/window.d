@@ -1,6 +1,7 @@
 module procon28.visualize.window;
 
-import procon28.basic_data : P;
+import procon28.basic_data : P, Situation;
+import procon28.solver.datamanip : move;
 
 import derelict.sdl2.sdl;
 
@@ -14,12 +15,26 @@ class Window {
 	SDL_Renderer *ren;
 	bool live;
 	bool dead;
-	this () {
+	@trusted
+	nothrow this () {
 		import std.string;
 		SDL_CreateWindowAndRenderer (500,500, SDL_WINDOW_SHOWN, &win, &ren);
 		live = true;
 	}
-	void show (in P[][] shapes) {
+
+	@trusted
+	nothrow void show (in P[][][] pieces, in P[][] merged, in P[] moved, in Situation acc) {
+		import std.algorithm.iteration : map;
+		import std.range : array;
+		show (
+			merged
+			~ moved
+			~ acc.shapes.map!(a => pieces[a.piece_idx][a.spin_level].move(a.x, a.y).move(0,100)).array
+			~ moved.move(0,100));
+	}
+
+	@trusted
+	nothrow void show (in P[][] shapes) {
 		if (live){
 			SDL_SetRenderDrawColor (ren, 10, 10, 10, 255);
 			SDL_RenderClear (ren);
@@ -55,7 +70,8 @@ class Window {
 		}
 	}
 
-	void quit () {
+	@trusted
+	nothrow void quit () {
 		SDL_DestroyRenderer(ren);
 		SDL_DestroyWindow(win);
 		SDL_Quit();
