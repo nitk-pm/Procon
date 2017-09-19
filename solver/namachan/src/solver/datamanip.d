@@ -74,7 +74,6 @@ unittest {
 	auto s2 = [P(0,0),P(5,0),P(0,10)];
 	auto ans =
 		[Point(P(0,0),true,false),Point(P(5,0),true, false),Point(P(10,0),false,false),Point(P(10,10),false,false),Point(P(0,10),true,false)];
-		import std.stdio;
 	assert (insert_junction(s1,s2)==ans);
 }
 @safe @nogc
@@ -167,6 +166,64 @@ unittest {
 }
 
 @safe
+pure nothrow bool same(in P[] s1, in P[] s2) {
+	if (s1.length != s2.length) return false;
+	if (s1.length == 0) return true;
+	auto v2 = s2[0];
+	long[] start_points;
+	foreach (idx1, v1; s1) {
+		if (v1 == v2) start_points ~= idx1;
+	}
+	if (start_points.length == 0) return false;
+	bool same_any;
+	foreach (start_idx; start_points) {
+		bool same = true;
+		for (size_t idx2, idx1 = start_idx; idx2 < s2.length; ++idx2, idx1 = (idx1+1)%s1.length) {
+			if (s1[idx1] != s2[idx2]) {
+				same = false;
+				break;
+			}
+		}
+		same_any |= same;
+	}
+	return same_any;
+}
+unittest {
+	auto s1 = [P(0,0), P(5,2), P(8,9)];
+	auto s2 = [P(8,9), P(0,0), P(5,2)];
+	assert (same(s1,s2));
+	auto s3 = [P(0,0), P(5,2), P(8,8)];
+	assert (!same(s1,s3));
+
+	auto s4 = [P(0, 0), P(10, 0), P(10, 10), P(0, 10), P(0, 5), P(5, 7), P(5, 3), P(0, 5)];
+	auto s5 = [P(0, 5), P(5, 7), P(5, 3), P(0, 5), P(0, 0), P(10, 0), P(10, 10), P(0, 10)];
+	assert (same(s4,s5));
+}
+
+@safe
+pure nothrow bool same (in P[][] ss1, in P[][] ss2) {
+	if (ss1.length != ss2.length) return false;
+	auto used_mask = new bool[ss2.length];
+	foreach (s1; ss1) {
+		bool same_found;
+		foreach(s2_idx, s2; ss2) {
+			if (used_mask[s2_idx]) continue;
+			if (same(s1, s2)) {
+				same_found = true;
+				used_mask[s2_idx] = true;
+			}
+		}
+		if (!same_found) return false;
+	}
+	return true;
+}
+unittest {
+	auto ss1 = [[P(0,0), P(5,2), P(8,9)], [P(4,2),P(1,1),P(31,4)]];
+	auto ss2 = [[P(4,2),P(1,1),P(31,4)], [P(8,9), P(0,0), P(5,2)]];
+	assert (same(ss1,ss2));
+}
+
+@safe
 pure nothrow P[][] merge(in P[] frame, in P[] piece) {
 	import std.range : retro, array;
 	Point[] frame_buf;
@@ -174,52 +231,40 @@ pure nothrow P[][] merge(in P[] frame, in P[] piece) {
 	frame_buf = insert_junction(frame, piece);
 	piece_buf = insert_junction(piece, frame).retro.array;
 	P[][] shapes;
-	foreach (frame_point; frame_buf) {
-		if (!frame_point.is_junction) continue;
-		P[] take (in Point start, ref Point[] looking, ref Point[] out_of_looking, in Point before_start) {
-			P[] shape;
-			auto idx = find_junction (looking, start.pos);
-			shape ~= looking[idx].pos;
+	foreach (f_idx, frame_point; frame_buf) {
+		if (frame_point.is_junction || frame_point.visited) continue;
+		P[] take (size_t start, ref Point[] looking, ref Point[] not_looking) {
+			P[] took;
+			auto idx = start;
 			looking[idx].visited = true;
-			for(;;) {
-				idx = (idx + 1) % looking.length;
-				// 中止条件 : 2個前のポイントに戻る(==無限ループに陥ったなら中止)
-				if (before_start.pos == looking[idx].pos)
-					return shape;
-				// 終了条件 : 始めた場所に戻っていたら先読み
-				if (looking[idx].pos == frame_point.pos) {
-					auto out_of_looking_idx = find_junction (out_of_looking, looking[idx].pos);
-					auto lookahead = out_of_looking[(out_of_looking_idx+1)%out_of_looking.length];
-					//先読みした頂点が衝突しているか、訪れたことがあった場合は閉じていると見なして返す
-					if (lookahead.is_junction || lookahead.visited)
-						return shape;
-				}
-				//フレーム遷移
+			took ~= looking[idx].pos;
+			for (;;) {
+				idx = (idx+1)%looking.length;
 				if (looking[idx].is_junction)
-					return shape ~ take(looking[idx], out_of_looking, looking, start);
-
+					return took ~ take (find_junction(not_looking, looking[idx].pos), not_looking, looking);
+				if (looking[idx].visited)
+					return took;
 				looking[idx].visited = true;
-				shape ~= looking[idx].pos;
+				took ~= looking[idx].pos;
 			}
 		}
-		auto not_exist_point = Point (P(int.max, int.max), false, false);
-		auto shape = take (frame_point, piece_buf, frame_buf, not_exist_point);
-		if (shape.length > 2)
-			shapes ~= [shape];
+		auto took = take (f_idx, frame_buf, piece_buf);
+		if (took.length >= 3)
+			shapes ~= took;
 	}
 	return shapes;
 }
 unittest {
 	auto s1 = [P(0,0),P(10,0),P(10,20),P(0,20)];
 	auto s2 = [P(0,0),P(10,0),P(0,10)];
-	assert (merge (s1, s2) == [[P(0,10),P(10,0),P(10,20),P(0,20)]]);
-	assert (merge (s1, s1) == []);
+	assert (same(merge (s1, s2),[[P(0,10),P(10,0),P(10,20),P(0,20)]]));
+	assert (same(merge (s1, s1), []));
 	
 	auto square = [P(0,0),P(10,0),P(10,10),P(0,10)];
 	auto triangle1 = [P(0,5),P(5,3),P(5,7)];
-	assert (merge (square,triangle1) == [[P(0, 5), P(5, 7), P(5, 3), P(0, 5), P(0, 0), P(10, 0), P(10, 10), P(0, 10)]]);
+	assert (same(merge (square,triangle1), [[P(0, 5), P(5, 7), P(5, 3), P(0, 5), P(0, 0), P(10, 0), P(10, 10), P(0, 10)]]));
 	auto triangle2 = [P(0,5),P(5,0),P(5,7)];
-	assert (merge (square,triangle2) == [[P(5, 0), P(0, 5), P(0, 0)], [P(0, 5), P(5, 7), P(5, 0), P(10, 0), P(10, 10), P(0, 10)]]);
+	assert (same(merge (square,triangle2), [[P(5, 0), P(0, 5), P(0, 0)], [P(0, 5), P(5, 7), P(5, 0), P(10, 0), P(10, 10), P(0, 10)]]));
 }
 
 @safe
