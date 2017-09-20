@@ -264,12 +264,12 @@ public:
 };
 
 
-int main() {
+int main(int argc,char* argv[]) {
 	Solver solve;
 	solve.loadShapeInfomation();
 
 	//ビーム
-	solve.beamSearch(10);
+	solve.beamSearch(argc);
 	puts("");
 	for (auto i = solve.frame.begin(); i != solve.frame.end(); ++i) {
 		for (int j = 0; j < i->vertexPositionList.size(); ++j)
