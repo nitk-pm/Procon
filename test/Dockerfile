@@ -19,8 +19,6 @@ RUN apt-get install -qy libcurl4-gnutls-dev
 RUN apt-get install -qy xz-utils
 RUN apt-get install -qy tar
 RUN apt-get install -qy wget
-RUN apt-get install -qy curl
-RUN apt-get install -qy libcurl4-gnutls-dev
 RUN apt-get install -qy libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-net-dev libsdl2-ttf-dev
 RUN apt-get install -qy cmake
 RUN apt-get install -qy make
