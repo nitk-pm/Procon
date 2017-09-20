@@ -40,7 +40,7 @@ class Window {
 			SDL_RenderClear (ren);
 			SDL_SetRenderDrawColor (ren, 255, 255, 255, 255);
 			foreach (shape; shapes) {
-				if (shape.length < 2) {
+				if (shape.length >= 2) {
 					SDL_Point[256] sdl_points;
 					foreach (idx, pt; shape)
 						sdl_points[idx] = SDL_Point(pt.x + 10, pt.y + 10);
