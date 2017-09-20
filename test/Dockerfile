@@ -31,13 +31,7 @@ RUN pip3 install --upgrade pip
 RUN pip3 install PyYAML
 RUN pip3 install jsonschema
 RUN pip3 install pyqt5
-RUN apt-get install -qy unzip
-RUN wget https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh -O - | sh -s /usr/local/bin
-ENV OPAMDOWNLOADJOBS 1
-RUN opam init -y -a --comp=4.04.0
-RUN opam install -y yojson omake
 
-RUN echo 'eval `opam config env`' > ~/.bashrc
 RUN echo 'source ~/dlang/dmd-2.076.0/activate' >> ~/.bashrc
 
 RUN mkdir ci
