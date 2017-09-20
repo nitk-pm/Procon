@@ -7,10 +7,13 @@ MAINTAINER Nakano Masaki
 # update sources list
 RUN apt-get clean
 RUN apt-get update
+RUN apt-get install -qy software-properties-common
+RUN add-apt-repository ppa:jonathonf/gcc-7.1
+RUN apt-get update
+RUN apt-get install -qy g++-7
 RUN apt-get install -qy apt-utils
 RUN apt-get install -qy git
-RUN apt-get install -qy clang
-RUN apt-get install -qy gcc
+RUN apt-get install -qy m4
 RUN apt-get install -qy curl
 RUN apt-get install -qy libcurl4-gnutls-dev
 RUN apt-get install -qy xz-utils
@@ -30,7 +33,6 @@ RUN pip3 install --upgrade pip
 RUN pip3 install PyYAML
 RUN pip3 install jsonschema
 RUN pip3 install pyqt5
-RUN apt-get install -qy m4
 RUN apt-get install -qy unzip
 RUN wget https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh -O - | sh -s /usr/local/bin
 ENV OPAMDOWNLOADJOBS 1
