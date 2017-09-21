@@ -10,6 +10,9 @@ jobs:
           name: namachan_solver
           command: bash ./solver/namachan/test.sh
       - run:
+          name: Mackyson_solver
+          command: bash ./solver/Mackyson/test.sh
+      - run:
           name: pyencoder
           command: bash ./tools/pyencoder/test.sh
       - run:
