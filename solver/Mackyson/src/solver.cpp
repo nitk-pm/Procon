@@ -160,8 +160,8 @@ public:
 		}
 
 		//枠の読み込み
-		if (shapeInfoTmp.at(pieceNumber + 1).c_str() != '\0') {
-			std::vector<std::string> shapeInfoTmp2 = split(shapeInfoTmp.at(pieceNumber + 1), ' ');//shapeInfoTmp[pieceNumber+1]に枠の形状情報
+		if (shapeInfoTmp.at (pieceNumber + 1).c_str () != NULL) {
+			std::vector<std::string> shapeInfoTmp2 = split (shapeInfoTmp.at (pieceNumber + 1), ' ');//shapeInfoTmp[pieceNumber+1]に枠の形状情報
 
 			int frameVertexNumberTmp = stoi(shapeInfoTmp2.at(0));
 
