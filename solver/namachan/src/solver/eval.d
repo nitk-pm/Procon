@@ -45,3 +45,19 @@ pure nothrow Tuple!(float, P[][]) eval_basic (in P[] frame, in P[] piece) {
 	if (point_conflict == 1) return tuple(-float.infinity, cast(P[][])[]);	
 	return tuple(point_conflict - segment_sum / 200.0f - tooshort - frame_num, merged);
 }
+
+@safe
+pure nothrow Tuple!(float, P[][]) simple_is_best (in P[] frame, in P [] piece) {
+	float point_conflict = 0.0f;
+	if (protrude_frame (frame, piece))
+		return tuple(-float.infinity, cast(P[][])[]);
+	auto merged = merge (frame, piece);
+	if (merged.length == 0) return tuple(float.infinity, cast(P[][])[]);
+	foreach (frame_point; frame) {
+		foreach (piece_point; piece) {
+			if (frame_point == piece_point)
+				++point_conflict;
+		}
+	}
+	return tuple(point_conflict, merged);
+}
