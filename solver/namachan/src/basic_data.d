@@ -32,6 +32,9 @@ public:
 		else static if (op == "*") {
 			return x*p.x+y*p.y;
 		}
+		else static if (op == "%") {
+			return Vector!T (x%p.x, y%p.y);
+		}
 	}
 
 	@safe @nogc
@@ -48,6 +51,9 @@ public:
 		else static if (op == "/") {
 			return Vector!T (x/n, y/n);
 		}
+		else static if (op == "%") {
+			return Vector!T (x%n, y%n);
+		}
 	}
 
 	@safe @nogc
@@ -59,6 +65,10 @@ public:
 		else static if (op == "-") {
 			x -= p.x;
 			y -= p.y;
+		}
+		else static if (op == "%") {
+			x %= p.x;
+			y %= p.y;
 		}
 	}
 
@@ -79,6 +89,10 @@ public:
 		else static if (op == "/") {
 			x /= n;
 			y /= n;
+		}
+		else static if (op == "%") {
+			x %= n;
+			y %= n;
 		}
 	}
 
@@ -114,6 +128,9 @@ unittest {
 	assert (cast(Vector!float)(v1) == Vector!float(107.0f, -122.0f));
 	//Vector!T型以外へのキャストは不可能
 	static assert (!__traits(compiles, cast(float)v1));
+
+	assert (v1 % 3 == Vector!int(2, -2));
+	assert (v1 % Vector!int(3, 7) == Vector!int(2, -3));
 }
 
 alias Pos = Vector!int;
