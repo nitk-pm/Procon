@@ -150,20 +150,7 @@ public:
 				for (int turning = 0; turning < 2; ++turning) {
 					for (int spining = 0; spining < 4; ++spining) {
 						Piece tmpPiece(piecePositionTmp, edge);
-						if (edge == 1) {
-
-							Piece minmax = piece.at(piece.size() - 8);
-							sort(minmax.vertexPositionList.begin(), minmax.vertexPositionList.end());
-							Position difference = minmax.vertexPositionList.back() - minmax.vertexPositionList.front();
-
-							auto onlinePositionTmp = piece.at(piece.size() - 8).onlinePositionList;
-							for (auto itr = onlinePositionTmp.begin(); itr != onlinePositionTmp.end(); ++itr)
-								tmpPiece.onlinePositionList.emplace(*itr + difference);
-
-							auto insidePositionTmp = piece.at(piece.size() - 8).insidePositionList;
-							for (auto itr = insidePositionTmp.begin(); itr != insidePositionTmp.end(); ++itr)
-								tmpPiece.insidePositionList.emplace(*itr + difference);
-						}
+						
 						piece.push_back(tmpPiece);
 						piecePositionTmp = spin(piecePositionTmp);
 					}

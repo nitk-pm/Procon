@@ -2,7 +2,7 @@
 
 //x,y座標のpair
 const int INF = 10000000;
-//#define unordered_set set
+#define unordered_set set
 
 class Position {
 public:
