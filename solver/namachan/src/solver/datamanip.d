@@ -312,6 +312,11 @@ nothrow pure bool judge_on_line (in Pos p, in P start, in P end) {
 
 @safe @nogc
 nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
+	import std.conv : to;
+	P pos_sum;
+	immutable gravity_point = pos_sum / cast(int)shape.length;
+	if (crossing_number(gravity_point, shape) && !crossing_number(gravity_point, frame))
+		return true;
 	foreach (shape_vertex; shape) {
 		if (!crossing_number(shape_vertex, frame))
 			return true;
@@ -320,7 +325,6 @@ nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
 		if (crossing_number(frame_vertex, shape, false))
 			return true;
 	}
-	P pos_sum;
 	for (int p_idx; p_idx < shape.length; ++p_idx) {
 		for (int f_idx; f_idx < frame.length; ++f_idx) {
 			if (judge_intersected (
