@@ -4,6 +4,8 @@ import procon28.basic_data : P, BitField, Situation, PlacedShape, Pos;
 import procon28.solver.datamanip : merge, move;
 import procon28.solver.eval : eval_basic;
 
+import core.time : TickDuration;
+
 import std.algorithm.iteration : map;
 import std.conv;
 import std.range : array;
@@ -73,16 +75,32 @@ pure const(Situation)[] eval_all(alias EvalFunc)(in P[][][] pieces,in Situation 
 }
 
 @safe
+pure string show_duration (in TickDuration dur) {
+	import std.format : format;
+	return format("%4s s %4s msecs", dur.msecs / 1000, dur.msecs % 1000);
+}
+
+@safe
 const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, size_t beam_width) {
+	import std.datetime : StopWatch;
+	import std.stdio : writefln;
 	BitField!128 mask_base;
 	foreach (idx; pieces.length..128)
 		mask_base[idx] = true;
 	const(Situation)[] sorted = [Situation([], mask_base, frames, 1.0f)];
+	TickDuration total_time;
+	size_t piece_cnt;
 	for (;;) {
+		++piece_cnt;
+		StopWatch sw;
+		sw.start;
 		const(Situation)[] evaled;
 		foreach (i,situation; sorted) {
 			evaled ~= eval_all!EvalFunc(pieces, situation);
 		}
+		sw.stop;
+		total_time += sw.peek;
+		writefln ("%2s/%s | %4s 探索幅 | %6s 盤面数 |  %s 計算時間 | %s 計", piece_cnt, pieces.length, beam_width, evaled.length, sw.peek.show_duration, total_time.show_duration);
 		sorted = evaled.sort!((a,b) => a.val > b.val);
 		if (sorted.length > beam_width)
 			sorted = sorted[0..beam_width];
