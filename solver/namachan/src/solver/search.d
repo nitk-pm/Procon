@@ -81,15 +81,19 @@ pure string show_duration (in TickDuration dur) {
 }
 
 @safe
-const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, size_t beam_width) {
+const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, int beam_width, int target_time) {
 	import std.datetime : StopWatch;
 	import std.stdio : writefln;
 	BitField!128 mask_base;
 	foreach (idx; pieces.length..128)
 		mask_base[idx] = true;
 	const(Situation)[] sorted = [Situation([], mask_base, frames, 1.0f)];
+	int total_width;
 	TickDuration total_time;
 	size_t piece_cnt;
+	//sec -> msec conversion
+	target_time *= 1000;
+
 	for (;;) {
 		++piece_cnt;
 		StopWatch sw;
@@ -100,7 +104,22 @@ const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, size_
 		}
 		sw.stop;
 		total_time += sw.peek;
-		writefln ("%2s/%s | %4s 探索幅 | %6s 盤面数 |  %s 計算時間 | %s 計", piece_cnt, pieces.length, beam_width, evaled.length, sw.peek.show_duration, total_time.show_duration);
+		writefln ("%2s/%s | %4s 探索幅 | %6s 盤面数 |  %s 計算時間 | %s 計",
+			piece_cnt,
+			pieces.length,
+			beam_width,
+			evaled.length,
+			sw.peek.show_duration,
+			total_time.show_duration);
+		//次のビーム幅の計算
+		if (target_time > 0) {
+			total_width += beam_width;
+			auto width_per_time = cast(float)total_width / cast(float)total_time.msecs;
+			beam_width = cast(int)(width_per_time * (target_time - total_time.msecs));
+			if (beam_width < 1)
+				beam_width = 1;
+		}
+		
 		sorted = evaled.sort!((a,b) => a.val > b.val);
 		if (sorted.length > beam_width)
 			sorted = sorted[0..beam_width];
