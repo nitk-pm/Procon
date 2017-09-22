@@ -77,21 +77,19 @@ const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, size_
 	BitField!128 mask_base;
 	foreach (idx; pieces.length..128)
 		mask_base[idx] = true;
-	auto sorted = eval_all!EvalFunc(pieces, Situation([], mask_base, frames, 1.0f))
-		.sort!((a, b) => a.val > b.val)
-		.array;
+	const(Situation)[] sorted = [Situation([], mask_base, frames, 1.0f)];
 	for (;;) {
+		const(Situation)[] evaled;
+		foreach (i,situation; sorted) {
+			evaled ~= eval_all!EvalFunc(pieces, situation);
+		}
+		sorted = evaled.sort!((a,b) => a.val > b.val);
 		if (sorted.length > beam_width)
 			sorted = sorted[0..beam_width];
 		foreach (procedure; sorted) {
 			if (procedure.used_pieces.all)
 				return procedure;
 		}
-		const(Situation)[] evaled;
-		foreach (i,situation; sorted) {
-			evaled ~= eval_all!EvalFunc(pieces, situation);
-		}
-		sorted = evaled.sort!((a,b) => a.val > b.val);
 		if (sorted.length == 0) throw new Exception("could'nt solve.");
 	}
 }
