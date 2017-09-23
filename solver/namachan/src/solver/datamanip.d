@@ -312,6 +312,11 @@ nothrow pure bool judge_on_line (in Pos p, in P start, in P end) {
 
 @safe @nogc
 nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
+	import std.conv : to;
+	P pos_sum;
+	immutable gravity_point = pos_sum / cast(int)shape.length;
+	if (crossing_number(gravity_point, shape) && !crossing_number(gravity_point, frame))
+		return true;
 	foreach (shape_vertex; shape) {
 		if (!crossing_number(shape_vertex, frame))
 			return true;
@@ -320,7 +325,6 @@ nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
 		if (crossing_number(frame_vertex, shape, false))
 			return true;
 	}
-	P pos_sum;
 	for (int p_idx; p_idx < shape.length; ++p_idx) {
 		for (int f_idx; f_idx < frame.length; ++f_idx) {
 			if (judge_intersected (
@@ -330,10 +334,26 @@ nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
 		}
 		pos_sum += shape[p_idx];
 	}
-	import std.conv : to;
-	immutable gravity_point = pos_sum / cast(int)shape.length;
-	if (crossing_number(gravity_point, shape) && !crossing_number(gravity_point, frame))
-		return true;
+	for (int p_idx1; p_idx1 < shape.length; ++p_idx1) {
+		immutable p_idx2 = (p_idx1 + 1) % shape.length;
+		immutable point_sum = shape[p_idx1] + shape[p_idx2];
+		immutable int x1 = point_sum.x / 2;
+		immutable int x2 = (point_sum.x + 1) / 2;
+		immutable int y1 = point_sum.y / 2;
+		immutable int y2 = (point_sum.y + 1) / 2;
+		immutable P[4] ps = [
+			P(x1, y1),
+			P(x2, y1),
+			P(x1, y2),
+			P(x2, y2)
+		];
+		bool all_protruded = true;
+		foreach (p; ps)
+			if (crossing_number(p, frame))
+				all_protruded = false;
+		if (all_protruded)
+			return true;
+	}
 	return false;
 }
 unittest {
