@@ -86,9 +86,8 @@ class Solver {
 				int i = posCandidate->x, j = posCandidate->y;
 				Position tmpPos(i, j);
 
-
-				if (piece.at(currentPieceID).minX + i >= 0 && piece.at(currentPieceID).maxX + i <= 100 &&
-					piece.at(currentPieceID).minY + j >= 0 && piece.at(currentPieceID).maxY + j <= 64 &&
+				if (piece.at(currentPieceID).minX + i >= fminX && piece.at(currentPieceID).maxX + i <= fmaxX &&
+					piece.at(currentPieceID).minY + j >= fminY && piece.at(currentPieceID).maxY + j <= fmaxY &&
 					isInFrameBit(piece.at(currentPieceID).insidePositionList, tmpPos, currentFrame)) {//ぼくのかんがえたさいきょうのないがいはんてい
 
 					int evalPointCnt = 0;
@@ -130,6 +129,7 @@ public:
 	std::deque<Piece> piece;
 	std::vector<Frame> frame;
 	std::bitset<101 * 65>frameStatus;
+	int fminY = 65, fmaxY = -65, fminX = 101, fmaxX = -101;
 
 	std::string infomationString = "8:5 7 1 6 5 4 5 0 2 6 0:3 0 0 4 4 0 5:5 2 5 0 5 5 0 5 8 2 8:3 6 2 0 7 0 0:5 6 5 0 0 13 0 9 2 9 5:4 0 0 4 0 4 5 0 3:8 5 1 5 0 7 0 7 3 0 3 0 0 2 0 2 1:4 0 0 3 0 3 3 0 3:9 11 0 11 2 13 2 13 0 16 0 16 10 0 10 0 3 4 0";//形状情報読み込み
 	void loadShapeInfomation() {
@@ -175,27 +175,20 @@ public:
 			}
 			frame.push_back(Frame(framePositionTmp));
 
-			int minY = 65, maxY = -65, minX = 101, maxX = -101;
 			for (int i = 0; i < framePositionTmp.size() - 1; ++i) {
-				minY = std::min(minY, frame.at(0).vertexPositionList.at(i).y);
-				maxY = std::max(maxY, frame.at(0).vertexPositionList.at(i).y);
-				minX = std::min(minX, frame.at(0).vertexPositionList.at(i).x);
-				maxX = std::max(maxX, frame.at(0).vertexPositionList.at(i).x);
+				fminY = std::min(fminY, frame.at(0).vertexPositionList.at(i).y);
+				fmaxY = std::max(fmaxY, frame.at(0).vertexPositionList.at(i).y);
+				fminX = std::min(fminX, frame.at(0).vertexPositionList.at(i).x);
+				fmaxX = std::max(fmaxX, frame.at(0).vertexPositionList.at(i).x);
 			}
-			for (int i = minX; i <= maxX; ++i) {
-				for (int j = minY; j <= maxY; ++j) {
+
+			for (int i = fminX; i <= fmaxX; ++i) {
+				for (int j = fminY; j <= fmaxY; ++j) {
 					Position tmpPos(i, j);
 
 					if (gridEvalution(tmpPos, framePositionTmp)) {
 						frameStatus.set(j * 101 + i);
 					}
-				}
-			}
-		}
-
-		pieceNumber *= 8 * 2; //ピース回転分8　基準点右上と左上で2
-		return;
-	}
 
 	//配置情報読み込み
 	void loadLayoutInfomation() {}
