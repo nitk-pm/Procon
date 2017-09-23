@@ -5,10 +5,11 @@ import std.algorithm.iteration : splitter;
 import std.file : readText;
 
 import procon28.decoder;
+import procon28.encoder;
 import procon28.solver.search;
 import procon28.solver.eval;
 
-import std.stdio : stderr, writeln;
+import std.stdio : stderr, writeln, File, write;
 import core.thread : exit;
 
 void main(string[] args){
@@ -31,5 +32,7 @@ void main(string[] args){
 		stderr.writeln("Error : 目標時間かビーム幅のどちらかを指定してください");
 		exit(-1);
 	}
-	beam_search!simple_is_best(piece, frame, width, target_time);
+	auto situation = beam_search!simple_is_best(piece, frame, width, target_time);
+	auto output_file = File ("output.json", "w");
+	output_file.write(situation.situation_pp);
 }
