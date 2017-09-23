@@ -69,14 +69,14 @@ class Solver {
 		return tmp;
 	}
 
-	void climbForBeam(ParStruct par, std::priority_queue<std::pair<int, ParStruct>> *chi, int width) {
+	void climbForBeam(ParStruct par, std::vector<std::pair<int, ParStruct>> *chi, int width) {
 
 		std::vector<bool> usableList = par.usableList;
 		std::unordered_set<Position> evalPos = par.evalPos;
 
 		auto currentFrame = par.frame;
 
-		std::priority_queue<std::tuple<int, int, Position>>evalutionList; //左から、評価値、インデックス値、絶対座標の始点
+		std::priority_queue<Evalution>evalutionList; //左から、評価値、インデックス値、絶対座標の始点
 
 		for (int currentPieceID = 0; currentPieceID < piece.size() - 1; ++currentPieceID) {//全てのusableなピースに対して探索を行う
 			if (!usableList.at(currentPieceID))
@@ -86,37 +86,40 @@ class Solver {
 				int i = posCandidate->x, j = posCandidate->y;
 				Position tmpPos(i, j);
 
+
 				if (piece.at(currentPieceID).minX + i >= 0 && piece.at(currentPieceID).maxX + i <= 100 &&
 					piece.at(currentPieceID).minY + j >= 0 && piece.at(currentPieceID).maxY + j <= 64 &&
 					isInFrameBit(piece.at(currentPieceID).insidePositionList, tmpPos, currentFrame)) {//ぼくのかんがえたさいきょうのないがいはんてい
 
-					int matchPointCnt = 0;
+					int evalPointCnt = 0;
 					for (int currentPieceVertexIdx = 0; currentPieceVertexIdx < piece.at(currentPieceID).vertexPositionList.size() - 1; ++currentPieceVertexIdx)//いくら何でも名前が長すぎる
-						if (evalPos.find(piece.at(currentPieceID).vertexPositionList.at(currentPieceVertexIdx) + tmpPos) != evalPos.end()) //フレームの構成頂点に重なる数を評価
-							++matchPointCnt;
-
-
-					evalutionList.push(std::tuple<int, int, Position>(matchPointCnt, currentPieceID, tmpPos));
+						if (std::find(evalPos.begin(), evalPos.end(), piece.at(currentPieceID).vertexPositionList.at(currentPieceVertexIdx) + tmpPos) != evalPos.end()) //フレームの構成頂点に重なる数を評価
+							evalPointCnt += 5000;
+					evalPointCnt += piece.at(currentPieceID).area;
+					if (evalPointCnt>6000)
+					evalutionList.push(Evalution(evalPointCnt, currentPieceID, tmpPos));
 				}
 			}
 
 		}
 		for (int cnt = 0; cnt < width && !evalutionList.empty(); ++cnt) {
-			int match = std::get<0>(evalutionList.top());
-			int itmp = std::get<1>(evalutionList.top());
-			Position ptmp = std::get<2>(evalutionList.top());
+			int match = evalutionList.top().point;
+			int itmp = evalutionList.top().idx;
+			Position ptmp = evalutionList.top().pos;
 			evalutionList.pop();
 
 			ParStruct tmp(par);
 
 			tmp.frame = frameMerge(currentFrame, piece.at(itmp), ptmp);
-			for (int i = 0; i < piece.at(itmp).vertexPositionList.size(); ++i)
-				tmp.evalPos.emplace(piece.at(itmp).vertexPositionList.at(i) + ptmp);
-
+			for (int i = 0; i < piece.at(itmp).vertexPositionList.size(); ++i) {
+				auto tmpPos = std::find(tmp.evalPos.begin(), tmp.evalPos.end(), piece.at(itmp).vertexPositionList.at(i) + ptmp);
+				if (tmpPos == tmp.evalPos.end())
+					tmp.evalPos.push_back(piece.at(itmp).vertexPositionList.at(i) + ptmp);
+			}
 			tmp.usableList = samePieceDisable(usableList, itmp);
 			tmp.log.push_back(std::pair<int, Position>(itmp, ptmp));
 
-			chi->push(std::pair<int, ParStruct>(match, tmp));
+			chi->push_back(std::pair<int, ParStruct>(match, tmp));
 		}
 		return;
 
@@ -240,28 +243,20 @@ public:
 		for (auto i = a.begin(); i != a.end(); ++i) {
 			frame.push_back(piece.at(i->first).absolutePiecePosition(i->second));
 		}
-		//d
-		rep(j, 13) {
-			rep(i, 19) {
-				std::cout << best.first[j * 101 + i];
-			}
-			puts("");
-		}
+
 	}/**/
 };
 
-
-int main(int argc,char* argv[]) {
+int main() {
+	int argc;
 	Solver solve;
 	solve.loadShapeInfomation();
-
+	argc = 1;
 	//ビーム
 	solve.beamSearch(argc);
-	puts("");
 	for (auto i = solve.frame.begin(); i != solve.frame.end(); ++i) {
 		for (int j = 0; j < i->vertexPositionList.size(); ++j)
-			std::cout << i->vertexPositionList.at(j).x << "," << i->vertexPositionList.at(j).y << std::endl;
-		puts("");
+			std::cout << i->vertexPositionList.at(j).x << std::endl << i->vertexPositionList.at(j).y << std::endl;
 	}
 	return 0;
 }
