@@ -65,6 +65,6 @@ pure nothrow Tuple!(float, P[][]) simple_is_best (in P[] frame, in P [] piece) {
 		}
 	}
 	if (!pt_on_line && point_conflict < 1.1f)
-		tuple(-float.infinity, cast(P[][])[]);
+		return tuple(-float.infinity, cast(P[][])[]);
 	return tuple(point_conflict, merged);
 }
