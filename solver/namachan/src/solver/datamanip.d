@@ -86,12 +86,12 @@ nothrow pure size_t find_junction (in Point[] points, in P target) {
 }
 
 @safe @nogc
-nothrow pure bool judge_cross_horizontal_line (in P p, in P start, in P end) {
+nothrow pure bool judge_cross_horizontal_line (V : Vector!T, T)(in V p, in V start, in V end) {
 	return (start.y - p.y) * (end.y - p.y) < 0;
 }
 
 @safe @nogc
-nothrow pure float on_right_side (in P start, in P end, in P p) {
+nothrow pure float on_right_side (V : Vector!T, T) (in V start, in V end, in V p) {
 	if ((p.y - start.y) * (p.y - end.y) > 0) return false;
 	if ((end - start).x == 0) {
 		if (start.x <= p.x) return true;
@@ -104,7 +104,7 @@ nothrow pure float on_right_side (in P start, in P end, in P p) {
 }
 
 @safe @nogc
-pure nothrow crossing_number (in P p, in P[] shape, in bool include_on_line = true) {
+pure nothrow crossing_number (V : Vector!T, T) (in V p, in V[] shape, in bool include_on_line = true) {
 	size_t cross_cnt;
 	foreach (idx, vertex1; shape) {
 		auto vertex2 = shape[(idx+1)%shape.length];
@@ -300,14 +300,20 @@ unittest {
 	assert (!judge_intersected(P(20,40),P(0,40), P(0,20),P(20,0)));
 }
 @safe @nogc
-nothrow pure bool judge_on_line (in Pos p, in P start, in P end) {
+nothrow pure bool judge_on_line (V : Vector!T, T)(in V p, in V start, in V end) {
 	immutable v1 = end - start;
 	immutable v2 = p - start;
 	immutable v1_abs_2 = (v1.x^^2+v1.y^^2);
 	immutable v2_abs_2 = (v2.x^^2+v2.y^^2);
 	immutable dot = v1 * v2;
 	//内積が|v1|*|v2|かつ内積が正(角度が同じ)で、v2の長さがv1より短い(線分の中に含まれている)場合は線の上にあるとみなす。
-	return dot > 0 && dot^^2 == v1_abs_2*v2_abs_2 && v1_abs_2 >= v2_abs_2;
+	static if (__traits(isFloating, T)) {
+		import std.math : approxEqual;
+		return approxEqual(dot > 0 && dot^^2, v1_abs_2*v2_abs_2) && v1_abs_2 >= v2_abs_2;
+	}
+	else {
+		return dot > 0 && dot^^2 == v1_abs_2*v2_abs_2 && v1_abs_2 >= v2_abs_2;
+	}
 }
 
 @safe @nogc
