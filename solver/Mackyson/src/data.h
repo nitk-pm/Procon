@@ -2,7 +2,7 @@
 
 //x,y座標のpair
 const int INF = 10000000;
-#define unordered_set set
+#define unordered_set vector
 
 class Position {
 public:
@@ -189,8 +189,8 @@ public:
 				Position tmpPos(i, j);
 				switch (gridEvalution(tmpPos, vertexPositionList)) {
 				case 0:break;
-				case 1:onlinePositionList.emplace(tmpPos); break;
-				case 2:insidePositionList.emplace(tmpPos); break;
+				case 1:onlinePositionList.push_back(tmpPos); break;
+				case 2:insidePositionList.push_back(tmpPos); break;
 				default:assert(false);
 				}
 			}
@@ -231,7 +231,7 @@ class Frame {
 
 public:
 
-	std::deque<Position> vertexPositionList;
+	std::vector<Position> vertexPositionList;
 
 	Frame() {};
 	Frame(std::vector<Position>positionList) {
@@ -273,4 +273,24 @@ bool ParStruct::operator <(const ParStruct& p)const {
 }
 bool ParStruct::operator >(const ParStruct& p)const {
 	return(*this < p);
+}
+struct Evalution {
+
+	int point;
+	int idx;
+	Position pos;
+
+	Evalution() {};
+	Evalution(int _point, int _idx, Position _pos) {
+		point = _point; idx = _idx; pos = _pos;
+	}
+
+	bool operator <(const Evalution& p)const;
+};
+bool Evalution::operator <(const Evalution& e) const{
+	return point == e.point ? 
+				idx == e.idx ? 
+					pos < e.pos : 
+				idx < e.idx : 
+			point < e.point;
 }
