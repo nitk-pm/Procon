@@ -60,7 +60,7 @@ pure nothrow Tuple!(float, P[][]) simple_is_best (in P[] frame, in P [] piece) {
 		foreach (piece_point; piece) {
 			if (frame_point1 == piece_point)
 				++point_conflict;
-			else if (judge_on_line(piece_point, frame_point1, frame_point2))
+			else if (judge_on_line(piece_point, frame_point1, frame_point2) && frame_point2 != piece_point) {
 				pt_on_line |= true;
 		}
 	}
