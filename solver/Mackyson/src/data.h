@@ -2,7 +2,6 @@
 
 //x,y座標のpair
 const int INF = 10000000;
-#define unordered_set vector
 
 class Position {
 public:
@@ -133,8 +132,8 @@ public:
 
 	double area;
 
-	std::unordered_set<Position>onlinePositionList;
-	std::unordered_set<Position>insidePositionList;
+	std::vector<Position>onlinePositionList;
+	std::vector<Position>insidePositionList;
 	int minY, maxY, minX, maxX;
 
 	std::vector<Position> vertexPositionList;
@@ -252,11 +251,11 @@ struct ParStruct {
 
 	std::bitset<101 * 65> frame;
 	std::vector<bool> usableList;
-	std::unordered_set<Position> evalPos;
+	std::vector<Position> evalPos;
 	std::vector<std::pair<int, Position>>log;
 
 	ParStruct() {};
-	ParStruct(std::bitset<101 * 65> f, std::vector<bool> u, std::unordered_set<Position> e, std::vector<std::pair<int, Position>> l) {
+	ParStruct(std::bitset<101 * 65> f, std::vector<bool> u, std::vector<Position> e, std::vector<std::pair<int, Position>> l) {
 
 		frame = f;
 		usableList = u;
