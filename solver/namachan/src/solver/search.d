@@ -4,6 +4,8 @@ import procon28.basic_data : P, BitField, Situation, PlacedShape, Pos;
 import procon28.solver.datamanip : merge, move;
 import procon28.solver.eval : eval_basic;
 
+import core.time : TickDuration;
+
 import std.algorithm.iteration : map;
 import std.conv;
 import std.range : array;
@@ -73,25 +75,58 @@ pure const(Situation)[] eval_all(alias EvalFunc)(in P[][][] pieces,in Situation 
 }
 
 @safe
-const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, size_t beam_width) {
+pure string show_duration (in TickDuration dur) {
+	import std.format : format;
+	return format("%4s s %4s msecs", dur.msecs / 1000, dur.msecs % 1000);
+}
+
+@safe
+const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, int beam_width, int target_time) {
+	import std.datetime : StopWatch;
+	import std.stdio : writefln;
 	BitField!128 mask_base;
 	foreach (idx; pieces.length..128)
 		mask_base[idx] = true;
-	auto sorted = eval_all!EvalFunc(pieces, Situation([], mask_base, frames, 1.0f))
-		.sort!((a, b) => a.val > b.val)
-		.array;
+	const(Situation)[] sorted = [Situation([], mask_base, frames, 1.0f)];
+	int total_width;
+	TickDuration total_time;
+	size_t piece_cnt;
+	//sec -> msec conversion
+	target_time *= 1000;
+
 	for (;;) {
+		++piece_cnt;
+		StopWatch sw;
+		sw.start;
+		const(Situation)[] evaled;
+		foreach (i,situation; sorted) {
+			evaled ~= eval_all!EvalFunc(pieces, situation);
+		}
+		sw.stop;
+		total_time += sw.peek;
+		writefln ("%2s/%s | %4s 探索幅 | %6s 盤面数 |  %s 計算時間 | %s 計",
+			piece_cnt,
+			pieces.length,
+			beam_width,
+			evaled.length,
+			sw.peek.show_duration,
+			total_time.show_duration);
+		//次のビーム幅の計算
+		if (target_time > 0) {
+			total_width += beam_width;
+			auto width_per_time = cast(float)total_width / cast(float)total_time.msecs;
+			beam_width = cast(int)(width_per_time * (target_time - total_time.msecs));
+			if (beam_width < 1)
+				beam_width = 1;
+		}
+		
+		sorted = evaled.sort!((a,b) => a.val > b.val);
 		if (sorted.length > beam_width)
 			sorted = sorted[0..beam_width];
 		foreach (procedure; sorted) {
 			if (procedure.used_pieces.all)
 				return procedure;
 		}
-		const(Situation)[] evaled;
-		foreach (i,situation; sorted) {
-			evaled ~= eval_all!EvalFunc(pieces, situation);
-		}
-		sorted = evaled.sort!((a,b) => a.val > b.val);
 		if (sorted.length == 0) throw new Exception("could'nt solve.");
 	}
 }
@@ -101,6 +136,6 @@ unittest {
 	auto p2 = [[P(20,0), P(20,20), P(0,20)]];
 	auto p3 = [[P(0,0), P (20, 0), P(20,20),P(0,20)]];
 	auto frames = [[P(0,0), P(20,0), P(20,40), P(0,40)]];
-	auto ops = beam_search!eval_basic([p1, p2, p3], frames, 1);
+	auto ops = beam_search!eval_basic([p1, p2, p3], frames, 1, -1);
 	assert (ops.shapes.length == 3);
 }

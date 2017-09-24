@@ -10,3 +10,4 @@ __test__*__
 *.json
 *.txt
 procon-solver
+procon-solver-test-library

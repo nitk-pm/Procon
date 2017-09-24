@@ -39,7 +39,8 @@ class BaseDetector(object):
     def setup(self, project_data):
         self.graph = {}
         for node in project_data['items']:
-            self.graph[node['node']] = node['linked-nodes'][:]
+            if len(node['linked-nodes']) != 0:
+                self.graph[node['node']] = node['linked-nodes'][:]
 
     @abstractmethod
     def search(self):

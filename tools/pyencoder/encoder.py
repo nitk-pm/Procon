@@ -94,7 +94,7 @@ class Encoder(object):
         result = None
         if is_frame:
             polygon = self.to_polygon(data)
-            result = [{'x': int(p.x()), 'y': int(p.y())} for p in polygon]
+            result = [{'x': int(p.x()), 'y': int(p.y())} for p in polygon[:-1]]
         else:
             polygon_list = self.expand_patterns(data)
             result = {'shapes': []}

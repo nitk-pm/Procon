@@ -11,6 +11,7 @@ import std.typecons : Tuple, tuple;
 @safe
 pure nothrow Tuple!(float, P[][]) eval_basic (in P[] frame, in P[] piece) {
 	float point_conflict = 0.0f;
+	float pt_on_line = 0.0f;
 	float segment_sum = 0.0f;
 	float tooshort = 0.0f;
 	float frame_num = 0.0f;
@@ -39,9 +40,31 @@ pure nothrow Tuple!(float, P[][]) eval_basic (in P[] frame, in P[] piece) {
 			if (frame_point1 == piece_point)
 				++point_conflict;
 			else if (judge_on_line(piece_point, frame_point1, frame_point2))
-				++point_conflict;
+				++pt_on_line;
 		}
 	}
-	if (point_conflict == 1) return tuple(-float.infinity, cast(P[][])[]);	
+	if (point_conflict < 1.1f && pt_on_line == 0.0f) return tuple(-float.infinity, cast(P[][])[]);	
 	return tuple(point_conflict - segment_sum / 200.0f - tooshort - frame_num, merged);
+}
+
+@safe
+pure nothrow Tuple!(float, P[][]) simple_is_best (in P[] frame, in P [] piece) {
+	float point_conflict = 0.0f;
+	if (protrude_frame (frame, piece))
+		return tuple(-float.infinity, cast(P[][])[]);
+	auto merged = merge (frame, piece);
+	if (merged.length == 0) return tuple(float.infinity, cast(P[][])[]);
+	bool pt_on_line = false;
+	foreach (f_idx, frame_point1; frame) {
+		auto frame_point2 = frame[(f_idx+1)%frame.length];
+		foreach (piece_point; piece) {
+			if (frame_point1 == piece_point)
+				++point_conflict;
+			else if (judge_on_line(piece_point, frame_point1, frame_point2))
+				pt_on_line |= true;
+		}
+	}
+	if (!pt_on_line && point_conflict < 1.1f)
+		return tuple(-float.infinity, cast(P[][])[]);
+	return tuple(point_conflict, merged);
 }
