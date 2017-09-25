@@ -1,6 +1,5 @@
 #pragma once
 
-//x,y座標のpair
 const int INF = 10000000;
 
 class Position {
@@ -68,26 +67,26 @@ int gridEvalution(Position p, std::vector<Position> shape) {
 		}
 	}
 
-	int wn = 0;
-	for (int k = 0; k < shape.size() - 1; ++k) {//currentな枠の頂点数に対応するループ
+	int cn = 0;
+	for (int k = 0; k < shape.size()-1 ; ++k) {//currentな枠の頂点数に対応するループ
 		double vt = (double)(p.y - shape.at(k).y) / (shape.at(k + 1).y - shape.at(k).y);//k,k+1のなす線分の傾き
 
 		if ((shape.at(k).y <= p.y)//始点以上終点未満のy値
 			&& (shape.at(k + 1).y > p.y)) {
 			if (p.x < (shape.at(k).x + (vt * (shape.at(k + 1).x - shape.at(k).x))))
 			{
-				wn++;
+				cn++;
 			}
 		}
 		else if ((shape.at(k).y > p.y)//あるいは終点以下始点超過のy値
 			&& (shape.at(k + 1).y <= p.y)) {
 			if (p.x < (shape.at(k).x + (vt * (shape.at(k + 1).x - shape.at(k).x))))
 			{
-				wn--;
+				cn++;
 			}
 		}
 	}
-	if (wn != 0) {
+	if (cn %2 == 1) {
 		return 2;
 	}
 
@@ -131,12 +130,12 @@ public:
 	bool operator !=(const Piece& p)const;
 
 	double area;
+	std::vector<Position> vertexPositionList;
 
 	std::vector<Position>onlinePositionList;
 	std::vector<Position>insidePositionList;
 	int minY, maxY, minX, maxX;
 
-	std::vector<Position> vertexPositionList;
 
 	Piece() {};
 	Piece(std::vector<Position>positionList, int edge) {
@@ -293,3 +292,18 @@ bool Evalution::operator <(const Evalution& e) const{
 				idx < e.idx : 
 			point < e.point;
 }
+
+class _queue { 
+
+private:
+	int data[6565];
+	int head = 0;
+	int tail = 0;
+	
+public:
+	void push(int a) { data[tail++] = a; }
+	void pop() { head++; }
+	int front() { return data[head]; }
+	bool empty() { return head == tail ? true : false; }
+
+};
