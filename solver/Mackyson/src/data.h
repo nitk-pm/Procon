@@ -2,7 +2,6 @@
 
 //x,y座標のpair
 const int INF = 10000000;
-#define unordered_set set
 
 class Position {
 public:
@@ -133,8 +132,8 @@ public:
 
 	double area;
 
-	std::unordered_set<Position>onlinePositionList;
-	std::unordered_set<Position>insidePositionList;
+	std::vector<Position>onlinePositionList;
+	std::vector<Position>insidePositionList;
 	int minY, maxY, minX, maxX;
 
 	std::vector<Position> vertexPositionList;
@@ -189,8 +188,8 @@ public:
 				Position tmpPos(i, j);
 				switch (gridEvalution(tmpPos, vertexPositionList)) {
 				case 0:break;
-				case 1:onlinePositionList.emplace(tmpPos); break;
-				case 2:insidePositionList.emplace(tmpPos); break;
+				case 1:onlinePositionList.push_back(tmpPos); break;
+				case 2:insidePositionList.push_back(tmpPos); break;
 				default:assert(false);
 				}
 			}
@@ -231,7 +230,7 @@ class Frame {
 
 public:
 
-	std::deque<Position> vertexPositionList;
+	std::vector<Position> vertexPositionList;
 
 	Frame() {};
 	Frame(std::vector<Position>positionList) {
@@ -252,11 +251,11 @@ struct ParStruct {
 
 	std::bitset<101 * 65> frame;
 	std::vector<bool> usableList;
-	std::unordered_set<Position> evalPos;
+	std::vector<Position> evalPos;
 	std::vector<std::pair<int, Position>>log;
 
 	ParStruct() {};
-	ParStruct(std::bitset<101 * 65> f, std::vector<bool> u, std::unordered_set<Position> e, std::vector<std::pair<int, Position>> l) {
+	ParStruct(std::bitset<101 * 65> f, std::vector<bool> u, std::vector<Position> e, std::vector<std::pair<int, Position>> l) {
 
 		frame = f;
 		usableList = u;
@@ -273,4 +272,24 @@ bool ParStruct::operator <(const ParStruct& p)const {
 }
 bool ParStruct::operator >(const ParStruct& p)const {
 	return(*this < p);
+}
+struct Evalution {
+
+	int point;
+	int idx;
+	Position pos;
+
+	Evalution() {};
+	Evalution(int _point, int _idx, Position _pos) {
+		point = _point; idx = _idx; pos = _pos;
+	}
+
+	bool operator <(const Evalution& p)const;
+};
+bool Evalution::operator <(const Evalution& e) const{
+	return point == e.point ? 
+				idx == e.idx ? 
+					pos < e.pos : 
+				idx < e.idx : 
+			point < e.point;
 }
