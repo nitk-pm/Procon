@@ -88,6 +88,7 @@ const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, int b
 	foreach (idx; pieces.length..128)
 		mask_base[idx] = true;
 	const(Situation)[] sorted = [Situation([], mask_base, frames, 1.0f)];
+	const(Situation)[] best;
 	int total_width;
 	TickDuration total_time;
 	size_t piece_cnt;
@@ -127,7 +128,12 @@ const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, int b
 			if (procedure.used_pieces.all)
 				return procedure;
 		}
-		if (sorted.length == 0) throw new Exception("could'nt solve.");
+		if (sorted.length == 0) {
+			writeln("Warning : 完全解未発見");
+			return best[0];
+		}
+		else
+			best = sorted[0..1];
 	}
 }
 
