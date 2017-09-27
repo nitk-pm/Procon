@@ -42,16 +42,20 @@ nothrow pure Point[] insert_junction (in P[] frame, in P[] piece) {
 	Point[] frame_buf;
 	foreach (f_idx; 0..frame.length) {
 		bool point_appended;
+		int p_idx_start;
 		//始点とピースの頂点の何処かが衝突していた場合追加
 		foreach (p_idx,piece_p; piece) {
 			if (frame[f_idx] == piece_p || judge_on_line(frame[f_idx], piece_p, piece[(p_idx+1)%piece.length])) {
+				p_idx_start = cast(int)p_idx;
 				frame_buf ~= Point(frame[f_idx], true, false);
 				point_appended = true;
 				break;
 			}
 		}
 		//線分の間にピースの頂点があった場合追加
-		foreach (p_idx,piece_p; piece) {
+		foreach(_;0..piece.length) {
+			p_idx_start = (p_idx_start+1)%cast(int)piece.length;
+			auto piece_p = piece[p_idx_start];
 			//judge_on_lineは線分の終点を含むので、除外
 			if (frame[(f_idx+1)%frame.length] != piece_p
 				&& judge_on_line(piece_p, frame[f_idx], frame[(f_idx+1)%frame.length])) {
