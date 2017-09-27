@@ -38,19 +38,21 @@ struct Point {
 //頂点座標の配列を、ピースと接触している点と接触していない点からなる頂点座標の配列に
 @safe
 nothrow pure Point[] insert_junction (in P[] frame, in P[] piece) {
+	import std.range : retro;
 	Point[] frame_buf;
+	auto piece_rev  = piece.retro.array;
 	foreach (f_idx; 0..frame.length) {
 		bool point_appended;
 		//始点とピースの頂点の何処かが衝突していた場合追加
-		foreach (p_idx,piece_p; piece) {
-			if (frame[f_idx] == piece_p || judge_on_line(frame[f_idx], piece_p, piece[(p_idx+1)%piece.length])) {
+		foreach (p_idx,piece_p; piece_rev) {
+			if (frame[f_idx] == piece_p || judge_on_line(frame[f_idx], piece_p, piece_rev[(p_idx+1)%piece_rev.length])) {
 				frame_buf ~= Point(frame[f_idx], true, false);
 				point_appended = true;
 				break;
 			}
 		}
 		//線分の間にピースの頂点があった場合追加
-		foreach (p_idx,piece_p; piece) {
+		foreach (p_idx,piece_p; piece_rev) {
 			//judge_on_lineは線分の終点を含むので、除外
 			if (frame[(f_idx+1)%frame.length] != piece_p
 				&& judge_on_line(piece_p, frame[f_idx], frame[(f_idx+1)%frame.length])) {
@@ -231,24 +233,30 @@ pure nothrow P[][] merge(in P[] frame, in P[] piece) {
 	frame_buf = insert_junction(frame, piece);
 	piece_buf = insert_junction(piece, frame).retro.array;
 	P[][] shapes;
-	foreach (f_idx, frame_point; frame_buf) {
-		if (frame_point.is_junction || frame_point.visited) continue;
-		P[] take (size_t start, ref Point[] looking, ref Point[] not_looking) {
-			P[] took;
-			auto idx = start;
+	P[] take (size_t start, ref Point[] looking, ref Point[] not_looking) {
+		P[] took;
+		auto idx = start;
+		looking[idx].visited = true;
+		took ~= looking[idx].pos;
+		for (;;) {
+			idx = (idx+1)%looking.length;
+			if (looking[idx].is_junction)
+				return took ~ take (find_junction(not_looking, looking[idx].pos), not_looking, looking);
+			if (looking[idx].visited)
+				return took;
 			looking[idx].visited = true;
 			took ~= looking[idx].pos;
-			for (;;) {
-				idx = (idx+1)%looking.length;
-				if (looking[idx].is_junction)
-					return took ~ take (find_junction(not_looking, looking[idx].pos), not_looking, looking);
-				if (looking[idx].visited)
-					return took;
-				looking[idx].visited = true;
-				took ~= looking[idx].pos;
-			}
 		}
+	}
+	foreach (f_idx, frame_point; frame_buf) {
+		if (frame_point.is_junction || frame_point.visited) continue;
 		auto took = take (f_idx, frame_buf, piece_buf);
+		if (took.length >= 3)
+			shapes ~= took;
+	}
+	foreach (p_idx, piece_point; piece_buf) {
+		if (piece_point.is_junction || piece_point.visited) continue;
+		auto took = take (p_idx, piece_buf, piece_buf);
 		if (took.length >= 3)
 			shapes ~= took;
 	}
