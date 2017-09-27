@@ -231,24 +231,30 @@ pure nothrow P[][] merge(in P[] frame, in P[] piece) {
 	frame_buf = insert_junction(frame, piece);
 	piece_buf = insert_junction(piece, frame).retro.array;
 	P[][] shapes;
-	foreach (f_idx, frame_point; frame_buf) {
-		if (frame_point.is_junction || frame_point.visited) continue;
-		P[] take (size_t start, ref Point[] looking, ref Point[] not_looking) {
-			P[] took;
-			auto idx = start;
+	P[] take (size_t start, ref Point[] looking, ref Point[] not_looking) {
+		P[] took;
+		auto idx = start;
+		looking[idx].visited = true;
+		took ~= looking[idx].pos;
+		for (;;) {
+			idx = (idx+1)%looking.length;
+			if (looking[idx].is_junction)
+				return took ~ take (find_junction(not_looking, looking[idx].pos), not_looking, looking);
+			if (looking[idx].visited)
+				return took;
 			looking[idx].visited = true;
 			took ~= looking[idx].pos;
-			for (;;) {
-				idx = (idx+1)%looking.length;
-				if (looking[idx].is_junction)
-					return took ~ take (find_junction(not_looking, looking[idx].pos), not_looking, looking);
-				if (looking[idx].visited)
-					return took;
-				looking[idx].visited = true;
-				took ~= looking[idx].pos;
-			}
 		}
+	}
+	foreach (f_idx, frame_point; frame_buf) {
+		if (frame_point.is_junction || frame_point.visited) continue;
 		auto took = take (f_idx, frame_buf, piece_buf);
+		if (took.length >= 3)
+			shapes ~= took;
+	}
+	foreach (p_idx, piece_point; piece_buf) {
+		if (piece_point.is_junction || piece_point.visited) continue;
+		auto took = take (p_idx, piece_buf, piece_buf);
 		if (took.length >= 3)
 			shapes ~= took;
 	}
