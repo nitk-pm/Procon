@@ -40,19 +40,18 @@ struct Point {
 nothrow pure Point[] insert_junction (in P[] frame, in P[] piece) {
 	import std.range : retro;
 	Point[] frame_buf;
-	auto piece_rev  = piece.retro.array;
 	foreach (f_idx; 0..frame.length) {
 		bool point_appended;
 		//始点とピースの頂点の何処かが衝突していた場合追加
-		foreach (p_idx,piece_p; piece_rev) {
-			if (frame[f_idx] == piece_p || judge_on_line(frame[f_idx], piece_p, piece_rev[(p_idx+1)%piece_rev.length])) {
+		foreach (p_idx,piece_p; piece) {
+			if (frame[f_idx] == piece_p || judge_on_line(frame[f_idx], piece_p, piece[(p_idx+1)%piece.length])) {
 				frame_buf ~= Point(frame[f_idx], true, false);
 				point_appended = true;
 				break;
 			}
 		}
 		//線分の間にピースの頂点があった場合追加
-		foreach (p_idx,piece_p; piece_rev) {
+		foreach (p_idx,piece_p; piece) {
 			//judge_on_lineは線分の終点を含むので、除外
 			if (frame[(f_idx+1)%frame.length] != piece_p
 				&& judge_on_line(piece_p, frame[f_idx], frame[(f_idx+1)%frame.length])) {
