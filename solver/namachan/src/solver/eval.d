@@ -23,13 +23,13 @@ pure nothrow bool has_point_contact (in P[] s1, in P[] s2) {
 unittest {
 	auto box = [P(0,0),P(10,0),P(10,10),P(0,10)];
 	auto triangle1 = [P(2,2), P(10,5),P(2,7)];
-	assert (point_contact(box, triangle1));
+	assert (has_point_contact(box, triangle1));
 	auto small_box = [P(0,0),P(5,0),P(5,5),P(0,5)];
-	assert (!point_contact(box, small_box));
+	assert (!has_point_contact(box, small_box));
 	auto triangle2 = [P(2,0), P(10,5),P(2,7)];
-	assert (point_contact(box, triangle2));
+	assert (has_point_contact(box, triangle2));
 	auto triangle3 = [P(0,0),P(5,7),P(10,10)];
-	assert (point_contact(box, triangle3));
+	assert (has_point_contact(box, triangle3));
 }
 
 /++
