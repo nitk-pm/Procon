@@ -175,24 +175,47 @@ class PieceDetector(BaseDetector):
 class FrameDetector(BaseDetector):
 
     def search(self):
-        self.path = []
-        self.convex_hull_on_graph()
+        self.paths = []
+        self.nodes = list(self.graph.keys())
+        while True:
+            path = self.convex_hull_on_graph()
+            self.paths.append(path)
+            self.update_nodes(path)
+            if len(self.nodes) == 0:
+                break
         self.correct_with_angle()
         self.correct_loopwise()
-        return self.path
+        return self.paths
 
     def convex_hull_on_graph(self):
-        self.path.append(self.min_point())
-        self.path.append(self.min_radian_point(self.path[0], '(-1, -1)'))
-        while self.path[0] != self.path[-1]:
-            p = self.min_radian_point(self.path[-1], self.path[-2])
-            self.path.append(p)
+        path = []
+        path.append(self.min_point())
+        path.append(self.min_radian_point(path[0], '(-1, -1)'))
+        while path[0] != path[-1]:
+            p = self.min_radian_point(path[-1], path[-2])
+            path.append(p)
+        return path
+
+    def update_nodes(self, path):
+        polygon = to_polygon(path)
+        nodes = []
+        for node in self.nodes:
+            flag = False
+            for path in self.paths:
+                if node in path:
+                    flag = True
+                    break
+            if flag:
+                continue
+            p = convert_from_str(node)
+            if not polygon.containsPoint(p, Qt.WindingFill):
+                nodes.append(node)
+        self.nodes = nodes
 
     def min_point(self):
-        nodes = list(self.graph.keys())
-        m_str = nodes[0]
+        m_str = self.nodes[0]
         m_p = convert_from_str(m_str)
-        for node in nodes:
+        for node in self.nodes:
             if len(self.graph[node]) == 0:
                 continue
             n = convert_from_str(node)
@@ -225,11 +248,12 @@ class FrameDetector(BaseDetector):
         return math.sqrt(point.x() * point.x() + point.y() * point.y())
 
     def correct_loopwise(self):
-        if self.signed_area() < 0:
-            self.path.reverse()
+        for i, path in enumerate(self.paths):
+            if self.signed_area(path) < 0:
+                self.paths[i].reverse()
 
-    def signed_area(self):
-        points = [convert_from_str(node) for node in self.path]
+    def signed_area(self, path):
+        points = [convert_from_str(node) for node in path]
         length = len(points)
         area = 0.0
         for i in range(length - 1):
@@ -237,20 +261,21 @@ class FrameDetector(BaseDetector):
         return area / 2
 
     def correct_with_angle(self):
-        length = len(self.path)
-        find = [False for i in range(length)]
-        for i in range(length - 2):
-            p1 = convert_from_str(self.path[i])
-            p2 = convert_from_str(self.path[i + 1])
-            p3 = convert_from_str(self.path[i + 2])
-            l1, l2 = QLineF(p1, p2), QLineF(p2, p3)
-            if l1.angleTo(l2) == 0.0:
-                find[i + 1] = True
-        new_path = []
-        for i in range(length):
-            if not find[i]:
-                new_path.append(self.path[i])
-        self.path = new_path
+        for index, path in enumerate(self.paths):
+            length = len(path)
+            find = [False for i in range(length)]
+            for i in range(length - 2):
+                p1 = convert_from_str(path[i])
+                p2 = convert_from_str(path[i + 1])
+                p3 = convert_from_str(path[i + 2])
+                l1, l2 = QLineF(p1, p2), QLineF(p2, p3)
+                if l1.angleTo(l2) == 0.0:
+                    find[i + 1] = True
+            new_path = []
+            for i in range(length):
+                if not find[i]:
+                    new_path.append(path[i])
+            self.paths[index] = new_path
 
 
 class BaseFormat(object):
@@ -289,10 +314,14 @@ class OfficialFormat(BaseFormat):
         pieces = PieceDetector(project_data).search()
         pieces = [self.remove_offset(p) for p in pieces]
         pieces = [self.convert_to_official(p) for p in pieces]
-        frame = FrameDetector(project_data).search()
-        frame = [convert_from_str(p) for p in frame[:-1]]
-        frame = self.convert_to_official(frame)
-        data = '{}:{}:{}'.format(len(pieces), ':'.join(pieces), frame)
+        frames = FrameDetector(project_data).search()
+        frames = [[convert_from_str(p) for p in f[:-1]] for f in frames]
+        frames = [self.convert_to_official(f) for f in frames]
+        data = '{}:{}:{}'.format(
+            len(pieces),
+            ':'.join(pieces),
+            ':'.join(frames)
+        )
         with open(filename, 'w') as file:
             file.write(data)
 
