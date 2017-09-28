@@ -359,10 +359,6 @@ nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
 				return true;
 		}
 	}
-	foreach (shape_vertex; shape) {
-		if (!crossing_number(shape_vertex, frame))
-			return true;
-	}
 	foreach (frame_vertex; frame) {
 		if (crossing_number(frame_vertex, shape, false))
 			return true;
