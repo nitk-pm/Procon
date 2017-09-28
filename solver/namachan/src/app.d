@@ -6,8 +6,8 @@ import std.file : readText;
 
 import procon28.decoder;
 import procon28.encoder;
-import procon28.solver.search;
-import procon28.solver.eval;
+import procon28.search;
+import procon28.eval;
 
 import std.stdio : stderr, writeln, File, write;
 import core.thread : exit;

@@ -1,4 +1,4 @@
-module procon28.solver.geometry;
+module procon28.geometry;
 
 import procon28.data : P, PlacedShape, Situation, Height, Width, Pos, Vector;
 

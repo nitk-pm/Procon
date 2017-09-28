@@ -1,6 +1,6 @@
 module procon28.data;
 
-import procon28.solver.geometry : shape_idx;
+import procon28.geometry : shape_idx;
 
 import std.algorithm.iteration : uniq;
 import std.algorithm.sorting : sort;
