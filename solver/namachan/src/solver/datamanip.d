@@ -349,6 +349,16 @@ nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
 	immutable gravity_point = pos_sum / cast(int)shape.length;
 	if (crossing_number(gravity_point, shape) && !crossing_number(gravity_point, frame))
 		return true;
+	foreach (s_idx, shape_vertex1; shape) {
+		immutable s_start = shape_vertex1;
+		immutable s_end = shape[(s_idx+1)%shape.length];
+		foreach (f_idx, frame_vertex; frame) {
+			immutable f_start = frame_vertex;
+			immutable f_end   = frame[(f_idx+1)%frame.length];
+			if (judge_intersected(s_start, s_end, f_start, f_end))
+				return true;
+		}
+	}
 	foreach (shape_vertex; shape) {
 		if (!crossing_number(shape_vertex, frame))
 			return true;
