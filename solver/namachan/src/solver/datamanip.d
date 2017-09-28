@@ -40,28 +40,46 @@ struct Point {
 nothrow pure Point[] insert_junction (in P[] frame, in P[] piece) {
 	import std.range : retro;
 	Point[] frame_buf;
-	auto piece_rev  = piece.retro.array;
 	foreach (f_idx; 0..frame.length) {
 		bool point_appended;
 		//始点とピースの頂点の何処かが衝突していた場合追加
-		foreach (p_idx,piece_p; piece_rev) {
-			if (frame[f_idx] == piece_p || judge_on_line(frame[f_idx], piece_p, piece_rev[(p_idx+1)%piece_rev.length])) {
+		foreach (p_idx,piece_p; piece) {
+			if (frame[f_idx] == piece_p || judge_on_line(frame[f_idx], piece_p, piece[(p_idx+1)%piece.length])) {
 				frame_buf ~= Point(frame[f_idx], true, false);
 				point_appended = true;
 				break;
 			}
 		}
+		//予め最も始点に近い点の添字を計算しておく。これはこれで正しい点から追加していけるようになる。
+		P[] between_seg;
+		int start_idx;
+		int cnt;
+		int norm_max = int.max;
 		//線分の間にピースの頂点があった場合追加
-		foreach (p_idx,piece_p; piece_rev) {
+		foreach(piece_p;piece) {
 			//judge_on_lineは線分の終点を含むので、除外
 			if (frame[(f_idx+1)%frame.length] != piece_p
 				&& judge_on_line(piece_p, frame[f_idx], frame[(f_idx+1)%frame.length])) {
-				//まだ始点が追加されてなかった場合追加してから線分の間の点を追加
-				if (!point_appended) {
-					frame_buf ~= Point(frame[f_idx], false, false);
-					point_appended = true;
+				between_seg ~= piece_p;
+				auto norm2 = (piece_p-frame[f_idx]).norm2;
+				if (norm2 < norm_max) {
+					norm_max = norm2;
+					start_idx = cnt;
+					++cnt;
 				}
-				frame_buf ~= Point(piece_p, true, false);
+			}
+		}
+		if (between_seg.length != 0) {
+			//まだ始点が追加されてなかった場合追加してから線分の間の点を追加
+			if (!point_appended) {
+				frame_buf ~= Point(frame[f_idx], false, false);
+				point_appended = true;
+			}
+			//最も始点に近いものから順番に追加
+			int idx = start_idx;
+			foreach (_;0..between_seg.length) {
+				frame_buf ~= Point(between_seg[idx], true, false);
+				idx = (idx+1)%cast(int)between_seg.length;
 			}
 		}
 		//衝突してなかった場合、点を追加
