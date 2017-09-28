@@ -1,7 +1,7 @@
 module procon28.solver.eval;
 
-import procon28.basic_data : P;
-import procon28.solver.datamanip : equal_slope, move, protrude_frame, judge_on_line, merge, insert_junction, Point;
+import procon28.data : P;
+import procon28.solver.geometry : equal_slope, move, protrude_frame, judge_on_line, merge, insert_junction, Point;
 import std.typecons : Tuple, tuple;
 
 //接触をの検出

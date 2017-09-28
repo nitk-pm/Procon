@@ -1,6 +1,6 @@
 module procon28.decoder;
 
-import procon28.basic_data : Pos, P;
+import procon28.data : Pos, P;
 
 import std.conv : to;
 import std.json : parseJSON, JSONValue;

@@ -1,7 +1,7 @@
 module procon28.solver.search;
 
-import procon28.basic_data : P, BitField, Situation, PlacedShape, Pos;
-import procon28.solver.datamanip : merge, move;
+import procon28.data : P, BitField, Situation, PlacedShape, Pos;
+import procon28.solver.geometry: merge, move;
 import procon28.solver.eval : eval_basic;
 
 import core.time : TickDuration;

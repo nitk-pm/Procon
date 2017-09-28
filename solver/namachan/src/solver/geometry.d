@@ -1,6 +1,6 @@
-module procon28.solver.datamanip;
+module procon28.solver.geometry;
 
-import procon28.basic_data : P, PlacedShape, Situation, Height, Width, Pos, Vector;
+import procon28.data : P, PlacedShape, Situation, Height, Width, Pos, Vector;
 
 import std.math : approxEqual;
 
