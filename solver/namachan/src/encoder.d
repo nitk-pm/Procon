@@ -1,7 +1,7 @@
 module procon28.encoder;
 
 import std.json : JSONValue;
-import procon28.basic_data : Situation, P, PlacedShape;
+import procon28.data : Situation, P, PlacedShape;
 
 @safe
 pure JSONValue pos2json (in P p) {

@@ -1,7 +1,7 @@
-module procon28.visualize.window;
+module procon28.visualize;
 
-import procon28.basic_data : P, Situation;
-import procon28.solver.datamanip : move;
+import procon28.data : P, Situation;
+import procon28.geometry : move;
 
 import derelict.sdl2.sdl;
 
