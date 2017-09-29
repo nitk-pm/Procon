@@ -7,6 +7,7 @@ import procon28.eval : eval_basic;
 import core.time : TickDuration;
 
 import std.algorithm.iteration : map;
+import std.parallelism : TaskPool;
 import std.conv;
 import std.range : array;
 import std.stdio;
@@ -80,7 +81,7 @@ pure string show_duration (in TickDuration dur) {
 	return format("%4s s %4s msecs", dur.msecs / 1000, dur.msecs % 1000);
 }
 
-@safe
+@trusted
 const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, int beam_width, int target_time) {
 	import std.datetime : StopWatch;
 	import std.stdio : writefln;
@@ -94,13 +95,16 @@ const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, int b
 	size_t piece_cnt;
 	//sec -> msec conversion
 	target_time *= 1000;
+	auto pool = new TaskPool;
+	scope(exit)
+		pool.finish;
 
 	for (;;) {
 		++piece_cnt;
 		StopWatch sw;
 		sw.start;
 		const(Situation)[] evaled;
-		foreach (i,situation; sorted) {
+		foreach (i,situation; pool.parallel(sorted, 1)) {
 			evaled ~= eval_all!EvalFunc(pieces, situation);
 		}
 		sw.stop;
