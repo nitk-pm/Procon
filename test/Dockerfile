@@ -35,6 +35,8 @@ RUN echo 'source ~/dlang/dmd-2.076.0/activate' >> ~/.bashrc
 RUN apt-get install -qy libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-net-dev libsdl2-ttf-dev
 RUN apt-get install -qy libcurl4-gnutls-dev
 
+RUN dub fetch derelict-sdl2 --version=2.0.2
+
 # python setting
 RUN apt-get install -qy python3
 RUN apt-get install -qy python3-pip
