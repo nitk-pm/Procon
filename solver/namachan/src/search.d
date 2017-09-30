@@ -7,7 +7,6 @@ import procon28.eval : eval_basic;
 import core.time : TickDuration;
 
 import std.algorithm.iteration : map;
-import std.parallelism : TaskPool;
 import std.conv;
 import std.range : array;
 import std.stdio;
@@ -18,6 +17,7 @@ version(unittest) {
 }
 else {
 	enum ENABLE_PARALLEL = true;
+	import std.parallelism : TaskPool;
 }
 
 /++
@@ -102,9 +102,11 @@ const(Situation) beam_search(alias EvalFunc)(in P[][][] pieces, in P[][] frames,
 	size_t piece_cnt;
 	//sec -> msec conversion
 	immutable target_time_msecs = target_time * 1000;
-	auto pool = new TaskPool;
-	scope(exit)
-		pool.finish;
+	static if (ENABLE_PARALLEL) {
+		auto pool = new TaskPool;
+		scope(exit)
+			pool.finish;
+	}
 	int next_width = beam_width;
 	for (;;) {
 		++piece_cnt;
