@@ -82,52 +82,59 @@ pure string show_duration (in TickDuration dur) {
 }
 
 @trusted
-const(Situation) beam_search(alias EvalFunc)(P[][][] pieces, P[][] frames, int beam_width, int target_time) {
+const(Situation) beam_search(alias EvalFunc)(in P[][][] pieces, in P[][] frames, in int beam_width, in int target_time, in bool parallel) {
 	import std.datetime : StopWatch;
 	import std.stdio : writefln;
 	BitField!128 mask_base;
 	foreach (idx; pieces.length..128)
 		mask_base[idx] = true;
-	const(Situation)[] sorted = [Situation([], mask_base, frames, 1.0f)];
+	const(Situation)[] sorted = [const(Situation)([], mask_base, frames, 1.0f)];
 	const(Situation)[] best;
 	int total_width;
 	TickDuration total_time;
 	size_t piece_cnt;
 	//sec -> msec conversion
-	target_time *= 1000;
+	immutable target_time_msecs = target_time * 1000;
 	auto pool = new TaskPool;
 	scope(exit)
 		pool.finish;
-
+	int next_width = beam_width;
 	for (;;) {
 		++piece_cnt;
 		StopWatch sw;
 		sw.start;
 		const(Situation)[] evaled;
-		foreach (i,situation; pool.parallel(sorted, 1)) {
-			evaled ~= eval_all!EvalFunc(pieces, situation);
+		if (parallel) {
+			foreach (i,situation; pool.parallel(sorted, 1)) {
+				evaled ~= eval_all!EvalFunc(pieces, situation);
+			}
+		}
+		else {
+			foreach (i,situation; sorted) {
+				evaled ~= eval_all!EvalFunc(pieces, situation);
+			}
 		}
 		sw.stop;
 		total_time += sw.peek;
 		writefln ("%2s/%s | %4s 探索幅 | %6s 盤面数 |  %s 計算時間 | %s 計",
 			piece_cnt,
 			pieces.length,
-			beam_width,
+			next_width,
 			evaled.length,
 			sw.peek.show_duration,
 			total_time.show_duration);
 		//次のビーム幅の計算
-		if (target_time > 0) {
-			total_width += beam_width;
+		if (target_time_msecs > 0) {
+			total_width += next_width;
 			auto width_per_time = cast(float)total_width / cast(float)total_time.msecs;
-			beam_width = cast(int)(width_per_time * (target_time - total_time.msecs));
-			if (beam_width < 1)
-				beam_width = 1;
+			next_width = cast(int)(width_per_time * (target_time_msecs - total_time.msecs));
+			if (next_width < 1)
+				next_width = 1;
 		}
 		
 		sorted = evaled.sort!((a,b) => a.val > b.val);
-		if (sorted.length > beam_width)
-			sorted = sorted[0..beam_width];
+		if (sorted.length > next_width)
+			sorted = sorted[0..next_width];
 		foreach (procedure; sorted) {
 			if (procedure.used_pieces.all)
 				return procedure;
