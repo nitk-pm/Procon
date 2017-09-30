@@ -55,10 +55,7 @@ class PolygonWidget(QFrame):
         self.united_rect = self.polygons[0].boundingRect()
         for polygon in self.polygons:
             self.united_rect = self.united_rect.united(polygon.boundingRect())
-        self.resize(
-            self.united_rect.width() * self.scale + self.margin * 2,
-            self.united_rect.height() * self.scale + self.margin * 2
-        )
+        self.update()
 
     def draw_polygon(self, painter):
         pass
@@ -136,6 +133,13 @@ class PieceWidget(PolygonWidget):
             self.index = 7
         self.update()
 
+    def update_size(self):
+        super().update_size()
+        self.resize(
+            self.united_rect.width() * self.scale + self.margin * 2,
+            self.united_rect.height() * self.scale + self.margin * 2
+        )
+
     def draw_polygon(self, painter):
         source = self.polygons[self.index].boundingRect()
         delta_x = self.rect().width() - source.width() * self.scale
@@ -179,7 +183,7 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def play(self):
         self.ui.reference.setEnabled(False)
-        self.watcher = Watcher(self.callback)
+        self.watcher = Watcher(self.load)
         self.watcher.start(self.ui.dir_path.text())
 
     @pyqtSlot()
@@ -224,7 +228,6 @@ class MainWindow(QMainWindow):
 
         self.ui.frame_view.set_polygons(problem_data.frame)
         self.ui.frame_view.set_scale(6)
-
         self.ui.num_piece.setText('{}'.format(problem_data.num_piece))
 
     @pyqtSlot()
@@ -237,14 +240,6 @@ class MainWindow(QMainWindow):
             json.dump(piece, file, indent=2)
         with open('frame.json', 'w') as file:
             json.dump(frame, file, indent=2)
-
-    def callback(self, filename, data):
-        data_list = [d.replace('QR-Code:', '') for d in data.splitlines()]
-        num = 0
-        for i in range(len(data_list)):
-            num_str, data_list[i] = data_list[i].split(':', 1)
-            num += int(num_str)
-        self.load(filename, '{}:{}'.format(num, ':'.join(data_list)))
 
     def load(self, filename, data):
         problem_data = ProblemData(filename, data)

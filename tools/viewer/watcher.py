@@ -10,7 +10,7 @@ class Handler(FileSystemEventHandler):
     def handler(self, func, *args):
         return func(*args)
 
-    def on_created(self, event):
+    def run_command(self, event):
         if event.is_directory:
             return
         data = subprocess.run(
@@ -22,8 +22,34 @@ class Handler(FileSystemEventHandler):
             self.handler(
                 callback_list,
                 event.src_path,
-                data.stdout.decode('utf-8')
+                self.shaping_data(data.stdout.decode('utf-8'))
             )
+
+    def on_created(self, event):
+        self.run_command(event)
+
+    def on_moved(self, event):
+        self.run_command(event)
+
+    def on_modified(self, event):
+        self.run_command(event)
+
+    def shaping_data(self, data):
+        data_list = [d.replace('QR-Code:', '') for d in data.splitlines()]
+        head = []
+        tail = None
+        total = 0
+        for d in data_list:
+            num_str, shapes = d.split(':', 1)
+            num = int(num_str)
+            shapes_num = len(shapes.split(':'))
+            total += num
+            if num != shapes_num:
+                tail = shapes
+            else:
+                head.append(shapes)
+        head.append(tail)
+        return '{}:{}'.format(total, ':'.join(head))
 
 
 class Watcher(object):
