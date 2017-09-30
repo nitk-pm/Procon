@@ -13,6 +13,13 @@ import std.range : array;
 import std.stdio;
 import std.array : join;
 
+version(unittest) {
+	enum ENABLE_PARALLEL = false;
+}
+else {
+	enum ENABLE_PARALLEL = true;
+}
+
 /++
  + なぜphobosのソートアルゴリズムは破壊的なのか。
  + その謎を探るため我々は南米の奥地へ飛んだ...
@@ -104,9 +111,14 @@ const(Situation) beam_search(alias EvalFunc)(in P[][][] pieces, in P[][] frames,
 		StopWatch sw;
 		sw.start;
 		const(Situation)[] evaled;
-		if (parallel) {
-			foreach (i,situation; pool.parallel(sorted, 1)) {
-				evaled ~= eval_all!EvalFunc(pieces, situation);
+		static if (ENABLE_PARALLEL) {
+			if (parallel) {
+				foreach (i,situation; pool.parallel(sorted, 1)) {
+					evaled ~= eval_all!EvalFunc(pieces, situation);
+				}
+			}
+			else {
+			
 			}
 		}
 		else {
