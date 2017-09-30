@@ -33,7 +33,7 @@ T get_value (T)(in string[] args, in size_t pos, in string type_description) {
 }
 unittest {
 	assert (get_value!int(["-p", "124", "-f"], 0, "") == 124);
-	assert (get_value!int(["--enable_parallel", "-p", "124", "-f"], 1, "") == 124);
+	assert (get_value!int(["--parallel", "-p", "124", "-f"], 1, "") == 124);
 	assertThrown(get_value!int(["-p", "124", "-f"], 1, ""));
 	assertThrown(get_value!int(["-p", "-f"], 0, ""));
 	assertThrown(get_value!int(["-p"], 0, ""));
@@ -78,5 +78,5 @@ Option parse_arg (in string[] args) {
 	return Option(width, time, frame_name, piece_name, enable_parallel);
 }
 unittest {
-	assert (["-p", "p.json", "--frame", "f.json", "--enable_parallel"].parse_arg == Option (1, -1, "f.json", "p.json", true));
+	assert (["-p", "p.json", "--frame", "f.json", "--parallel"].parse_arg == Option (1, -1, "f.json", "p.json", true));
 }

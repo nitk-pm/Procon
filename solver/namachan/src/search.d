@@ -153,6 +153,6 @@ unittest {
 	auto p2 = [[P(20,0), P(20,20), P(0,20)]];
 	auto p3 = [[P(0,0), P (20, 0), P(20,20),P(0,20)]];
 	auto frames = [[P(0,0), P(20,0), P(20,40), P(0,40)]];
-	auto ops = beam_search!eval_basic([p1, p2, p3], frames, 1, -1);
+	auto ops = beam_search!eval_basic([p1, p2, p3], frames, 1, -1, false);
 	assert (ops.shapes.length == 3);
 }
