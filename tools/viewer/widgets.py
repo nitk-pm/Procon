@@ -3,6 +3,7 @@ from PyQt5.QtCore import (
     Qt,
     QSize,
     pyqtSlot,
+    QPointF
 )
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -38,6 +39,7 @@ class PolygonWidget(QFrame):
         self.setMidLineWidth(2)
 
         self.polygons = []
+        self.united_rect = None
         self.scale = 1
         self.margin = 10
 
@@ -50,17 +52,10 @@ class PolygonWidget(QFrame):
         self.update_size()
 
     def update_size(self):
-        w = self.polygons[0].boundingRect().width()
-        h = self.polygons[0].boundingRect().height()
-        for polygon in self.polygons[1:]:
-            if w < polygon.boundingRect().width():
-                w = polygon.boundingRect().width()
-            if h < polygon.boundingRect().height():
-                h = polygon.boundingRect().height()
-        self.resize(
-            w * self.scale + self.margin * 2,
-            h * self.scale + self.margin * 2
-        )
+        self.united_rect = self.polygons[0].boundingRect()
+        for polygon in self.polygons:
+            self.united_rect = self.united_rect.united(polygon.boundingRect())
+        self.update()
 
     def draw_polygon(self, painter):
         pass
@@ -71,21 +66,31 @@ class PolygonWidget(QFrame):
         opt = QStyleOption()
         opt.initFrom(self)
         self.style().drawPrimitive(QStyle.PE_Frame, opt, painter, self)
-        self.draw_polygon(painter)
+        if len(self.polygons) != 0:
+            self.draw_polygon(painter)
 
 
 class FrameWidget(PolygonWidget):
 
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.pieces = []
+        self.offset = []
+
     def draw_polygon(self, painter):
+        delta_x = self.rect().width() - self.united_rect.width() * self.scale
+        delta_x /= 2
+        delta_y = self.rect().height() - self.united_rect.height() * self.scale
+        delta_y /= 2
         for polygon in self.polygons:
             source = polygon.boundingRect()
-            delta_x = self.rect().width() - source.width() * self.scale
-            delta_y = self.rect().height() - source.height() * self.scale
 
-            painter.translate(delta_x / 2, delta_y / 2)
+            painter.save()
+            painter.translate(delta_x, delta_y)
             painter.scale(self.scale, self.scale)
             painter.setPen(QPen(Qt.white, 0.5))
             painter.drawPolygon(polygon)
+            painter.restore()
 
 
 class PieceWidget(PolygonWidget):
@@ -127,6 +132,13 @@ class PieceWidget(PolygonWidget):
         if self.index <= -1:
             self.index = 7
         self.update()
+
+    def update_size(self):
+        super().update_size()
+        self.resize(
+            self.united_rect.width() * self.scale + self.margin * 2,
+            self.united_rect.height() * self.scale + self.margin * 2
+        )
 
     def draw_polygon(self, painter):
         source = self.polygons[self.index].boundingRect()
@@ -171,7 +183,7 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def play(self):
         self.ui.reference.setEnabled(False)
-        self.watcher = Watcher(self.callback)
+        self.watcher = Watcher(self.load)
         self.watcher.start(self.ui.dir_path.text())
 
     @pyqtSlot()
@@ -216,27 +228,20 @@ class MainWindow(QMainWindow):
 
         self.ui.frame_view.set_polygons(problem_data.frame)
         self.ui.frame_view.set_scale(6)
-
         self.ui.num_piece.setText('{}'.format(problem_data.num_piece))
 
     @pyqtSlot()
     def export(self):
         import json
         problem_data = self.ui.problem_list.currentData()
+        if problem_data is None:
+            return
         piece = problem_data.to_dict_piece()
         frame = problem_data.to_dict_frame()
         with open('piece.json', 'w') as file:
             json.dump(piece, file, indent=2)
         with open('frame.json', 'w') as file:
             json.dump(frame, file, indent=2)
-
-    def callback(self, filename, data):
-        data_list = [d.replace('QR-Code:', '') for d in data.splitlines()]
-        num = 0
-        for i in range(len(data_list)):
-            num_str, data_list[i] = data_list[i].split(':', 1)
-            num += int(num_str)
-        self.load(filename, '{}:{}'.format(num, ':'.join(data_list)))
 
     def load(self, filename, data):
         problem_data = ProblemData(filename, data)
