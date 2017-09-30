@@ -13,6 +13,8 @@ class Handler(FileSystemEventHandler):
     def run_command(self, event):
         if event.is_directory:
             return
+        if event.src_path.rsplit('.', 1)[-1] != 'png':
+            return
         data = subprocess.run(
             ['zbarimg', event.src_path],
             stdout=subprocess.PIPE

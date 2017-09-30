@@ -234,6 +234,8 @@ class MainWindow(QMainWindow):
     def export(self):
         import json
         problem_data = self.ui.problem_list.currentData()
+        if problem_data is None:
+            return
         piece = problem_data.to_dict_piece()
         frame = problem_data.to_dict_frame()
         with open('piece.json', 'w') as file:
