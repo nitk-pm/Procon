@@ -345,16 +345,6 @@ nothrow pure bool judge_on_line (V : Vector!T, T)(in V p, in V start, in V end) 
 @safe @nogc
 nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
 	import std.conv : to;
-	foreach (s_idx, shape_vertex1; shape) {
-		immutable s_start = shape_vertex1;
-		immutable s_end = shape[(s_idx+1)%shape.length];
-		foreach (f_idx, frame_vertex; frame) {
-			immutable f_start = frame_vertex;
-			immutable f_end   = frame[(f_idx+1)%frame.length];
-			if (judge_intersected(s_start, s_end, f_start, f_end))
-				return true;
-		}
-	}
 	foreach (frame_vertex; frame) {
 		if (crossing_number(frame_vertex, shape, false))
 			return true;
