@@ -115,16 +115,18 @@ const(Situation) beam_search(alias EvalFunc)(in P[][][] pieces, in P[][] frames,
 		const(Situation)[] evaled;
 		static if (ENABLE_PARALLEL) {
 			if (parallel) {
-				foreach (i,situation; pool.parallel(sorted, 1)) {
+				foreach (situation; pool.parallel(sorted, 1)) {
 					evaled ~= eval_all!EvalFunc(pieces, situation);
 				}
 			}
 			else {
-			
+				foreach (situation; sorted) {
+					evaled ~= eval_all!EvalFunc(pieces, situation);
+				}
 			}
 		}
 		else {
-			foreach (i,situation; sorted) {
+			foreach (situation; sorted) {
 				evaled ~= eval_all!EvalFunc(pieces, situation);
 			}
 		}
