@@ -349,6 +349,10 @@ nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
 		if (crossing_number(frame_vertex, shape, false))
 			return true;
 	}
+	foreach (piece_vertex; shape) {
+		if (!crossing_number(piece_vertex, frame, true))
+			return true;
+	}
 	for (int p_idx; p_idx < shape.length; ++p_idx) {
 		for (int f_idx; f_idx < frame.length; ++f_idx) {
 			if (judge_intersected (
