@@ -15,7 +15,15 @@ import core.thread : exit;
 
 void main(string[] args){
 	auto opt = args[1..$].parse_arg;
-	auto situation = beam_search!simple_is_best(opt.piece_name.readText.decode_piece, opt.frame_name.readText.decode_frame, opt.beam_width, opt.time_limit, opt.enable_parallel);
+	auto situation = beam_search!(
+			//頂点衝突 1乗, 1倍
+			point_conflict, 1, 1.0f
+		)(
+			opt.piece_name.readText.decode_piece,
+			opt.frame_name.readText.decode_frame,
+			opt.beam_width, opt.time_limit,
+			opt.enable_parallel
+		);
 	auto output_file = File ("output.json", "w");
 	output_file.write(situation.situation_pp);
 }
