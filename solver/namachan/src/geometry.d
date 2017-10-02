@@ -306,6 +306,13 @@ nothrow pure P[] move (in P[] shape, in int x, in int y) {
 	return shape.move(P(x,y));
 }
 
+@safe
+nothrow pure P[] zoom (in P[] shape, in int r) {
+	auto copy = shape.dup;
+	foreach (ref vertex; copy)
+		vertex *= 2;
+	return copy;
+}
 
 /++
  + 線分の交差判定
@@ -362,11 +369,11 @@ nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
 		}
 	}
 	for (int p_idx; p_idx < shape.length; ++p_idx) {
-		if (!crossing_number((cast(Vector!float)shape[p_idx] + cast(Vector!float)shape[(p_idx+1)%shape.length])/2.0f, frame, true))
+		if (!crossing_number((shape[p_idx] + shape[(p_idx+1)%shape.length])/2, frame, true))
 			return true;
 	}
 	for (int f_idx; f_idx < frame.length; ++f_idx) {
-		if (crossing_number((cast(Vector!float)frame[f_idx] + cast(Vector!float)frame[(f_idx+1)%frame.length])/2.0f, shape, false))
+		if (crossing_number((frame[f_idx] + frame[(f_idx+1)%frame.length])/2, shape, false))
 			return true;
 	}
 	return false;

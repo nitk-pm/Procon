@@ -16,7 +16,8 @@ pure JSONValue placed_shape2json (in PlacedShape shape) {
 	JSONValue json;
 	json["piece_id"] = shape.piece_idx;
 	json["shape_id"] = shape.spin_level;
-	json["pos"] = pos2json(P(shape.x, shape.y));
+	//デコード時に2倍してたので1/2にする
+	json["pos"] = pos2json(P(shape.x, shape.y)/2);
 	return json;
 }
 

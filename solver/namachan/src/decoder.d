@@ -1,6 +1,7 @@
 module procon28.decoder;
 
 import procon28.data : Pos, P;
+import procon28.geometry : zoom;
 
 import std.conv : to;
 import std.json : parseJSON, JSONValue;
@@ -13,7 +14,8 @@ P[] decode_shape (in JSONValue json) {
 		auto y = pos.object["y"].integer.to!int;
 		vertexies ~= Pos(x, y);
 	}
-	return vertexies;
+	//2倍して全ての頂点座標の値を偶数にしておくと中点をとっても必ず丁度整数になる
+	return vertexies.zoom(2);
 }
 
 ///jsonフォーマットの文字列をShapeにデコード
