@@ -74,7 +74,7 @@ pure const(Situation)[] eval_all(alias EvalFunc)(in P[][][] pieces,in Situation 
 						auto reply = EvalFunc (frame, moved);
 						if (reply[0] == -float.infinity) continue;
 						auto merged_frames = reply[1] ~ acc.frames[0..frame_idx] ~ acc.frames[frame_idx+1..$];
-						auto placed_shape = PlacedShape (diff.x.to!byte, diff.y.to!byte, piece_idx.to!ubyte, spin_level.to!ubyte);
+						auto placed_shape = PlacedShape (diff.x.to!ubyte, diff.y.to!ubyte, piece_idx.to!ubyte, spin_level.to!ubyte);
 						situaions ~=
 							const(Situation) (acc.shapes ~ placed_shape, new_mask, merged_frames, reply[0]);
 					}
