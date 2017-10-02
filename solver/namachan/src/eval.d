@@ -3,6 +3,7 @@ module procon28.eval;
 import procon28.data : P;
 import procon28.geometry : equal_slope, move, protrude_frame, judge_on_line, merge, insert_junction, Point;
 import std.typecons : Tuple, tuple;
+import std.meta : AliasSeq;
 
 //接触をの検出
 @safe
@@ -105,27 +106,4 @@ template eval (Set...) {
 	}
 }
 
-/++
- + 線分の角度の一致度と重複した点の数で評価する評価関数
- + 衝突していた場合は-float.inifinityを返す
- +/
-
-@safe
-pure nothrow Tuple!(float, P[][]) simple_is_best (in P[] frame, in P [] piece) {
-	float point_conflict = 0.0f;
-	if (protrude_frame (frame, piece))
-		return tuple(-float.infinity, cast(P[][])[]);
-	auto merged = merge (frame, piece);
-	if (merged.length == 0) return tuple(float.infinity, cast(P[][])[]);
-	bool pt_on_line = false;
-	if (has_point_contact (frame, piece))
-		return tuple(-float.infinity, cast(P[][])[]);
-	foreach (f_idx, frame_point1; frame) {
-		auto frame_point2 = frame[(f_idx+1)%frame.length];
-		foreach (piece_point; piece) {
-			if (frame_point1 == piece_point)
-				++point_conflict;
-		}
-	}
-	return tuple(point_conflict^^2, merged);
-}
+alias simple_is_best = AliasSeq!(point_conflict, 1, 1.0f);
