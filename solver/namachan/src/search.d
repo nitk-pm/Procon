@@ -15,6 +15,9 @@ import std.array : join;
 version(unittest) {
 	enum ENABLE_PARALLEL = false;
 }
+else version(LDC) {
+	enum ENABLE_PARALLEL = false;
+}
 else {
 	enum ENABLE_PARALLEL = true;
 	import std.parallelism : TaskPool;

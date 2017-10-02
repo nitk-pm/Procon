@@ -6,7 +6,7 @@ import std.conv : to;
 import std.json : parseJSON, JSONValue;
 
 @system
-pure P[] decode_shape (in JSONValue json) {
+P[] decode_shape (in JSONValue json) {
 	Pos[] vertexies;
 	foreach (pos; json.array) {
 		auto x = pos.object["x"].integer.to!int;
@@ -18,7 +18,7 @@ pure P[] decode_shape (in JSONValue json) {
 
 ///jsonフォーマットの文字列をShapeにデコード
 @system
-pure P[][] decode_frame (in string str) {
+P[][] decode_frame (in string str) {
 	auto json = str.parseJSON;
 	P[][] shape;
 	foreach (shape_json; json["shapes"].array) {
@@ -29,7 +29,7 @@ pure P[][] decode_frame (in string str) {
 
 ///jsonフォーマットの文字列をPieceの集合にデコード
 @system
-pure P[][][] decode_piece (in string str) {
+P[][][] decode_piece (in string str) {
 	auto json = str.parseJSON;
 	P[][][] piecies;
 	foreach (piece_json; json["pieces"].array) {
