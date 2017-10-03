@@ -7,7 +7,6 @@ import std.algorithm.sorting : sort;
 import std.conv : to;
 import std.format : format;
 import std.range : array;
-import core.simd;
 
 enum Width = 101;
 enum Height = 65;
@@ -138,28 +137,8 @@ alias P = Pos;
 
 struct BitField(alias size) {
 private:
-	enum xmm_length =
-		size % 128 == 0 ? size / 128 : size / 128 + 1;
-	union {
-		ulong[xmm_length * 2] array;
-		__vector(ulong[2])[xmm_length] xmms;
-	}
-
-	template expand_loop (alias times, alias code) {
-		import std.algorithm.iteration : map;
-		import std.range : iota, array;
-		import std.array : join;
-		import std.format : format;
-		//わからん
-		enum expand_loop =
-			(){
-				return times
-					.iota
-					.map!(idx => format(code, idx))
-					.join;
-			}();
-
-	}
+	enum array_elem_num = size % 64 == 0 ? size / 64 : size / 64 + 1;
+	ulong[array_elem_num] array;
 public:
 	@safe @nogc
 	nothrow pure bool opIndex (in int idx) const {
@@ -180,36 +159,6 @@ public:
 		}
 		return b;
 	}
-	@safe @nogc
-	nothrow pure BitField!size opBinary (string op)(in BitField!size field) const {
-		BitField!size ymm;
-		static if (op == "|") {
-			mixin(expand_loop!(xmm_length, "ymm.xmms[%1$s] = xmms[%1$s] | field.xmms[%1$s];"));
-		}
-		else static if (op == "&") {
-			mixin(expand_loop!(xmm_length, "ymm.xmms[%1$s] = xmms[%1$s] & field.xmms[%1$s];"));
-		}
-		else static if (op == "^") {
-			mixin(expand_loop!(xmm_length, "ymm.xmms[%1$s] = xmms[%1$s] ^ field.xmms[%1$s];"));
-		}
-		return ymm;
-	}
-	
-	@safe @nogc
-	nothrow BitField!size opOpAssign (string op)(in BitField!size field) {
-		BitField!size ymm;
-		static if (op == "|") {
-			mixin(expand_loop!(xmm_length, "xmms[%1$s] = xmms[%1$s] | field.xmms[%1$s];"));
-		}
-		else static if (op == "&") {
-			mixin(expand_loop!(xmm_length, "xmms[%1$s] = xmms[%1$s] & field.xmms[%1$s];"));
-		}
-		else static if (op == "^") {
-			mixin(expand_loop!(xmm_length, "xmms[%1$s] = xmms[%1$s] ^ field.xmms[%1$s];"));
-		}
-		return ymm;
-	}
-
 	@safe
 	pure string toString () const {
 		string[] strs;
@@ -240,9 +189,7 @@ public:
 }
 unittest {
 	BitField!256 bf256;
-	static assert (bf256.xmms.length == 2);
 	BitField!5 bf5;
-	static assert (bf5.xmms.length == 1);
 
 	bf256[1] = true;
 	bf256[2] = true;
@@ -267,9 +214,6 @@ unittest {
 
 	BitField!256 bf256_2;
 	bf256_2[132] = true;
-	assert ((bf256_2 | bf256) == bf256);
-
-	assert ((bf256_2 & bf256) == bf256_2);
 }
 
 
