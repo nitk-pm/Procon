@@ -190,7 +190,7 @@ pure nothrow bool same(in P[] s1, in P[] s2) {
 	if (s1.length != s2.length) return false;
 	if (s1.length == 0) return true;
 	auto v2 = s2[0];
-	long[] start_points;
+	size_t[] start_points;
 	foreach (idx1, v1; s1) {
 		if (v1 == v2) start_points ~= idx1;
 	}
