@@ -111,7 +111,7 @@ nothrow pure bool judge_cross_horizontal_line (V : Vector!T, T)(in V p, in V sta
 }
 
 @safe @nogc
-nothrow pure float on_right_side (V : Vector!T, T) (in V start, in V end, in V p) {
+nothrow pure float on_right_side (V1 : Vector!T1, T1, V2 : Vector!T2, T2) (in V1 start, in V1 end, in V2 p) {
 	if ((p.y - start.y) * (p.y - end.y) > 0) return false;
 	if ((end - start).x == 0) {
 		if (start.x <= p.x) return true;
@@ -124,7 +124,7 @@ nothrow pure float on_right_side (V : Vector!T, T) (in V start, in V end, in V p
 }
 
 @safe @nogc
-pure nothrow crossing_number (V : Vector!T, T) (in V p, in V[] shape, in bool include_on_line = true) {
+pure nothrow crossing_number (V1 : Vector!T1, T1, V2 : Vector!T2, T2) (in V1 p, in V2[] shape, in bool include_on_line = true) {
 	size_t cross_cnt;
 	foreach (idx, vertex1; shape) {
 		auto vertex2 = shape[(idx+1)%shape.length];
@@ -306,6 +306,13 @@ nothrow pure P[] move (in P[] shape, in int x, in int y) {
 	return shape.move(P(x,y));
 }
 
+@safe
+nothrow pure P[] zoom (in P[] shape, in int r) {
+	auto copy = shape.dup;
+	foreach (ref vertex; copy)
+		vertex *= 2;
+	return copy;
+}
 
 /++
  + 線分の交差判定
@@ -326,16 +333,16 @@ unittest {
 	assert (!judge_intersected(P(20,40),P(0,40), P(0,20),P(20,0)));
 }
 @safe @nogc
-nothrow pure bool judge_on_line (V : Vector!T, T)(in V p, in V start, in V end) {
+nothrow pure bool judge_on_line (V1 : Vector!T1, T1, V2 : Vector!T2, T2)(in V1 p, in V2 start, in V2 end) {
 	immutable v1 = end - start;
-	immutable v2 = p - start;
+	immutable v2 = p - cast(V1)start;
 	immutable v1_abs_2 = (v1.x^^2+v1.y^^2);
 	immutable v2_abs_2 = (v2.x^^2+v2.y^^2);
-	immutable dot = v1 * v2;
+	immutable dot = cast(V1)v1 * v2;
 	//内積が|v1|*|v2|かつ内積が正(角度が同じ)で、v2の長さがv1より短い(線分の中に含まれている)場合は線の上にあるとみなす。
-	static if (__traits(isFloating, T)) {
+	static if (__traits(isFloating, T1)) {
 		import std.math : approxEqual;
-		return approxEqual(dot > 0 && dot^^2, v1_abs_2*v2_abs_2) && v1_abs_2 >= v2_abs_2;
+		return dot > 0 && approxEqual(dot^^2, v1_abs_2*v2_abs_2) && v1_abs_2 >= v2_abs_2;
 	}
 	else {
 		return dot > 0 && dot^^2 == v1_abs_2*v2_abs_2 && v1_abs_2 >= v2_abs_2;
@@ -345,16 +352,12 @@ nothrow pure bool judge_on_line (V : Vector!T, T)(in V p, in V start, in V end) 
 @safe @nogc
 nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
 	import std.conv : to;
-	P pos_sum;
-	immutable gravity_point = pos_sum / cast(int)shape.length;
-	if (crossing_number(gravity_point, shape) && !crossing_number(gravity_point, frame))
-		return true;
-	foreach (shape_vertex; shape) {
-		if (!crossing_number(shape_vertex, frame))
-			return true;
-	}
 	foreach (frame_vertex; frame) {
 		if (crossing_number(frame_vertex, shape, false))
+			return true;
+	}
+	foreach (piece_vertex; shape) {
+		if (!crossing_number(piece_vertex, frame, true))
 			return true;
 	}
 	for (int p_idx; p_idx < shape.length; ++p_idx) {
@@ -364,26 +367,13 @@ nothrow pure bool protrude_frame (in P[] frame,in P[] shape) {
 				shape[p_idx], shape[(p_idx+1)%shape.length]))
 				return true;
 		}
-		pos_sum += shape[p_idx];
 	}
-	for (int p_idx1; p_idx1 < shape.length; ++p_idx1) {
-		immutable p_idx2 = (p_idx1 + 1) % shape.length;
-		immutable point_sum = shape[p_idx1] + shape[p_idx2];
-		immutable int x1 = point_sum.x / 2;
-		immutable int x2 = (point_sum.x + 1) / 2;
-		immutable int y1 = point_sum.y / 2;
-		immutable int y2 = (point_sum.y + 1) / 2;
-		immutable P[4] ps = [
-			P(x1, y1),
-			P(x2, y1),
-			P(x1, y2),
-			P(x2, y2)
-		];
-		bool all_protruded = true;
-		foreach (p; ps)
-			if (crossing_number(p, frame))
-				all_protruded = false;
-		if (all_protruded)
+	for (int p_idx; p_idx < shape.length; ++p_idx) {
+		if (!crossing_number((shape[p_idx] + shape[(p_idx+1)%shape.length])/2, frame, true))
+			return true;
+	}
+	for (int f_idx; f_idx < frame.length; ++f_idx) {
+		if (crossing_number((frame[f_idx] + frame[(f_idx+1)%frame.length])/2, shape, false))
 			return true;
 	}
 	return false;
