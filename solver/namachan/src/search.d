@@ -2,7 +2,7 @@ module procon28.search;
 
 import procon28.data : P, BitField, Situation, PlacedShape, Pos;
 import procon28.geometry: merge, move;
-import procon28.eval : eval_basic;
+import procon28.eval;
 
 import core.time : TickDuration;
 
@@ -59,7 +59,7 @@ nothrow pure auto sort(alias compare, T)(inout T[] ops) {
 
 
 @safe
-pure const(Situation)[] eval_all(alias EvalFunc)(in P[][][] pieces,in Situation acc) {
+pure const(Situation)[] eval_all(Param...)(in P[][][] pieces,in Situation acc) {
 	const(Situation)[] situaions; 
 	foreach (piece_idx, piece; pieces) {
 		if (acc.used_pieces[cast(int)piece_idx]) continue;
@@ -71,7 +71,7 @@ pure const(Situation)[] eval_all(alias EvalFunc)(in P[][][] pieces,in Situation 
 					foreach (frame_vertex; frame) {
 						auto diff = frame_vertex - piece_vertex;
 						auto moved = shape.move(diff);
-						auto reply = EvalFunc (frame, moved);
+						auto reply = eval!Param(frame, moved);
 						if (reply[0] == -float.infinity) continue;
 						auto merged_frames = reply[1] ~ acc.frames[0..frame_idx] ~ acc.frames[frame_idx+1..$];
 						auto placed_shape = PlacedShape (diff.x.to!ubyte, diff.y.to!ubyte, piece_idx.to!ubyte, spin_level.to!ubyte);
@@ -92,7 +92,7 @@ pure string show_duration (in TickDuration dur) {
 }
 
 @trusted
-const(Situation) beam_search(alias EvalFunc)(in P[][][] pieces, in P[][] frames, in int beam_width, in int target_time, in bool parallel) {
+const(Situation) beam_search(Param...)(in P[][][] pieces, in P[][] frames, in int beam_width, in int target_time, in bool parallel) {
 	import std.datetime : StopWatch;
 	import std.stdio : writefln;
 	BitField!128 mask_base;
@@ -119,18 +119,18 @@ const(Situation) beam_search(alias EvalFunc)(in P[][][] pieces, in P[][] frames,
 		static if (ENABLE_PARALLEL) {
 			if (parallel) {
 				foreach (situation; pool.parallel(sorted, 1)) {
-					evaled ~= eval_all!EvalFunc(pieces, situation);
+					evaled ~= eval_all!Param(pieces, situation);
 				}
 			}
 			else {
 				foreach (situation; sorted) {
-					evaled ~= eval_all!EvalFunc(pieces, situation);
+					evaled ~= eval_all!Param(pieces, situation);
 				}
 			}
 		}
 		else {
 			foreach (situation; sorted) {
-				evaled ~= eval_all!EvalFunc(pieces, situation);
+				evaled ~= eval_all!Param(pieces, situation);
 			}
 		}
 		sw.stop;
@@ -172,6 +172,6 @@ unittest {
 	auto p2 = [[P(20,0), P(20,20), P(0,20)]];
 	auto p3 = [[P(0,0), P (20, 0), P(20,20),P(0,20)]];
 	auto frames = [[P(0,0), P(20,0), P(20,40), P(0,40)]];
-	auto ops = beam_search!eval_basic([p1, p2, p3], frames, 1, -1, false);
+	auto ops = beam_search!simple_is_best([p1, p2, p3], frames, 1, -1, false);
 	assert (ops.shapes.length == 3);
 }

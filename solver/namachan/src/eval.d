@@ -3,6 +3,7 @@ module procon28.eval;
 import procon28.data : P;
 import procon28.geometry : equal_slope, move, protrude_frame, judge_on_line, merge, insert_junction, Point;
 import std.typecons : Tuple, tuple;
+import std.meta : AliasSeq;
 
 //接触をの検出
 @safe
@@ -32,65 +33,77 @@ unittest {
 	assert (has_point_contact(box, triangle3));
 }
 
-/++
- + 線分の角度の一致度と重複した点の数で評価する評価関数
- + 衝突していた場合は-float.inifinityを返す
- +/
-@safe
-pure nothrow Tuple!(float, P[][]) eval_basic (in P[] frame, in P[] piece) {
+@safe @nogc
+pure nothrow float point_conflict (in P[] frame, in P[] piece, in P[][] merged) {
 	float point_conflict = 0.0f;
-	float pt_on_line = 0.0f;
-	float segment_sum = 0.0f;
-	float tooshort = 0.0f;
-	float frame_num = 0.0f;
-	if (protrude_frame (frame, piece))
-		return tuple(-float.infinity, cast(P[][])[]);
-	auto merged = merge (frame, piece);
-	if (merged.length == 0) return tuple(float.infinity, cast(P[][])[]);
-	if (merged.length > 1) {
-		frame_num += merged.length * 2;
+	foreach (f_idx, frame_point1; frame) {
+		auto frame_point2 = frame[(f_idx+1)%frame.length];
+		foreach (piece_point; piece) {
+			if (frame_point1 == piece_point)
+				++point_conflict;
+		}
 	}
+	return point_conflict;
+}
+
+@safe @nogc
+pure nothrow tooshort_segments (in P[] frame, in P[] piece, in P[][] merged) {
+	float tooshort = 0.0f;
 	foreach (merged_frame; merged) {
 		foreach (f_idx, f_point1; merged_frame) {
 			auto f_point2 = merged_frame[(f_idx+1)%merged_frame.length];
 			auto norm = (f_point1 - f_point2).norm;
-			segment_sum += norm;
 			if (norm < 4.0f)
 				tooshort += 10.0f;
 			else if (norm < 10.0f)
 				tooshort += 3.0f;
 		}
 	}
-
-	foreach (f_idx, frame_point1; frame) {
-		auto frame_point2 = frame[(f_idx+1)%frame.length];
-		foreach (piece_point; piece) {
-			if (frame_point1 == piece_point)
-				++point_conflict;
-			else if (judge_on_line(piece_point, frame_point1, frame_point2))
-				++pt_on_line;
-		}
-	}
-	if (point_conflict < 1.1f && pt_on_line == 0.0f) return tuple(-float.infinity, cast(P[][])[]);	
-	return tuple(point_conflict - segment_sum / 200.0f - tooshort - frame_num, merged);
+	return tooshort;
 }
 
-@safe
-pure nothrow Tuple!(float, P[][]) simple_is_best (in P[] frame, in P [] piece) {
-	float point_conflict = 0.0f;
-	if (protrude_frame (frame, piece))
-		return tuple(-float.infinity, cast(P[][])[]);
-	auto merged = merge (frame, piece);
-	if (merged.length == 0) return tuple(float.infinity, cast(P[][])[]);
-	bool pt_on_line = false;
-	if (has_point_contact (frame, piece))
-		return tuple(-float.infinity, cast(P[][])[]);
-	foreach (f_idx, frame_point1; frame) {
-		auto frame_point2 = frame[(f_idx+1)%frame.length];
-		foreach (piece_point; piece) {
-			if (frame_point1 == piece_point)
-				++point_conflict;
+@safe @nogc
+pure nothrow segment_length_total (in P[] frame, in P[] piece, in P[][] merged) {
+	float segment_sum = 0.0f;
+	foreach (merged_frame; merged) {
+		foreach (f_idx, f_point1; merged_frame) {
+			auto f_point2 = merged_frame[(f_idx+1)%merged_frame.length];
+			auto norm = (f_point1 - f_point2).norm;
+			segment_sum += norm;
 		}
 	}
-	return tuple(point_conflict, merged);
+	return segment_sum;
 }
+
+@safe @nogc
+pure nothrow float frame_num (in P[] frame, in P[] piece, in P[][] merged) {
+	return cast(float)merged.length;
+}
+
+template eval (Set...) {
+	@safe
+	pure nothrow Tuple!(float, P[][]) eval (in P[] frame, in P[] piece) {
+		if (protrude_frame (frame, piece))
+			return tuple(-float.infinity, cast(P[][])[]);
+		if (has_point_contact(frame, piece))
+			return tuple(-float.infinity, cast(P[][])[]);
+		auto merged = merge (frame, piece);
+		if (merged.length == 0) return tuple(float.infinity, cast(P[][])[]);
+		float score = 0.0f;
+		@safe @nogc
+		pure nothrow float score_acc (Set...)(in P[] frame, in P[] piece, in P[][] merged) {
+			static if (Set.length > 0 && Set.length < 3) {
+				static assert (false, "不正なテンプレート引数");
+			}
+			else static if (Set.length != 0) {
+				return  Set[0](frame, piece, merged) * Set[2] + score_acc!(Set[3..$])(frame, piece, merged);
+			}
+			else {
+				return 0.0f;
+			}
+		}
+		return tuple(score_acc!Set(frame, piece, merged), merged);
+	}
+}
+
+alias simple_is_best = AliasSeq!(point_conflict, 1, 1.0f);
