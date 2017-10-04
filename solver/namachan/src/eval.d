@@ -47,16 +47,14 @@ pure nothrow float point_conflict (in P[] frame, in P[] piece, in P[][] merged) 
 }
 
 @safe @nogc
-pure nothrow tooshort_segments (in P[] frame, in P[] piece, in P[][] merged) {
+pure nothrow tooshort_segments (alias short_threshold, alias val) (in P[] frame, in P[] piece, in P[][] merged) {
 	float tooshort = 0.0f;
 	foreach (merged_frame; merged) {
 		foreach (f_idx, f_point1; merged_frame) {
 			auto f_point2 = merged_frame[(f_idx+1)%merged_frame.length];
 			auto norm = (f_point1 - f_point2).norm;
-			if (norm < 4.0f)
-				tooshort += 10.0f;
-			else if (norm < 10.0f)
-				tooshort += 3.0f;
+			if (norm < short_threshold)
+				tooshort += val;
 		}
 	}
 	return tooshort;
