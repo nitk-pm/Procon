@@ -3,6 +3,7 @@ module procon28.search;
 import procon28.data : P, BitField, Situation, PlacedShape, Pos;
 import procon28.geometry: merge, move;
 import procon28.eval;
+import procon28.accumurator : acc;
 
 import core.time : TickDuration;
 
@@ -172,6 +173,6 @@ unittest {
 	auto p2 = [[P(20,0), P(20,20), P(0,20)]];
 	auto p3 = [[P(0,0), P (20, 0), P(20,20),P(0,20)]];
 	auto frames = [[P(0,0), P(20,0), P(20,40), P(0,40)]];
-	auto ops = beam_search!simple_is_best([p1, p2, p3], frames, 1, -1, false);
+	auto ops = beam_search!(acc!(0.0, 1), simple_is_best)([p1, p2, p3], frames, 1, -1, false);
 	assert (ops.shapes.length == 3);
 }
