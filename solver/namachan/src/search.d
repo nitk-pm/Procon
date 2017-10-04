@@ -59,7 +59,7 @@ nothrow pure auto sort(alias compare, T)(inout T[] ops) {
 
 
 @safe
-pure const(Situation)[] eval_all(Param...)(in P[][][] pieces,in Situation acc) {
+/+pure+/ const(Situation)[] eval_all(alias Accumurator, Param...)(in P[][][] pieces,in Situation acc) {
 	const(Situation)[] situaions; 
 	foreach (piece_idx, piece; pieces) {
 		if (acc.used_pieces[cast(int)piece_idx]) continue;
@@ -76,7 +76,7 @@ pure const(Situation)[] eval_all(Param...)(in P[][][] pieces,in Situation acc) {
 						auto merged_frames = reply[1] ~ acc.frames[0..frame_idx] ~ acc.frames[frame_idx+1..$];
 						auto placed_shape = PlacedShape (diff.x.to!ubyte, diff.y.to!ubyte, piece_idx.to!ubyte, spin_level.to!ubyte);
 						situaions ~=
-							const(Situation) (acc.shapes ~ placed_shape, new_mask, merged_frames, reply[0]);
+							const(Situation) (acc.shapes ~ placed_shape, new_mask, merged_frames, Accumurator(acc.val, reply[0]));
 					}
 				}
 			}
@@ -92,7 +92,7 @@ pure string show_duration (in TickDuration dur) {
 }
 
 @trusted
-const(Situation) beam_search(Param...)(in P[][][] pieces, in P[][] frames, in int beam_width, in int target_time, in bool parallel) {
+const(Situation) beam_search (alias Accumurator, Param...)(in P[][][] pieces, in P[][] frames, in int beam_width, in int target_time, in bool parallel) {
 	import std.datetime : StopWatch;
 	import std.stdio : writefln;
 	BitField!128 mask_base;
@@ -119,18 +119,18 @@ const(Situation) beam_search(Param...)(in P[][][] pieces, in P[][] frames, in in
 		static if (ENABLE_PARALLEL) {
 			if (parallel) {
 				foreach (situation; pool.parallel(sorted, 1)) {
-					evaled ~= eval_all!Param(pieces, situation);
+					evaled ~= eval_all!(Accumurator, Param)(pieces, situation);
 				}
 			}
 			else {
 				foreach (situation; sorted) {
-					evaled ~= eval_all!Param(pieces, situation);
+					evaled ~= eval_all!(Accumurator, Param)(pieces, situation);
 				}
 			}
 		}
 		else {
 			foreach (situation; sorted) {
-				evaled ~= eval_all!Param(pieces, situation);
+				evaled ~= eval_all!(Accumurator, Param)(pieces, situation);
 			}
 		}
 		sw.stop;
