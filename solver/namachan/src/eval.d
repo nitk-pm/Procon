@@ -80,6 +80,12 @@ pure nothrow float frame_num (in P[] frame, in P[] piece, in P[][] merged) {
 	return cast(float)merged.length;
 }
 
+@safe @nogc
+pure nothrow float vanish_frame (alias v)(in P[] frame, in P[] piece, in P[][] merged) {
+	if (merged.length == 0)
+		return v;
+}
+
 template eval (Set...) {
 	@safe
 	pure nothrow Tuple!(float, P[][]) eval (in P[] frame, in P[] piece) {
@@ -88,7 +94,6 @@ template eval (Set...) {
 		if (has_point_contact(frame, piece))
 			return tuple(-float.infinity, cast(P[][])[]);
 		auto merged = merge (frame, piece);
-		if (merged.length == 0) return tuple(float.infinity, cast(P[][])[]);
 		float score = 0.0f;
 		@safe @nogc
 		pure nothrow float score_acc (Set...)(in P[] frame, in P[] piece, in P[][] merged) {
