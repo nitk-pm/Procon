@@ -398,7 +398,7 @@ nothrow pure size_t shape_idx (in size_t piece_idx, in size_t spin_level) {
 }
 
 @safe
-nothrow pure P[] erase_unnecessary_point (in P[] shape) {
+nothrow pure P[] erase_vertex_on_line (in P[] shape) {
 	P[] ret;
 	for (int idx; idx < shape.length; ++idx) {
 		auto previous = shape[idx];
@@ -410,6 +410,6 @@ nothrow pure P[] erase_unnecessary_point (in P[] shape) {
 	return ret;
 }
 unittest {
-	assert (same(erase_unnecessary_point ([P(0,0),P(10,0),P(0,10)]), [P(0,0),P(10,0),P(0,10)]));
-	assert (same(erase_unnecessary_point ([P(0,0),P(10,0),P(20,0), P(0,10)]), [P(0,0),P(20,0),P(0,10)]));
+	assert (same(erase_vertex_on_line ([P(0,0),P(10,0),P(0,10)]), [P(0,0),P(10,0),P(0,10)]));
+	assert (same(erase_vertex_on_line ([P(0,0),P(10,0),P(20,0), P(0,10)]), [P(0,0),P(20,0),P(0,10)]));
 }
