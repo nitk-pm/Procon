@@ -396,3 +396,20 @@ unittest {
 nothrow pure size_t shape_idx (in size_t piece_idx, in size_t spin_level) {
 	return piece_idx * 8 + spin_level;
 }
+
+@safe
+nothrow pure P[] erase_unnecessary_point (in P[] shape) {
+	P[] ret;
+	for (int idx; idx < shape.length; ++idx) {
+		auto previous = shape[idx];
+		auto here     = shape[(idx+1)%shape.length];
+		auto next     = shape[(idx+2)%shape.length];
+		if (!judge_on_line (here, previous, next))
+			ret ~= here;
+	}
+	return ret;
+}
+unittest {
+	assert (same(erase_unnecessary_point ([P(0,0),P(10,0),P(0,10)]), [P(0,0),P(10,0),P(0,10)]));
+	assert (same(erase_unnecessary_point ([P(0,0),P(10,0),P(20,0), P(0,10)]), [P(0,0),P(20,0),P(0,10)]));
+}
