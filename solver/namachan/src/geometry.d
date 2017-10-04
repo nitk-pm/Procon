@@ -276,7 +276,7 @@ pure nothrow P[][] merge(in P[] frame, in P[] piece) {
 		if (piece_point.is_junction || piece_point.visited) continue;
 		auto took = take (p_idx, piece_buf, piece_buf);
 		if (took.length >= 3)
-			shapes ~= took;
+			shapes ~= took.erase_vertex_on_line;
 	}
 	return shapes;
 }
