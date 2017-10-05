@@ -3,6 +3,7 @@ module procon28.search;
 import procon28.data : P, BitField, Situation, PlacedShape, Pos;
 import procon28.geometry: merge, move;
 import procon28.eval;
+import procon28.util : qsort;
 
 import core.time : TickDuration;
 
@@ -22,41 +23,6 @@ else {
 	enum ENABLE_PARALLEL = true;
 	import std.parallelism : TaskPool;
 }
-
-/++
- + なぜphobosのソートアルゴリズムは破壊的なのか。
- + その謎を探るため我々は南米の奥地へ飛んだ...
- +/
-@safe
-nothrow pure auto sort(alias compare, T)(inout T[] ops) {
-	import std.traits;
-	auto merge (inout T[] ops1, inout T[] ops2) {
-		inout(T)[] merged;
-		size_t ops1_idx, ops2_idx;
-		for (;ops1_idx < ops1.length || ops2_idx < ops2.length;) {
-			if (ops2_idx >= ops2.length || (ops1_idx < ops1.length && compare(ops1[ops1_idx], ops2[ops2_idx]))) {
-				merged ~= ops1[ops1_idx];
-				++ops1_idx;
-			}
-			else {
-				merged ~= ops2[ops2_idx];
-				++ops2_idx;
-			}
-		}
-		return merged;
-	}
-	if (ops.length < 2)
-		return ops;
-	if (ops.length == 2) {
-		if (compare(ops[0], ops[1]))
-			return ops;
-		else
-			return [ops[1], ops[0]];
-	}
-	auto center_idx = ops.length / 2;
-	return merge (sort!compare(ops[0..center_idx]), sort!compare(ops[center_idx..$]));
-}
-
 
 @safe
 pure const(Situation)[] eval_all(Param...)(in P[][][] pieces,in Situation acc) {
@@ -151,7 +117,7 @@ const(Situation) beam_search(Param...)(in P[][][] pieces, in P[][] frames, in in
 				next_width = 1;
 		}
 		
-		sorted = evaled.sort!((a,b) => a.val > b.val);
+		sorted = evaled.qsort!((a,b) => a.val > b.val);
 		if (sorted.length > next_width)
 			sorted = sorted[0..next_width];
 		foreach (procedure; sorted) {
