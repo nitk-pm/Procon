@@ -1,7 +1,7 @@
 module procon28.eval;
 
 import procon28.data : P;
-import procon28.geometry : equal_slope, move, protrude_frame, judge_on_line, merge, insert_junction, Point;
+import procon28.geometry : equal_slope, move, protrude_frame, judge_on_line, merge, insert_junction, Point, area;
 import std.typecons : Tuple, tuple;
 import std.meta : AliasSeq;
 
@@ -71,6 +71,11 @@ pure nothrow segment_length_total (in P[] frame, in P[] piece, in P[][] merged) 
 		}
 	}
 	return segment_sum;
+}
+
+@safe @nogc
+pure nothrow float area_size (in P[] frame, in P[] piece, in P[][] merged) {
+	return area(piece);
 }
 
 @safe @nogc
