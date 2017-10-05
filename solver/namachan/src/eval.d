@@ -78,6 +78,19 @@ pure nothrow float frame_num (in P[] frame, in P[] piece, in P[][] merged) {
 	return cast(float)merged.length;
 }
 
+//どの程度マージ後のフレームが尖っているか
+//尖っているほど小さい値(負)の値が出る。長方形で0
+@safe @nogc
+pure nothrow sharpness (in P[] frame, in P[] piece, in P[][] merged) {
+	float dot_total = 0.0f;
+	foreach (shape; merged) {
+		for (int idx; idx < shape.length; ++idx) {
+			dot_total += shape[idx] * shape[(idx+1)%shape.length];
+		}
+	}
+	return dot_total;
+}
+
 @safe @nogc
 pure nothrow float vanish_frame (alias v)(in P[] frame, in P[] piece, in P[][] merged) {
 	if (merged.length == 0)
