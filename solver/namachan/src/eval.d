@@ -78,6 +78,22 @@ pure nothrow float frame_num (in P[] frame, in P[] piece, in P[][] merged) {
 	return cast(float)merged.length;
 }
 
+//マージ後合計線長 - マージ前合計線長
+//係数は負の値を指定すべき
+@safe @nogc
+pure nothrow float diff_length_total (in P[] frame, in P[] piece, in P[][] merged) {
+	int before, after;
+	foreach (seg; frame)
+		before += seg.norm;
+
+	foreach (shape; merged) {
+		foreach (seg; shape) {
+			after += seg.norm;
+		}
+	}
+	return after - before;
+}
+
 @safe @nogc
 pure nothrow float vanish_frame (alias v)(in P[] frame, in P[] piece, in P[][] merged) {
 	if (merged.length == 0)
