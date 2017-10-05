@@ -8,6 +8,7 @@ import procon28.decoder;
 import procon28.encoder;
 import procon28.search;
 import procon28.eval;
+import procon28.accumurator;
 import procon28.cmdopt : Option, parse_arg;
 
 import std.stdio : stderr, writeln, File, write;
@@ -16,6 +17,7 @@ import core.thread : exit;
 void main(string[] args){
 	auto opt = args[1..$].parse_arg;
 	auto situation = beam_search!(
+			acc!(0.5f, 2),
 			//頂点衝突 1乗, 1倍
 			point_conflict, 1, 1.0f
 		)(
