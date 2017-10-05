@@ -82,7 +82,7 @@ pure nothrow float frame_num (in P[] frame, in P[] piece, in P[][] merged) {
 //係数は負の値を指定すべき
 @safe @nogc
 pure nothrow float diff_length_total (in P[] frame, in P[] piece, in P[][] merged) {
-	int before, after;
+	float before, after;
 	foreach (seg; frame)
 		before += seg.norm;
 
