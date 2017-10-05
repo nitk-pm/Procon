@@ -413,3 +413,24 @@ unittest {
 	assert (same(erase_vertex_on_line ([P(0,0),P(10,0),P(0,10)]), [P(0,0),P(10,0),P(0,10)]));
 	assert (same(erase_vertex_on_line ([P(0,0),P(10,0),P(20,0), P(0,10)]), [P(0,0),P(20,0),P(0,10)]));
 }
+
+@safe @nogc
+pure nothrow int cross_z (in P v1, in P v2) {
+	return v1.x * v2.y - v1.y * v2.x;
+}
+unittest {
+	assert (cross_z(P(1,3), P(5,2)) == -13);
+}
+
+@safe @nogc
+nothrow pure int area (in P[] shape) {
+	int sum;
+	for (size_t idx; idx < shape.length; ++idx) {
+		sum += cross_z(shape[idx], shape[(idx+1)%shape.length]);
+	}
+	return sum / 2;
+}
+unittest {
+	assert (area ([P(0,0),P(10,0),P(10,10),P(0,10)]) == 100);
+	assert (area ([P(0,0),P(10,0),P(0,10)]) == 50);
+}
