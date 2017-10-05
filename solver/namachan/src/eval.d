@@ -47,16 +47,14 @@ pure nothrow float point_conflict (in P[] frame, in P[] piece, in P[][] merged) 
 }
 
 @safe @nogc
-pure nothrow tooshort_segments (in P[] frame, in P[] piece, in P[][] merged) {
+pure nothrow tooshort_segments (alias short_threshold, alias val) (in P[] frame, in P[] piece, in P[][] merged) {
 	float tooshort = 0.0f;
 	foreach (merged_frame; merged) {
 		foreach (f_idx, f_point1; merged_frame) {
 			auto f_point2 = merged_frame[(f_idx+1)%merged_frame.length];
 			auto norm = (f_point1 - f_point2).norm;
-			if (norm < 4.0f)
-				tooshort += 10.0f;
-			else if (norm < 10.0f)
-				tooshort += 3.0f;
+			if (norm < short_threshold)
+				tooshort += val;
 		}
 	}
 	return tooshort;
@@ -80,6 +78,12 @@ pure nothrow float frame_num (in P[] frame, in P[] piece, in P[][] merged) {
 	return cast(float)merged.length;
 }
 
+@safe @nogc
+pure nothrow float vanish_frame (alias v)(in P[] frame, in P[] piece, in P[][] merged) {
+	if (merged.length == 0)
+		return v;
+}
+
 template eval (Set...) {
 	@safe
 	pure nothrow Tuple!(float, P[][]) eval (in P[] frame, in P[] piece) {
@@ -88,7 +92,6 @@ template eval (Set...) {
 		if (has_point_contact(frame, piece))
 			return tuple(-float.infinity, cast(P[][])[]);
 		auto merged = merge (frame, piece);
-		if (merged.length == 0) return tuple(float.infinity, cast(P[][])[]);
 		float score = 0.0f;
 		@safe @nogc
 		pure nothrow float score_acc (Set...)(in P[] frame, in P[] piece, in P[][] merged) {
