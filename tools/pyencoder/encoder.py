@@ -109,41 +109,25 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', action='store_true')
-    parser.add_argument('place_info', metavar='N', type=str, nargs='+')
-    parser.add_argument('-p', action='store_true')
     argv = sys.argv
     argv.pop(0)
     parse = parser.parse_args(argv)
     encoder = Encoder(parse.f)
 
-    if not parse.p:
-        piece = {'pieces': []}
-        frame = {'shapes': []}
-        while 1:
-            try:
-                data = input()
-                data_list = data.split(':')
-                num = int(data_list.pop(0))
-                for d in data_list[:num]:
-                    piece['pieces'].append(encoder.to_dict(d))
-                for d in data_list[num:]:
-                    frame['shapes'].append(encoder.to_dict(d, True))
-            except EOFError:
-                break
-        with open('piece.json', 'w') as file:
-            json.dump(piece, file, indent=2)
-        with open('frame.json', 'w') as file:
-            json.dump(frame, file, indent=2)
-    else:
-        piece = {'pieces': []}
-        place_number = 0
-        place_data = []
-        for place in parse.place_info:
-            with open(place, 'r') as file:
-                data = file.read()
-                place_list = data.split(':')
-                place_number += int(place_list.pop(0))
-                place_data.extend(place_list)
-        piece['pieces'] = [encoder.to_dict(d) for d in place_data]
-        with open('place.json', 'w') as file:
-            json.dump(piece, file, indent=2)
+    piece = {'pieces': []}
+    frame = {'shapes': []}
+    while 1:
+        try:
+            data = input()
+            data_list = data.split(':')
+            num = int(data_list.pop(0))
+            for d in data_list[:num]:
+                piece['pieces'].append(encoder.to_dict(d))
+            for d in data_list[num:]:
+                frame['shapes'].append(encoder.to_dict(d, True))
+        except EOFError:
+            break
+    with open('piece.json', 'w') as file:
+        json.dump(piece, file, indent=2)
+    with open('frame.json', 'w') as file:
+        json.dump(frame, file, indent=2)
