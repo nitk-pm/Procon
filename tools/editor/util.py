@@ -312,6 +312,8 @@ class OfficialFormat(BaseFormat):
     def save(self, filename):
         project_data = self.document.to_dict()
         pieces = PieceDetector(project_data).search()
+        p_data = [[convert_from_str(p) for p in f[:-1]] for f in pieces]
+        p_data = [self.convert_to_official(p) for p in p_data]
         pieces = [self.remove_offset(p) for p in pieces]
         pieces = [self.convert_to_official(p) for p in pieces]
         frames = FrameDetector(project_data).search()
@@ -323,6 +325,18 @@ class OfficialFormat(BaseFormat):
             ':'.join(frames)
         )
         with open(filename, 'w') as file:
+            file.write(data)
+
+        import random
+        num = len(p_data)
+        rnum = random.randint(int(num * 0.2), int(num * 0.5))
+        rcnt = 0
+        while rcnt < rnum:
+            r = random.randint(1, len(p_data))
+            del p_data[r]
+            rcnt += 1
+        data = '{}:{}'.format(len(p_data), ':'.join(p_data))
+        with open('place_{}'.format(filename), 'w') as file:
             file.write(data)
 
     def load(self, filename):
