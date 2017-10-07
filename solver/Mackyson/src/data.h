@@ -166,24 +166,30 @@ public:
 
                 int idx;
                 switch (edge) {
-                case 0:
+                case 0: {
                         for (int i = 0; i < positionList.size (); ++i)
                                 if (posListTmp.front () == positionList.at (i))
                                         idx = i;
 
                         break;
-
-                case 1:
+                }
+                case 1: {
                         for (int i = 0; i < positionList.size (); ++i)
                                 if (posListTmp.back () == positionList.at (i))
                                         idx = i;
                         break;
-                case 2:
+                }
+                case 2: {
                         auto tmp = concavePoint (positionList);
                         for (int i = 0; i < positionList.size (); ++i)
                                 if (positionList.at (i) == tmp)
                                         idx = i;
                         break;
+                }
+                case 3: {
+                        idx = 0;
+                        break;
+                }
                 }
 
                 for (int cnt = 0, i = 0; cnt < positionList.size (); ++i, ++cnt) {
@@ -233,7 +239,7 @@ bool Piece::operator >(const Piece& p)const {
         return (this->area > p.area);
 }
 bool Piece::operator ==(const Piece& p)const {
-        if (this->vertexPositionList.size () == p.vertexPositionList.size ()) {
+        if (this->vertexPositionList.size () == p.vertexPositionList.size () && this->vertexPositionList.size () == p.vertexPositionList.size ()) {
                 bool tmp = true;
                 for (int i = 0; i < this->vertexPositionList.size (); ++i)
                         tmp &= (this->vertexPositionList.at (i) == p.vertexPositionList.at (i));
