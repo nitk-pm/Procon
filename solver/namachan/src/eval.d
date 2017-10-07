@@ -1,7 +1,7 @@
 module procon28.eval;
 
 import procon28.data : P;
-import procon28.geometry : equal_slope, move, protrude_frame, judge_on_line, merge, insert_junction, Point;
+import procon28.geometry : equal_slope, move, protrude_frame, judge_on_line, merge, insert_junction, Point, area;
 import std.typecons : Tuple, tuple;
 import std.meta : AliasSeq;
 
@@ -74,6 +74,11 @@ pure nothrow segment_length_total (in P[] frame, in P[] piece, in P[][] merged) 
 }
 
 @safe @nogc
+pure nothrow float area_size (in P[] frame, in P[] piece, in P[][] merged) {
+	return area(piece);
+}
+
+@safe @nogc
 pure nothrow float frame_num (in P[] frame, in P[] piece, in P[][] merged) {
 	return cast(float)merged.length;
 }
@@ -89,6 +94,21 @@ pure nothrow sharpness (in P[] frame, in P[] piece, in P[][] merged) {
 		}
 	}
 	return dot_total;
+
+//マージ後合計線長 - マージ前合計線長
+//係数は負の値を指定すべき
+@safe @nogc
+pure nothrow float diff_length_total (in P[] frame, in P[] piece, in P[][] merged) {
+	float before, after;
+	foreach (seg; frame)
+		before += seg.norm;
+
+	foreach (shape; merged) {
+		foreach (seg; shape) {
+			after += seg.norm;
+		}
+	}
+	return after - before;
 }
 
 @safe @nogc
