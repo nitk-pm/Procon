@@ -45,13 +45,14 @@ class Visualiser(QWidget):
                 self.united_rect.width() + 20,
                 self.united_rect.height() + 20
             )
+        self.frame = None
         self.piece_count = 0
         self.limit = len(self.data)
 
     def load_text(self):
         with open(self.filename) as file:
-            data = file.read().splitlines()
             self.data = []
+            data = file.read().splitlines()
             polygon = []
             for index in range(0, len(data), 2):
                 point = QPointF(
@@ -62,11 +63,13 @@ class Visualiser(QWidget):
                 if len(polygon) >= 2 and polygon[0] == polygon[-1]:
                     self.data.append(QPolygonF(polygon))
                     polygon = []
+        self.frame = self.data.pop(0)
 
     def load_json(self):
         import json
         pieces = None
         with open(self.filename, 'r') as file:
+            self.data = []
             pieces = json.load(file)
 
         answer = None
@@ -82,7 +85,7 @@ class Visualiser(QWidget):
                 point = QPointF(int(p['x']), int(p['y'])) + pos
                 polygon.append(point * 10)
             polygon.append(polygon[0])
-            self.data.append(polygon)
+            self.data.append(QPolygonF(polygon))
 
     def paintEvent(self, event):
         super().paintEvent(event)
@@ -95,17 +98,18 @@ class Visualiser(QWidget):
 
         painter.translate(10, 10)
         painter.setPen(Qt.white)
-        painter.drawPolygon(self.data[0])
+        if self.frame is not None:
+            painter.drawPolygon(self.frame)
 
         painter.setBrush(Qt.black)
-        for index in range(1, self.piece_count + 1):
+        for index in range(0, self.piece_count):
             painter.drawPolygon(self.data[index])
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Right:
             self.piece_count += 1
             if self.piece_count >= self.limit:
-                self.piece_count = self.limit - 1
+                self.piece_count = self.limit
         elif event.key() == Qt.Key_Left:
             self.piece_count -= 1
             if self.piece_count < 0:
