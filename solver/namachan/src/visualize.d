@@ -58,7 +58,7 @@ debug{
 							run = false;
 							break;
 						}
-						if (e.type == SDL_KEYDOWN) {
+						if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_n) {
 							run = false;
 							break;
 						}
