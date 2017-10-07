@@ -113,6 +113,7 @@ if __name__ == '__main__':
     argv.pop(0)
     parse = parser.parse_args(argv)
     encoder = Encoder(parse.f)
+
     piece = {'pieces': []}
     frame = {'shapes': []}
     while 1:
