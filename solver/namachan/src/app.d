@@ -18,6 +18,7 @@ void main(string[] args){
 	auto opt = args[1..$].parse_arg;
 	auto situation = beam_search!(
 			acc!(0.5f, 2),
+			3,
 			//頂点衝突 1乗, 1倍
 			point_conflict, 1, 1.0f
 		)(
