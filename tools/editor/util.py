@@ -336,7 +336,8 @@ class OfficialFormat(BaseFormat):
             del p_data[r]
             rcnt += 1
         data = '{}:{}'.format(len(p_data), ':'.join(p_data))
-        with open('place_{}'.format(filename), 'w') as file:
+        f2 = filename.rsplit('/', 1)
+        with open('{}/place_{}'.format(f2[0], f2[1]), 'w') as file:
             file.write(data)
 
     def load(self, filename):
