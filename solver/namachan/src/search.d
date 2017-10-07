@@ -26,7 +26,7 @@ else {
 }
 
 @safe
-/+pure+/ const(Situation)[] eval_all(alias Accumurator, alias Pruning_Level, Param...)(in int times, in P[][][] pieces,in Situation acc) {
+const(Situation)[] eval_all(alias Accumurator, alias Pruning_Level, Param...)(in int times, in P[][][] pieces,in Situation acc) {
 	const(Situation)[] situaions; 
 	foreach (piece_idx, piece; pieces) {
 		if (acc.used_pieces[cast(int)piece_idx]) continue;
