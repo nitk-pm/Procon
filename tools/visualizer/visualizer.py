@@ -20,15 +20,36 @@ class Visualiser(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setStyleSheet('background-color: rgb(66, 66, 66);margin: 5px;')
-        path = QFileDialog.getOpenFileName(
+        self.data = None
+        self.filename = QFileDialog.getOpenFileName(
             self,
             'open file',
             '',
-            'text (*.txt)'
+            'text (*.txt);;json (*.json)'
         )[0]
 
-        self.data = None
-        with open(path) as file:
+        if self.filename.rsplit('.', 1)[1] == 'txt':
+            self.load_text()
+        else:
+            self.answerfile = QFileDialog.getOpenFileName(
+                self,
+                'open file',
+                '',
+                'json (*.json)'
+            )[0]
+            self.load_json()
+        self.united_rect = self.data[0].boundingRect()
+        for d in self.data:
+            self.united_rect = self.united_rect.united(d.boundingRect())
+            self.resize(
+                self.united_rect.width() + 20,
+                self.united_rect.height() + 20
+            )
+        self.piece_count = 0
+        self.limit = len(self.data)
+
+    def load_text(self):
+        with open(self.filename) as file:
             data = file.read().splitlines()
             self.data = []
             polygon = []
@@ -41,15 +62,27 @@ class Visualiser(QWidget):
                 if len(polygon) >= 2 and polygon[0] == polygon[-1]:
                     self.data.append(QPolygonF(polygon))
                     polygon = []
-            self.united_rect = self.data[0].boundingRect()
-            for d in self.data:
-                self.united_rect = self.united_rect.united(d.boundingRect())
-            self.resize(
-                self.united_rect.width() + 20,
-                self.united_rect.height() + 20
-            )
-        self.piece_count = 0
-        self.limit = len(self.data)
+
+    def load_json(self):
+        import json
+        pieces = None
+        with open(self.filename, 'r') as file:
+            pieces = json.load(file)
+
+        answer = None
+        with open(self.answerfile, 'r') as file:
+            answer = json.load(file)
+
+        for ope in answer['operations']:
+            pos = QPointF(int(ope['pos']['x']), int(ope['pos']['y']))
+            polygon = []
+            piece = pieces['pieces'][int(ope['piece_id'])]
+            piece = piece['shapes'][int(ope['shape_id'])]
+            for p in piece:
+                point = QPointF(int(p['x']), int(p['y'])) + pos
+                polygon.append(point * 10)
+            polygon.append(polygon[0])
+            self.data.append(polygon)
 
     def paintEvent(self, event):
         super().paintEvent(event)
