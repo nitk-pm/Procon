@@ -26,13 +26,14 @@ else {
 }
 
 @safe
-/+pure+/ const(Situation)[] eval_all(alias Accumurator, Param...)(in int times, in P[][][] pieces,in Situation acc) {
+/+pure+/ const(Situation)[] eval_all(alias Accumurator, alias Pruning_Level, Param...)(in int times, in P[][][] pieces,in Situation acc) {
 	const(Situation)[] situaions; 
 	foreach (piece_idx, piece; pieces) {
 		if (acc.used_pieces[cast(int)piece_idx]) continue;
 		BitField!128 new_mask = acc.used_pieces;
 		new_mask[piece_idx] = true;
 		foreach (spin_level, shape; piece) {
+			const(Situation)[] buf;
 			foreach (piece_vertex; shape) {
 				foreach (frame_idx, frame; acc.frames) {
 					foreach (frame_vertex; frame) {
@@ -42,11 +43,13 @@ else {
 						if (reply[0] == -float.infinity) continue;
 						auto merged_frames = reply[1] ~ acc.frames[0..frame_idx] ~ acc.frames[frame_idx+1..$];
 						auto placed_shape = PlacedShape (diff.x.to!ubyte, diff.y.to!ubyte, piece_idx.to!ubyte, spin_level.to!ubyte);
-						situaions ~=
+						buf ~=
 							const(Situation) (acc.shapes ~ placed_shape, new_mask, merged_frames, Accumurator(acc.val, reply[0]));
 					}
 				}
 			}
+			auto sorted = buf.qsort!((a,b) => a.val > b.val);
+			situaions ~= sorted.length > Pruning_Level ? sorted[0..Pruning_Level] : sorted;
 		}
 	}
 	return situaions;
@@ -59,7 +62,8 @@ pure string show_duration (in TickDuration dur) {
 }
 
 @trusted
-const(Situation) beam_search (alias Accumurator, Param...)(in P[][][] pieces, in P[][] frames, in int beam_width, in int target_time, in bool parallel) {
+const(Situation) beam_search (alias Accumurator, alias Pruning_Level, Param...)
+	(in P[][][] pieces, in P[][] frames, in int beam_width, in int target_time, in bool parallel) {
 	import std.datetime : StopWatch;
 	import std.stdio : writefln;
 	BitField!128 mask_base;
@@ -86,18 +90,18 @@ const(Situation) beam_search (alias Accumurator, Param...)(in P[][][] pieces, in
 		static if (ENABLE_PARALLEL) {
 			if (parallel) {
 				foreach (situation; pool.parallel(sorted, 1)) {
-					evaled ~= eval_all!(Accumurator, Param)(piece_cnt, pieces, situation);
+					evaled ~= eval_all!(Accumurator, Pruning_Level, Param)(piece_cnt, pieces, situation);
 				}
 			}
 			else {
 				foreach (situation; sorted) {
-					evaled ~= eval_all!(Accumurator, Param)(piece_cnt, pieces, situation);
+					evaled ~= eval_all!(Accumurator, Pruning_Level, Param)(piece_cnt, pieces, situation);
 				}
 			}
 		}
 		else {
 			foreach (situation; sorted) {
-				evaled ~= eval_all!(Accumurator, Param)(piece_cnt, pieces, situation);
+				evaled ~= eval_all!(Accumurator, Pruning_Level, Param)(piece_cnt, pieces, situation);
 			}
 		}
 		sw.stop;
@@ -139,6 +143,6 @@ unittest {
 	auto p2 = [[P(20,0), P(20,20), P(0,20)]];
 	auto p3 = [[P(0,0), P (20, 0), P(20,20),P(0,20)]];
 	auto frames = [[P(0,0), P(20,0), P(20,40), P(0,40)]];
-	auto ops = beam_search!(acc!(0.0, 1), simple_is_best)([p1, p2, p3], frames, 1, -1, false);
+	auto ops = beam_search!(acc!(0.0, 1), 3, simple_is_best)([p1, p2, p3], frames, 1, -1, false);
 	assert (ops.shapes.length == 3);
 }

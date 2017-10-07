@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{url_for('static', filename='normalize.css')}}">
+        <link rel="stylesheet" href="{{url_for('static', filename='simple.css')}}">
+    </head>
+    <body class="siimple-bg--navy">
+        <div class="siimple-grid">
+            <div class="simple-grid-row">
+                <div class="siimple-bg--blue siimple-h1">
+                    Dash Board
+                </div>
+            </div>
+            <div class="siimple-grid-row">
+                <div class="siimple-bg--white siimple-grid-col siimple-grid-col--12">
+                    <div class="siimple-h2">piece.json, frame.json</div>
+                    <p class="siimple-p">
+                        <button class="siimple-btn siimple-btn--navy" onclick="handleDownload('piece.json')" style="margin-left: 10px;">
+                            piece.json
+                        </button>
+                    </p>
+                    <p class="siimple-p">
+                        <button class="siimple-btn siimple-btn--navy" onclick="handleDownload('frame.json')" style="margin-left: 10px;">
+                            frame.json
+                        </button>
+                    </p>
+                </div>
+            </div>
+            <div class="siimple-grid-row">
+                <div class="siimple-bg--white siimple-grid-col siimple-grid-col--12">
+                    <div class="siimple-h2">official format</div>
+                    <p class="siimple-p">
+                        <button class="siimple-btn siimple-btn--navy" style="margin-left: 10px;">
+                            Download
+                        </button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script type="text/javascript">
+    function download() {
+        handleDownload('piece.json');
+        handleDownload('frame.json');
+    }
+    function handleDownload(name) {
+
+        // IE
+        if (window.navigator.msSaveBlob) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/download/' + name, true);
+            xhr.responseType = 'blob';
+            xhr.onload = function (e) {
+                var blob = xhr.response;
+                window.navigator.msSaveBlob(blob, name);
+            }
+            xhr.send();
+            return;
+        }
+
+        // chrome, firefox
+        var a = document.createElement('a');
+        a.download = name;
+        a.href = '/download/' + name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+    </script>
+</html>
