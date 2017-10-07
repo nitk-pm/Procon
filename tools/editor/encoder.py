@@ -35,7 +35,7 @@ if __name__ == '__main__':
             rnum = random.randint(int(num * 0.2), int(num * 0.5))
             rcnt = 0
             while rcnt < rnum:
-                r = random.randint(1, len(p_data))
+                r = random.randint(1, len(p_data) - 1)
                 del p_data[r]
                 rcnt += 1
             data = '{}:{}'.format(len(p_data), ':'.join(p_data))
