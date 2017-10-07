@@ -124,6 +124,6 @@ if __name__ == '__main__':
             place_list = data.split(':')
             place_number += int(place_list.pop(0))
             place_data.extend(place_list)
-    piece['pieces'] = [encoder.to_dict(d) for d in place_data]
+    piece['pieces'] = [encoder.to_dict(d, True) for d in place_data]
     with open('place.json', 'w') as file:
         json.dump(piece, file, indent=2)
