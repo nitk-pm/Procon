@@ -21,23 +21,34 @@ class Visualiser(QWidget):
         super().__init__(parent)
         self.setStyleSheet('background-color: rgb(66, 66, 66);margin: 5px;')
         self.data = None
-        self.filename = QFileDialog.getOpenFileName(
-            self,
-            'open file',
-            '',
-            'text (*.txt);;json (*.json)'
-        )[0]
-
-        if self.filename.rsplit('.', 1)[1] == 'txt':
+        self.filename = None
+        arg = QApplication.arguments()
+        arg.pop(0)
+        if len(arg) == 1:
+            self.filename = arg[0]
             self.load_text()
+        elif len(arg) == 2:
+            self.filename = arg[0]
+            self.answerfile = arg[1]
+            self.load_json()
         else:
-            self.answerfile = QFileDialog.getOpenFileName(
+            self.filename = QFileDialog.getOpenFileName(
                 self,
                 'open file',
                 '',
-                'json (*.json)'
+                'text (*.txt);;json (*.json)'
             )[0]
-            self.load_json()
+
+            if self.filename.rsplit('.', 1)[1] == 'txt':
+                self.load_text()
+            else:
+                self.answerfile = QFileDialog.getOpenFileName(
+                    self,
+                    'open file',
+                    '',
+                    'json (*.json)'
+                )[0]
+                self.load_json()
         self.united_rect = self.data[0].boundingRect()
         for d in self.data:
             self.united_rect = self.united_rect.united(d.boundingRect())
