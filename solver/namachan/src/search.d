@@ -26,7 +26,7 @@ else {
 }
 
 @safe
-/+pure+/ const(Situation)[] eval_all(alias Accumurator, Param...)(in P[][][] pieces,in Situation acc) {
+/+pure+/ const(Situation)[] eval_all(alias Accumurator, Param...)(in int times, in P[][][] pieces,in Situation acc) {
 	const(Situation)[] situaions; 
 	foreach (piece_idx, piece; pieces) {
 		if (acc.used_pieces[cast(int)piece_idx]) continue;
@@ -38,7 +38,7 @@ else {
 					foreach (frame_vertex; frame) {
 						auto diff = frame_vertex - piece_vertex;
 						auto moved = shape.move(diff);
-						auto reply = eval!Param(frame, moved);
+						auto reply = eval!Param(times, frame, moved);
 						if (reply[0] == -float.infinity) continue;
 						auto merged_frames = reply[1] ~ acc.frames[0..frame_idx] ~ acc.frames[frame_idx+1..$];
 						auto placed_shape = PlacedShape (diff.x.to!ubyte, diff.y.to!ubyte, piece_idx.to!ubyte, spin_level.to!ubyte);
@@ -69,7 +69,7 @@ const(Situation) beam_search (alias Accumurator, Param...)(in P[][][] pieces, in
 	const(Situation)[] best;
 	int total_width;
 	TickDuration total_time;
-	size_t piece_cnt;
+	int piece_cnt;
 	//sec -> msec conversion
 	immutable target_time_msecs = target_time * 1000;
 	static if (ENABLE_PARALLEL) {
@@ -86,18 +86,18 @@ const(Situation) beam_search (alias Accumurator, Param...)(in P[][][] pieces, in
 		static if (ENABLE_PARALLEL) {
 			if (parallel) {
 				foreach (situation; pool.parallel(sorted, 1)) {
-					evaled ~= eval_all!(Accumurator, Param)(pieces, situation);
+					evaled ~= eval_all!(Accumurator, Param)(piece_cnt, pieces, situation);
 				}
 			}
 			else {
 				foreach (situation; sorted) {
-					evaled ~= eval_all!(Accumurator, Param)(pieces, situation);
+					evaled ~= eval_all!(Accumurator, Param)(piece_cnt, pieces, situation);
 				}
 			}
 		}
 		else {
 			foreach (situation; sorted) {
-				evaled ~= eval_all!(Accumurator, Param)(pieces, situation);
+				evaled ~= eval_all!(Accumurator, Param)(piece_cnt, pieces, situation);
 			}
 		}
 		sw.stop;

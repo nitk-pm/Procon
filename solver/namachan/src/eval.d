@@ -121,7 +121,7 @@ pure nothrow float vanish_frame (alias v)(in P[] frame, in P[] piece, in P[][] m
 
 template eval (Set...) {
 	@safe
-	pure nothrow Tuple!(float, P[][]) eval (in P[] frame, in P[] piece) {
+	pure nothrow Tuple!(float, P[][]) eval (in int times, in P[] frame, in P[] piece) {
 		if (protrude_frame (frame, piece))
 			return tuple(-float.infinity, cast(P[][])[]);
 		if (has_point_contact(frame, piece))
@@ -134,7 +134,7 @@ template eval (Set...) {
 				static assert (false, "不正なテンプレート引数");
 			}
 			else static if (Set.length != 0) {
-				return Set[1](frame, piece, merged) ? Set[0](frame, piece, merged) * Set[3] + score_acc!(Set[4..$])(frame, piece, merged) : 0.0f;
+				return Set[1](times, frame, piece, merged) ? Set[0](frame, piece, merged) * Set[3] + score_acc!(Set[4..$])(frame, piece, merged) : 0.0f;
 			}
 			else {
 				return 0.0f;
