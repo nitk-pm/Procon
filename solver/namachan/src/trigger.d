@@ -36,3 +36,8 @@ pure nothrow bool or (alias F, alias G)(in int times, in P[] frame, in P[] piece
 pure nothrow bool more (alias F, alias Val)(in int times, in P[] frame, in P[] piece, in P[][] merged) {
 	return F(frame, piece, merged) >= Val;
 }
+
+@safe @nogc
+pure nothrow bool not (alias F)(in int times, in P[] frame, in P[] piece, in P[][] merged) {
+	return !F(times, frame, piece, merged);
+}
