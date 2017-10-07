@@ -16,14 +16,12 @@
             </div>
             <div class="siimple-grid-row">
                 <div class="siimple-bg--white siimple-grid-col siimple-grid-col--12">
-                    <div class="siimple-h2">piece.json, frame.json</div>
+                    <div class="siimple-h2">Problem</div>
                     <p class="siimple-p">
-                        <button class="siimple-btn siimple-btn--navy" onclick="handleDownload('piece.json')" style="margin-left: 10px;">
+                        <button class="siimple-btn siimple-btn--navy" onclick="download('piece.json')" style="margin-left: 10px;">
                             piece.json
                         </button>
-                    </p>
-                    <p class="siimple-p">
-                        <button class="siimple-btn siimple-btn--navy" onclick="handleDownload('frame.json')" style="margin-left: 10px;">
+                        <button class="siimple-btn siimple-btn--navy" onclick="download('frame.json')" style="margin-left: 10px;">
                             frame.json
                         </button>
                     </p>
@@ -31,10 +29,10 @@
             </div>
             <div class="siimple-grid-row">
                 <div class="siimple-bg--white siimple-grid-col siimple-grid-col--12">
-                    <div class="siimple-h2">official format</div>
+                    <div class="siimple-h2">Place Information</div>
                     <p class="siimple-p">
-                        <button class="siimple-btn siimple-btn--navy" style="margin-left: 10px;">
-                            Download
+                        <button class="siimple-btn siimple-btn--navy" onclick="download('place.json')" style="margin-left: 10px;">
+                            place.json
                         </button>
                     </p>
                 </div>
@@ -42,11 +40,7 @@
         </div>
     </body>
     <script type="text/javascript">
-    function download() {
-        handleDownload('piece.json');
-        handleDownload('frame.json');
-    }
-    function handleDownload(name) {
+    function download(name) {
 
         // IE
         if (window.navigator.msSaveBlob) {
