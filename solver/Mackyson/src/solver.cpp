@@ -169,10 +169,10 @@ class Solver {
                                                         prevIsMatch = true;
                                                 }
                                                 else prevIsMatch = false;
-                                                evalPointCnt += piece.at (currentPieceID).area;
                                         }
                                         if (prevIsMatch)
                                                 evalPointCnt += 5000;
+                                        evalPointCnt += piece.at (currentPieceID).area;
                                         mostOfPiece.push (Evalution (evalPointCnt, currentPieceID, tmpPos));
                                 }
 
