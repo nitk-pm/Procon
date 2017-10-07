@@ -2,6 +2,7 @@ module procon28.eval;
 
 import procon28.data : P;
 import procon28.geometry : equal_slope, move, protrude_frame, judge_on_line, merge, insert_junction, Point, area;
+import procon28.trigger;
 import std.typecons : Tuple, tuple;
 import std.meta : AliasSeq;
 
@@ -129,11 +130,11 @@ template eval (Set...) {
 		float score = 0.0f;
 		@safe @nogc
 		pure nothrow float score_acc (Set...)(in P[] frame, in P[] piece, in P[][] merged) {
-			static if (Set.length > 0 && Set.length < 3) {
+			static if (Set.length > 0 && Set.length < 4) {
 				static assert (false, "不正なテンプレート引数");
 			}
 			else static if (Set.length != 0) {
-				return  Set[0](frame, piece, merged) * Set[2] + score_acc!(Set[3..$])(frame, piece, merged);
+				return Set[1](frame, piece, merged) ? Set[0](frame, piece, merged) * Set[3] + score_acc!(Set[4..$])(frame, piece, merged) : 0.0f;
 			}
 			else {
 				return 0.0f;
@@ -143,4 +144,4 @@ template eval (Set...) {
 	}
 }
 
-alias simple_is_best = AliasSeq!(point_conflict, 1, 1.0f);
+alias simple_is_best = AliasSeq!(point_conflict, always, 1, 1.0f);
