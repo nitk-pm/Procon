@@ -47,6 +47,18 @@ pure nothrow float point_conflict (in P[] frame, in P[] piece, in P[][] merged) 
 	return point_conflict;
 }
 
+@safe
+float random (in P[] frame, in P[] piece, in P[][] merged) {
+	import std.random;
+	auto seed = Random(unpredictableSeed);
+	return uniform(0.0f, 1.0f, seed);
+}
+unittest {
+	auto v1 = random([],[],[]);
+	auto v2 = random([],[],[]);
+	assert (v1 != v2);
+}
+
 @safe @nogc
 pure nothrow float consective_point_conflict (alias Pow) (in P[] frame, in P[] piece, in P[][] merged) {
 	float score = 0.0f;
@@ -166,15 +178,15 @@ pure nothrow float vanish_frame (alias v)(in P[] frame, in P[] piece, in P[][] m
 
 template eval (Set...) {
 	@safe
-	pure nothrow Tuple!(float, P[][]) eval (in int times, in P[] frame, in P[] piece) {
+	Tuple!(float, P[][]) eval (in int times, in P[] frame, in P[] piece) {
 		if (protrude_frame (frame, piece))
 			return tuple(-float.infinity, cast(P[][])[]);
 		if (has_point_contact(frame, piece))
 			return tuple(-float.infinity, cast(P[][])[]);
 		auto merged = merge (frame, piece);
 		float score = 0.0f;
-		@safe @nogc
-		pure nothrow float score_acc (Set...)(in P[] frame, in P[] piece, in P[][] merged) {
+		@safe
+		float score_acc (Set...)(in P[] frame, in P[] piece, in P[][] merged) {
 			static if (Set.length > 0 && Set.length < 4) {
 				static assert (false, "不正なテンプレート引数");
 			}
