@@ -15,14 +15,17 @@ import procon28.cmdopt : Option, parse_arg;
 import std.stdio : stderr, writeln, File, write;
 import core.thread : exit;
 
+alias simple = AliasSeq!(
+	acc!(0.5f, 2),
+	3,
+	//頂点衝突 1乗, 1倍
+	point_conflict, always, 1, 1.0f
+);
+
 void main(string[] args){
 	auto opt = args[1..$].parse_arg;
-	auto situation = beam_search!(
-			acc!(0.5f, 2),
-			3,
-			//頂点衝突 1乗, 1倍
-			point_conflict, always, 1, 1.0f
-		)(
+	auto situation = beam_search!simple
+		(
 			opt.piece_name.readText.decode_piece,
 			opt.frame_name.readText.decode_frame,
 			opt.beam_width, opt.time_limit,
