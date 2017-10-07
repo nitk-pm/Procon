@@ -47,6 +47,51 @@ pure nothrow float point_conflict (in P[] frame, in P[] piece, in P[][] merged) 
 }
 
 @safe @nogc
+pure nothrow float consective_point_conflict (alias Pow) (in P[] frame, in P[] piece, in P[][] merged) {
+	float score = 0.0f;
+	bool before_conflict;
+	int times;
+	int idx;
+	foreach (i, p1; piece) {
+		bool conflict;
+		foreach (p2; frame) {
+			if (p1 == p2) {
+				conflict = true;
+				break;
+			}
+		}
+		if (!conflict)
+			idx = cast(int)i;
+	}
+	foreach(_;0..piece.length) {
+		auto pp = piece[idx];
+		bool conflict;
+		foreach (fp; frame) {
+			if (pp == fp)
+				conflict = true;
+		}
+		if (conflict && !before_conflict) {
+			before_conflict = true;
+			++times;
+		}
+		else if (conflict && before_conflict) {
+			++times;
+		}
+		else if (!conflict && before_conflict) {
+			score += times ^^ Pow;
+			before_conflict = false;
+		}
+		idx = (idx+1)%cast(int)piece.length;
+	}
+	if (before_conflict)
+		score += times ^^ Pow;
+	return score;
+}
+unittest {
+	assert (consective_point_conflict!2([P(0,0), P(10,0),P(10,10),P(0,10)],[P(0,0),P(10,0),P(0,10)],[]) == 9.0f);
+}
+
+@safe @nogc
 pure nothrow tooshort_segments (alias short_threshold, alias val) (in P[] frame, in P[] piece, in P[][] merged) {
 	float tooshort = 0.0f;
 	foreach (merged_frame; merged) {
