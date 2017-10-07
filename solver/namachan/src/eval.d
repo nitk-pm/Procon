@@ -94,6 +94,7 @@ pure nothrow sharpness (in P[] frame, in P[] piece, in P[][] merged) {
 		}
 	}
 	return dot_total;
+}
 
 //マージ後合計線長 - マージ前合計線長
 //係数は負の値を指定すべき
