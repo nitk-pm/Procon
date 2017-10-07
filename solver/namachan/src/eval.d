@@ -179,7 +179,7 @@ template eval (Set...) {
 				static assert (false, "不正なテンプレート引数");
 			}
 			else static if (Set.length != 0) {
-				return Set[1](times, frame, piece, merged) ? Set[0](frame, piece, merged) * Set[3] + score_acc!(Set[4..$])(frame, piece, merged) : 0.0f;
+				return Set[1](times, frame, piece, merged) ? Set[0](frame, piece, merged) ^^ Set[2] * Set[3] + score_acc!(Set[4..$])(frame, piece, merged) : 0.0f;
 			}
 			else {
 				return 0.0f;
