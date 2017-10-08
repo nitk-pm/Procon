@@ -28,7 +28,7 @@ void main(string[] args) {
 		if (i == piece_id)
 			replaced ~= spin_all;
 		else if (merge_ids[1..$].map!(a => output[a].piece_idx).any!(a => a == i))
-			replaced ~= [[]];
+			continue;
 		else
 			replaced ~= p;
 	}
