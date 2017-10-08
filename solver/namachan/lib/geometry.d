@@ -286,6 +286,9 @@ unittest {
 	auto s2 = [P(10,0),P(10,10),P(0,10)];
 	assert (merge_piece(s1, []).length == 1 && same(merge_piece(s1, [])[0], s1));
 	assert (merge_piece(s1, s2).length == 1 && same(merge_piece(s1, s2)[0], [P(0,0),P(10,0),P(10,10),P(0,10)]));
+	import std.stdio;
+	auto s3 = [P(84, 64), P(84, 42), P(89, 42), P(89, 46), P(94, 46), P(90, 64)];
+	auto s4 = [P(96, 32), P(96, 26), P(108, 26), P(106, 36), P(101, 36), P(101, 32)];
 }
 
 @safe
@@ -355,6 +358,8 @@ pure nothrow P[] rotate90 (in P[] shape) {
 @safe
 pure P[] adjust (in P[] shape) {
 	auto ret = shape.dup;
+	if (ret.length < 2)
+		return ret;
 	auto x_min = ret.map!(a => a.x).fold!((a,b) => a > b ? b : a);
 	auto y_min = ret.map!(a => a.y).fold!((a,b) => a > b ? b : a);
 	foreach (ref p; ret) {

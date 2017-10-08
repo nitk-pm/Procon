@@ -16,12 +16,12 @@ void main(string[] args) {
 	auto piece_id = output[merge_ids[0]].piece_idx;
 	foreach (id; merge_ids) {
 		writeln(output[id].piece_idx);
-		merged = merge_piece(piece[output[id].piece_idx][output[id].spin_level].move(output[id].x, output[id].y), merged)[0];
+		merged = merge_piece(piece[output[id].piece_idx][output[id].spin_level].move(output[id].x, output[id].y), merged)[0].adjust;
 	}
 	P[][] spin_all = [merged];
 	foreach (_;0..7) {
-		merged = rotate90(merged).adjust;
-		spin_all ~= merged;
+		merged = rotate90(merged);
+		spin_all ~= merged.adjust;
 	}
 	P[][][] replaced ;
 	foreach(i, p; piece) {
