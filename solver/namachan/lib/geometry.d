@@ -388,6 +388,14 @@ nothrow pure P[] zoom (in P[] shape, in int r) {
 	return copy;
 }
 
+@safe
+nothrow pure P[] reduct(in P[] shape, in int r) {
+	auto copy = shape.dup;
+	foreach (ref vertex; copy)
+		vertex /= r;
+	return copy;
+}
+
 /++
  + 線分の交差判定
  + 始点と終点が線分に接触していた場合は交差していないとみなす
