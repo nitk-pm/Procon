@@ -172,12 +172,13 @@ class Solver {
                                         }
                                         if (prevIsMatch)
                                                 evalPointCnt += 5000;
+
                                         evalPointCnt += piece.at (currentPieceID).area;
                                         mostOfPiece.push (Evalution (evalPointCnt, currentPieceID, tmpPos));
                                 }
 
                         }
-                        if (!mostOfPiece.empty())evalutionList.push (mostOfPiece.top ());
+                        if (!mostOfPiece.empty ())evalutionList.push (mostOfPiece.top ());
 
                 }
 
@@ -197,11 +198,11 @@ class Solver {
                         }
                         if (existingFrame.find (hash_fn (tmp.frame)) == existingFrame.end ()) {
                                 int independentAreaNumber = IndependentArea (tmp.frame), sharpPointNumber = sharpPoint (tmp.frame);
-                                if (independentAreaNumber >=4)
+                                if (!isUsingPlace)
+                                if (independentAreaNumber >= 4)
                                         continue;
                                 tmp.point = match - independentAreaNumber * 3000 - sharpPointNumber * 8000;
-                                if (nowTurn < 4)
-                                    tmp.point *=0.1;
+
                                 if (nowTurn < maxTurn / 2)
                                         tmp.point *= 0.1;
                                 tmp.usableList = samePieceDisable (usableList, itmp);
@@ -222,6 +223,7 @@ public:
         std::bitset<101 * 65>frameStatus;
         int fminY = 65, fmaxY = -65, fminX = 101, fmaxX = -101;
         int setPieceNumber = 0;
+        bool isUsingPlace = false;
 
         std::vector<bool> usableInit;
 
@@ -236,7 +238,7 @@ public:
                 }
 
                 usableInit.resize (piece.size ());
-                for (int i = 0; i < piece.size () - 1; ++i)
+                for (int i = 0; i < piece.size (); ++i)
                         usableInit.at (i) = true;
 
                 auto tmpFrames = getFrameShape ();
@@ -261,17 +263,17 @@ public:
                 auto tmpPieces = getLayout ();
                 if (tmpPieces.empty ())
                         return;
-                int cnt = 0;
+                isUsingPlace = true;
+                int cnt = 1;
                 setPieceNumber = tmpPieces.size ();
 
                 for (auto itr = tmpPieces.begin (); itr != tmpPieces.end (); ++itr, ++cnt) {
                         frame.push_back (*itr);
-                        for (int i = 0; i < 65; ++i)
-                                for (int j = 0; j < 101; ++j)
-                                        if (gridEvalution (Position (j, i), frame.at (cnt).vertexPositionList) == 2)
-                                                frameStatus[i * 101 + j] = 1;
-                        Piece p (*itr, 0);
-                        for (int i = 0; i < piece.size (); i += 3) {
+                        Position ptmp = itr->at (0);
+                        Piece p (*itr, 3);
+                        frameStatus = frameMerge (frameStatus, p, ptmp);
+
+                        for (int i = 0; i < piece.size (); i += 1) {
                                 if (piece.at (i) == p) {
                                         usableInit = samePieceDisable (usableInit, i);
                                         break;
@@ -283,14 +285,14 @@ public:
         //chokudaiサーチ
         void beamSearch (int time, time_point start) {
                 int width = 1;
-                std::unordered_set<size_t> existingFrame;
-                int maxTurn = (piece.size () - 1) / 24 + 1 -setPieceNumber;
+                int maxTurn = (piece.size ()) / 24 - setPieceNumber;
 
                 std::vector<Position> evalPosInit;
-                std::vector<bool> usableInit (piece.size (), true);
                 std::vector<std::pair<int, Position>> logInit;
                 for (int i = 0; i < frame.size (); ++i)
                         for (int j = 0; j < frame.at (i).vertexPositionList.size (); ++j) {
+                                auto tmpPos = std::find (evalPosInit.begin (), evalPosInit.end (),frame.at (i).vertexPositionList.at (j));
+                                if (tmpPos == evalPosInit.end ())
                                 evalPosInit.push_back (frame.at (i).vertexPositionList.at (j));
                         }
 
@@ -298,19 +300,36 @@ public:
                 std::vector<std::pair<int, Position>>  best;
                 bool isFirst = false;
                 std::vector<std::priority_queue<ParStruct>> parEval (maxTurn + 1);
-                parEval[0].push (ParStruct (0, frameStatus, usableInit, evalPosInit, logInit));
+                //parEval[0].push (ParStruct (0, frameStatus, usableInit, evalPosInit, logInit));
 
                 while (parEval[maxTurn].empty ()) {
-
+                        parEval[0].push (ParStruct (0, frameStatus, usableInit, evalPosInit, logInit));
                         if (!timeCheck (start, time))
                                 goto 	END_SEARCHING;
-                        for (int cnt = 0; cnt <= maxTurn; ++cnt) {
+                        for (int cnt = 0; cnt < maxTurn; ++cnt) {
 
                                 std::vector<ParStruct> tmpEvalList;
 
                                 if (parEval[cnt].empty ())
                                         continue;
 
+                                ////d
+
+                                //rep (j, 65) {
+                                //	rep (i, 101) {
+                                //		std::cout << parEval[cnt].top ().frame[j * 101 + i];
+                                //	}
+                                //	std::this_thread::sleep_for (std::chrono::milliseconds (30));
+                                //	puts ("");
+                                //}
+                                //puts ("");
+                                //rep (i, parEval[cnt].top ().log.size ()) {
+                                //	Position tmp = parEval[cnt].top ().log.at (i).second;
+                                //	std::cout << tmp.x << "," << tmp.y << std::endl;
+                                //	std::this_thread::sleep_for (std::chrono::milliseconds (100));
+                                //}
+                                //puts ("");
+                                ////d
                                 for (int i = 0; i < width; ++i) {
                                         if (!parEval[cnt].empty ()) {
 
@@ -327,7 +346,6 @@ public:
 
                                         }
                                 }
-
 
                                 std::sort (tmpEvalList.begin (), tmpEvalList.end ());
 
@@ -354,6 +372,7 @@ int main (int argc, char*argv[]) {
         time_point start = std::chrono::system_clock::now ();
         Solver solve;
         solve.loadShapeInfomation ();
+        solve.loadLayoutInfomation ();
         int time = atoi (argv[1]);
         solve.beamSearch (time, start);
         for (auto i = solve.frame.begin (); i != solve.frame.end (); ++i) {

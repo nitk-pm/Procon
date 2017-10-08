@@ -61,26 +61,24 @@ std::vector<std::vector<Position>> getLayout () {
         std::ifstream fs;
 
         fs.open ("place.json", std::ios::binary);
-        if (!fs.fail ())
+        if (fs.fail ())
                 return ret;
 
         picojson::value val;
         fs >> val;	fs.close ();
 
 
-        auto pieceList = val.get<picojson::object> ()["pieces"].get<picojson::array> ();
-        for (auto __itr = pieceList.begin (); __itr != pieceList.end (); ++__itr) {
-                auto shapeList = __itr->get<picojson::object> ()["shapes"].get<picojson::array> ();
-                for (auto itr = shapeList.begin (); itr != shapeList.end (); ++itr) {
-                        std::vector<Position> tmp;
-                        auto vertexList = itr->get<picojson::array> ();
-                        for (auto _itr = vertexList.begin (); _itr != vertexList.end (); ++_itr) {
-                                int x = (int)_itr->get<picojson::object> ()["x"].get<double> ();
-                                int y = (int)_itr->get<picojson::object> ()["y"].get<double> ();
-                                tmp.push_back (Position (x, y));
-                        }
-                        ret.push_back (tmp);
+        auto shapeList = val.get<picojson::object> ()["pieces"].get<picojson::array> ();
+
+        for (auto itr = shapeList.begin (); itr != shapeList.end (); ++itr) {
+                auto vertexList = itr->get<picojson::array> ();
+                std::vector<Position> tmp;
+                for (auto _itr = vertexList.begin (); _itr != vertexList.end (); ++_itr) {
+                        int x = (int)_itr->get<picojson::object> ()["x"].get<double> ();
+                        int y = (int)_itr->get<picojson::object> ()["y"].get<double> ();
+                        tmp.push_back (Position (x, y));
                 }
+                ret.push_back (tmp);
         }
         return ret;
 }
