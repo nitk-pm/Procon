@@ -20,7 +20,7 @@ void main(string[] args) {
 	}
 	P[][] spin_all = [merged];
 	foreach (_;0..7) {
-		merged = rotate90(merged);
+		merged = rotate90(merged).adjust;
 		spin_all ~= merged;
 	}
 	P[][][] replaced ;
@@ -28,7 +28,7 @@ void main(string[] args) {
 		if (i == piece_id)
 			replaced ~= spin_all;
 		else if (merge_ids[1..$].map!(a => output[a].piece_idx).any!(a => a == i))
-			replaced ~= [[]];
+			continue;
 		else
 			replaced ~= p;
 	}
