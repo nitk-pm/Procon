@@ -2,6 +2,8 @@ module procon28.encoder;
 
 import std.json : JSONValue;
 import procon28.data : Situation, P, PlacedShape;
+import std.algorithm.iteration : map;
+import std.range : array;
 
 @safe
 pure JSONValue pos2json (in P p) {
@@ -23,8 +25,6 @@ pure JSONValue placed_shape2json (in PlacedShape shape) {
 
 @safe
 pure JSONValue construct_json (in Situation situation) {
-	import std.algorithm.iteration : map;
-	import std.range : array;
 	JSONValue json;
 	json["operations"] =
 		situation
@@ -37,4 +37,28 @@ pure JSONValue construct_json (in Situation situation) {
 @safe
 string situation_pp (in Situation situation) {
 	return situation.construct_json.toPrettyString;
+}
+
+@safe
+pure JSONValue[] construct_shape (in P[] shape) {
+	return shape.map!(a => a.pos2json).array;
+}
+
+@safe
+pure JSONValue construct_shapes (in P[][] shapes) {
+	JSONValue json;
+	json["shapes"] = shapes.map!(a => a.construct_shape).array;
+	return json;
+}
+
+@safe
+pure JSONValue construct_piece (in P[][][] pieces) {
+	JSONValue json;
+	json["pieces"] = pieces.map!(a => a.construct_shapes).array;
+	return json;
+}
+
+@safe
+string pieces_pp(in P[][][] pieces){
+	return construct_piece(pieces).toPrettyString;
 }
