@@ -20,7 +20,7 @@ void main(string[] args) {
 	}
 	P[][] spin_all = [merged];
 	foreach (_;0..7) {
-		merged = rotate90(merged);
+		merged = rotate90(merged).adjust;
 		spin_all ~= merged;
 	}
 	P[][][] replaced ;
