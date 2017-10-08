@@ -8,6 +8,7 @@ __test__*__
 *.log
 *.def
 *.json
+!dub.json
 *.txt
 procon-solver
 procon-solver-test-library
