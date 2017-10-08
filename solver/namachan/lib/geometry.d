@@ -4,7 +4,7 @@ import procon28.data : P, PlacedShape, Situation, Height, Width, Pos, Vector;
 
 import std.math : approxEqual;
 
-import std.algorithm.iteration : map;
+import std.algorithm.iteration : map, fold;
 import std.algorithm.sorting : sort;
 import std.range : array, zip;
 
@@ -350,6 +350,21 @@ pure nothrow P[] rotate90 (in P[] shape) {
 		p = P(matrix[0][0] * p.x + matrix[1][0] * p.y, matrix[0][1] * p.x + matrix[1][1] * p.y);
 	}
 	return ret;
+}
+
+@safe
+pure P[] adjust (in P[] shape) {
+	auto ret = shape.dup;
+	auto x_min = ret.map!(a => a.x).fold!((a,b) => a > b ? b : a);
+	auto y_min = ret.map!(a => a.y).fold!((a,b) => a > b ? b : a);
+	foreach (ref p; ret) {
+		p -= P(x_min, y_min);
+	}
+	return ret;
+}
+unittest {
+	auto s = [P(3,2),P(5,1),P(9,7)];
+	assert (s.adjust == [P(0,1),P(2, 0), P(6,6)]);
 }
 
 @safe
