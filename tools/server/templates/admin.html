@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{url_for('static', filename='normalize.css')}}">
+        <link rel="stylesheet" href="{{url_for('static', filename='simple.css')}}">
+    </head>
+    <body class="siimple-bg--navy">
+        <div class="siimple-grid">
+            <div class="siimple-grid-row">
+                <div class="siimple-bg--blue siimple-h1">
+                    Dash Board
+                </div>
+            </div>
+            <div class="siimple-grid-row">
+                <div class="siimple-bg--white siimple-grid-col siimple-grid-col--12">
+                    <div class="siimple-h2">Operation</div>
+                    <p class="siimple-p">
+                        <button class="siimple-btn siimple-btn--navy" style="margin-left: 10px;">
+                            Scan QRcode
+                        </button>
+                        <button class="siimple-btn siimple-btn--navy" style="margin-left: 10px;">
+                            Problem Encode
+                        </button>
+                        <button class="siimple-btn siimple-btn--navy" style="margin-left: 10px;">
+                            Place Info Encode
+                        </button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script type="text/javascript">
+    function operation(operator) {
+        var message = document.getElementById('message');
+        message.innerText = 'send operation';
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', operator, true);
+        xhr.onload = function(e) {
+            var response = xhr.response;
+            message.innerText = 'operation success';
+        }
+        xhr.send();
+    }
+    </script>
+</html>

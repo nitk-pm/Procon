@@ -27,5 +27,4 @@ def problem(filename):
 if __name__ == '__main__':
     import sys
     data = problem(sys.argv[1])
-    with open('data/data.txt', 'w') as file:
-        file.write(data)
+    print(data)
