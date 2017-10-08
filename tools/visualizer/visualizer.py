@@ -115,6 +115,8 @@ class Visualiser(QWidget):
         painter.setBrush(Qt.black)
         for index in range(0, self.piece_count):
             painter.drawPolygon(self.data[index])
+            center = self.data[index].boundingRect().center()
+            painter.drawText(center, '{}'.format(index))
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Right:
