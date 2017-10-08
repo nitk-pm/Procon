@@ -113,6 +113,7 @@ if __name__ == '__main__':
     argv.pop(0)
     parse = parser.parse_args(argv)
     encoder = Encoder(parse.f)
+
     piece = {'pieces': []}
     frame = {'shapes': []}
     while 1:
@@ -126,7 +127,7 @@ if __name__ == '__main__':
                 frame['shapes'].append(encoder.to_dict(d, True))
         except EOFError:
             break
-    with open('piece.json', 'w') as file:
+    with open('data/piece.json', 'w') as file:
         json.dump(piece, file, indent=2)
-    with open('frame.json', 'w') as file:
+    with open('data/frame.json', 'w') as file:
         json.dump(frame, file, indent=2)
