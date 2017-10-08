@@ -1,7 +1,7 @@
 module procon28.search;
 
 import procon28.data : P, BitField, Situation, PlacedShape, Pos;
-import procon28.geometry: merge, move;
+import procon28.geometry: merge, move, zoom;
 import procon28.eval;
 import procon28.accumurator : acc;
 import procon28.util : qsort;
@@ -42,7 +42,7 @@ const(Situation)[] eval_all(alias Accumurator, alias Pruning_Level, Param...)(in
 						auto reply = eval!Param(times, frame, moved);
 						if (reply[0] == -float.infinity) continue;
 						auto merged_frames = reply[1] ~ acc.frames[0..frame_idx] ~ acc.frames[frame_idx+1..$];
-						auto placed_shape = PlacedShape (diff.x.to!ubyte, diff.y.to!ubyte, piece_idx.to!ubyte, spin_level.to!ubyte);
+						auto placed_shape = PlacedShape (diff.x.to!ubyte/2, diff.y.to!ubyte/2, piece_idx.to!ubyte, spin_level.to!ubyte);
 						buf ~=
 							const(Situation) (acc.shapes ~ placed_shape, new_mask, merged_frames, Accumurator(acc.val, reply[0]));
 					}
@@ -63,7 +63,9 @@ pure string show_duration (in TickDuration dur) {
 
 @trusted
 const(Situation) beam_search (alias Accumurator, alias Pruning_Level, Param...)
-	(in P[][][] pieces, in P[][] frames, in int beam_width, in int target_time, in bool parallel) {
+	(in P[][][] small_pieces, in P[][] small_frames, in int beam_width, in int target_time, in bool parallel) {
+	auto pieces = small_pieces.map!(piece => piece.map!(shape => shape.zoom(2)).array).array;
+	auto frames = small_frames.map!(shape => shape.zoom(2)).array;
 	import std.datetime : StopWatch;
 	import std.stdio : writefln;
 	BitField!128 mask_base;
