@@ -6,6 +6,8 @@
 	"description": "Procon28's solver",
 	"copyright": "Copyright © 2017, Nakano Masaki",
 	"license": "BSL-1.0",
+	"importPaths" : ["../lib/", "./src/"],
+	"sourcePaths" : ["../lib/", "./src/"],
 	"dependencies" : {
 		"derelict-sdl2":"2.0.2"
 	}
