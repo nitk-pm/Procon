@@ -244,6 +244,51 @@ unittest {
 }
 
 @safe
+pure nothrow P[][] merge_piece(in P[] frame, in P[] piece) {
+	import std.stdio;
+	import std.range : retro, array;
+	Point[] frame_buf;
+	Point[] piece_buf;
+	frame_buf = insert_junction(frame, piece);
+	piece_buf = insert_junction(piece, frame);
+	P[][] shapes;
+	P[] take (size_t start, ref Point[] looking, ref Point[] not_looking) {
+		P[] took;
+		auto idx = start;
+		looking[idx].visited = true;
+		took ~= looking[idx].pos;
+		for (;;) {
+			idx = (idx+1)%looking.length;
+			if (looking[idx].is_junction)
+				return took ~ take (find_junction(not_looking, looking[idx].pos), not_looking, looking);
+			if (looking[idx].visited)
+				return took;
+			looking[idx].visited = true;
+			took ~= looking[idx].pos;
+		}
+	}
+	foreach (f_idx, frame_point; frame_buf) {
+		if (frame_point.is_junction || frame_point.visited) continue;
+		auto took = take (f_idx, frame_buf, piece_buf);
+		if (took.length >= 3)
+			shapes ~= took;
+	}
+	foreach (p_idx, piece_point; piece_buf) {
+		if (piece_point.is_junction || piece_point.visited) continue;
+		auto took = take (p_idx, piece_buf, piece_buf);
+		if (took.length >= 3)
+			shapes ~= took.erase_vertex_on_line;
+	}
+	return shapes;
+}
+unittest {
+	auto s1 = [P(0,0),P(10,0),P(0,10)];
+	auto s2 = [P(10,0),P(10,10),P(0,10)];
+	assert (merge_piece(s1, []).length == 1 && same(merge_piece(s1, [])[0], s1));
+	assert (merge_piece(s1, s2).length == 1 && same(merge_piece(s1, s2)[0], [P(0,0),P(10,0),P(10,10),P(0,10)]));
+}
+
+@safe
 pure nothrow P[][] merge(in P[] frame, in P[] piece) {
 	import std.range : retro, array;
 	Point[] frame_buf;
@@ -291,6 +336,20 @@ unittest {
 	assert (same(merge (square,triangle1), [[P(0, 5), P(5, 7), P(5, 3), P(0, 5), P(0, 0), P(10, 0), P(10, 10), P(0, 10)]]));
 	auto triangle2 = [P(0,5),P(5,0),P(5,7)];
 	assert (same(merge (square,triangle2), [[P(5, 0), P(0, 5), P(0, 0)], [P(0, 5), P(5, 7), P(5, 0), P(10, 0), P(10, 10), P(0, 10)]]));
+}
+
+@safe
+pure nothrow P[] rotate90 (in P[] shape) {
+	auto ret = shape.dup;
+	foreach (ref p; ret) {
+		int[2][2] matrix;
+		matrix[0][0] = 0;
+		matrix[0][1] = 1;
+		matrix[1][0] = -1;
+		matrix[1][1] = 0;
+		p = P(matrix[0][0] * p.x + matrix[1][0] * p.y, matrix[0][1] * p.x + matrix[1][1] * p.y);
+	}
+	return ret;
 }
 
 @safe
