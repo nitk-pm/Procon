@@ -19,8 +19,7 @@ P[] decode_shape (in JSONValue json) {
 	foreach (pos; json.array) {
 		vertexies ~= decode_p(pos);
 	}
-	//2倍して全ての頂点座標の値を偶数にしておくと中点をとっても必ず丁度整数になる
-	return vertexies.zoom(2);
+	return vertexies;
 }
 
 ///jsonフォーマットの文字列をShapeにデコード
