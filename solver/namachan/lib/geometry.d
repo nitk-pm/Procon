@@ -384,7 +384,7 @@ nothrow pure P[] move (in P[] shape, in int x, in int y) {
 nothrow pure P[] zoom (in P[] shape, in int r) {
 	auto copy = shape.dup;
 	foreach (ref vertex; copy)
-		vertex *= 2;
+		vertex *= r;
 	return copy;
 }
 
