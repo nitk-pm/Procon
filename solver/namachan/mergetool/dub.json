@@ -1,0 +1,11 @@
+{
+	"name": "mergetool",
+	"authors": [
+		"namachan"
+	],
+	"description": "procon28 merge tool",
+	"copyright": "Copyright © 2017, namachan",
+	"sourcePaths":["../lib/", "./src/"],
+	"importPaths":["../lib", "./src/"],
+	"license": "BSL-1.0"
+}

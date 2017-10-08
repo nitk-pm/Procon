@@ -1,0 +1,14 @@
+.dub
+docs.json
+__dummy.html
+docs/
+mergetool.so
+mergetool.dylib
+mergetool.dll
+mergetool.a
+mergetool.lib
+mergetool-test-*
+*.exe
+*.o
+*.obj
+*.lst
