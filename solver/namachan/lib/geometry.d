@@ -286,6 +286,14 @@ unittest {
 	auto s2 = [P(10,0),P(10,10),P(0,10)];
 	assert (merge_piece(s1, []).length == 1 && same(merge_piece(s1, [])[0], s1));
 	assert (merge_piece(s1, s2).length == 1 && same(merge_piece(s1, s2)[0], [P(0,0),P(10,0),P(10,10),P(0,10)]));
+	import std.stdio;
+	auto s3 = [P(84, 64), P(84, 42), P(89, 42), P(89, 46), P(94, 46), P(90, 64)];
+	auto s4 = [P(96, 32), P(96, 26), P(108, 26), P(106, 36), P(101, 36), P(101, 32)];
+	import procon28.visualize;	
+	auto win = new Window;
+	win.show([[P(9, 0), P(16, 0), P(16, 16), P(16, 22), P(0, 22), P(0, 18), P(4, 16)]]);
+	win.show([[P(12, 0), P(16, 0), P(20, 0), P(20, 38), P(16, 38), P(0, 38), P(0, 34), P(4, 32), P(9, 16)]]);
+	win.show([[P(25, 0), P(48, 0), P(48, 11), P(52, 11), P(56, 11), P(56, 49), P(52, 49), P(36, 49), P(36, 45), P(30, 45), P(30, 49), P(9, 49), P(0, 49), P(0, 45), P(5, 42), P(10, 37), P(3, 37), P(3, 12), P(3, 6), P(9, 6), P(20, 6), P(25, 6)]]);
 }
 
 @safe
@@ -355,6 +363,8 @@ pure nothrow P[] rotate90 (in P[] shape) {
 @safe
 pure P[] adjust (in P[] shape) {
 	auto ret = shape.dup;
+	if (ret.length < 2)
+		return ret;
 	auto x_min = ret.map!(a => a.x).fold!((a,b) => a > b ? b : a);
 	auto y_min = ret.map!(a => a.y).fold!((a,b) => a > b ? b : a);
 	foreach (ref p; ret) {
