@@ -1,18 +1,23 @@
 module procon28.decoder;
 
-import procon28.data : Pos, P;
+import procon28.data : Pos, P, PlacedShape;
 import procon28.geometry : zoom;
 
 import std.conv : to;
 import std.json : parseJSON, JSONValue;
 
 @system
+P decode_p (in JSONValue json) {
+	auto x = json.object["x"].integer.to!int;
+	auto y = json.object["y"].integer.to!int;
+	return P(x,y);
+}
+
+@system
 P[] decode_shape (in JSONValue json) {
 	Pos[] vertexies;
 	foreach (pos; json.array) {
-		auto x = pos.object["x"].integer.to!int;
-		auto y = pos.object["y"].integer.to!int;
-		vertexies ~= Pos(x, y);
+		vertexies ~= decode_p(pos);
 	}
 	//2倍して全ての頂点座標の値を偶数にしておくと中点をとっても必ず丁度整数になる
 	return vertexies.zoom(2);
@@ -42,4 +47,22 @@ P[][][] decode_piece (in string str) {
 		piecies ~= shapes;
 	}
 	return piecies;
+}
+
+@system
+PlacedShape decode_placedshape (in JSONValue json) {
+	auto piece_idx = json["piece_id"].integer.to!ubyte;
+	auto spin_level = json["shape_id"].integer.to!ubyte;
+	auto p = decode_p(json["pos"]);
+	return PlacedShape(p.x.to!ubyte, p.y.to!ubyte, piece_idx, spin_level);
+}
+
+@system
+PlacedShape[] decode_output (in string str) {
+	auto json = str.parseJSON;
+	PlacedShape[] ret;
+	foreach (placedshape; json["operations"].array) {
+		ret ~= decode_placedshape(placedshape);
+	}
+	return ret;
 }
