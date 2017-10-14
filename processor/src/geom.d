@@ -62,7 +62,7 @@ unittest {
 @safe @nogc
 pure nothrow Matrix4 gen_rotate_mat (in Vec now, in Vec target) {
 	auto tv = target.normalized;
-	auto nv = target.normalized;
+	auto nv = now.normalized;
 	//cosの加法定理より
 	auto cos = tv.x * nv.x + tv.y * nv.y;
 	//sinの加法定理より
