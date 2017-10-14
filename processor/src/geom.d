@@ -26,6 +26,7 @@ struct Vec {
 	@safe @nogc
 	pure nothrow Vec normalized () const {
 		auto norm = norm();
+		if (norm == 0) return Vec(0,0);
 		return Vec (x/norm, y/norm);
 	}
 }
