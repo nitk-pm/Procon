@@ -54,7 +54,7 @@ Result[] search(in Vec[] shape) {
 	}
 	Result[] results;
 	foreach (cand; candidates) {
-		auto rotate_mat = gen_rotate_mat (Vec(cand.x, cand.y), sample);
+		auto rotate_mat = gen_rotate_mat (sample, Vec(cand.x, cand.y));
 		auto rotated    = normalized.rotate(rotate_mat);
 		results ~= Result(eval(rotated), rotated);
 	}
