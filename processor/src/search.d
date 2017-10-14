@@ -1,6 +1,7 @@
 import geom;
 import std.algorithm.comparison;
 import std.algorithm.sorting;
+import std.math;
 
 struct Point {
 	int x, y;
