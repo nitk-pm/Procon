@@ -46,8 +46,8 @@ Result[] search(in Vec[] shape) {
 	Point[] candidates;
 	foreach (x; 0..(cast(int)len + 1)) {
 		foreach (y; 0..(cast(int)len + 1)) {
-			auto diff = Vec(x, y).norm2 - len;
-			if (diff < 1.0)
+			auto diff = abs(Vec(x, y).norm2 - len);
+			if (diff < 1.0f)
 				candidates ~= Point(x, y, diff);
 		}
 	}
