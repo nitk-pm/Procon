@@ -135,6 +135,11 @@ unittest {
 alias Pos = Vector!int;
 alias P = Pos;
 
+struct Shapes {
+	P[][][] pieces;
+	P[][] frames;
+}
+
 struct BitField(alias size) {
 private:
 	enum array_elem_num = size % 64 == 0 ? size / 64 : size / 64 + 1;

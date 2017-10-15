@@ -36,8 +36,7 @@ void main(string[] args){
 	auto opt = args[1..$].parse_arg;
 	auto situation = beam_search!model_jinriki
 		(
-			opt.piece_name.readText.decode_piece,
-			opt.frame_name.readText.decode_frame,
+			opt.frame_name.readText.parse_shapes,
 			opt.beam_width, opt.time_limit,
 			opt.enable_parallel
 		);

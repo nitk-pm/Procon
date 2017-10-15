@@ -1,6 +1,6 @@
 module procon28.decoder;
 
-import procon28.data : Pos, P, PlacedShape;
+import procon28.data : Pos, P, PlacedShape, Shapes;
 import procon28.geometry : zoom;
 
 import std.conv : to;
@@ -24,10 +24,9 @@ P[] decode_shape (in JSONValue json) {
 
 ///jsonフォーマットの文字列をShapeにデコード
 @system
-P[][] decode_frame (in string str) {
-	auto json = str.parseJSON;
+P[][] decode_shapes (in JSONValue json) {
 	P[][] shape;
-	foreach (shape_json; json["shapes"].array) {
+	foreach (shape_json; json.array) {
 		shape ~= decode_shape (shape_json);
 	}
 	return shape;
@@ -35,17 +34,20 @@ P[][] decode_frame (in string str) {
 
 ///jsonフォーマットの文字列をPieceの集合にデコード
 @system
-P[][][] decode_piece (in string str) {
-	auto json = str.parseJSON;
+P[][][] decode_piece (in JSONValue json) {
 	P[][][] piecies;
-	foreach (piece_json; json["pieces"].array) {
-		P[][] shapes;
-		foreach (shape_json; piece_json["shapes"].array) {
-			shapes ~= decode_shape (shape_json);
-		}
-		piecies ~= shapes;
+	foreach (piece_json; json.array) {
+		piecies ~= decode_shapes(piece_json["shapes"]);
 	}
 	return piecies;
+}
+
+@system
+Shapes parse_shapes (in string str) {
+	auto json = str.parseJSON;
+	auto pieces = decode_piece(json["piece"]);
+	auto frame  = decode_shapes(json["frame"]);
+	return Shapes(pieces, frame);
 }
 
 @system
