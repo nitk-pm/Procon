@@ -1,0 +1,9 @@
+{
+	"name": "processor",
+	"authors": [
+		"namachan"
+	],
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2017, namachan",
+	"license": "BSL-1.0"
+}
