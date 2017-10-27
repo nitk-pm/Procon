@@ -1,0 +1,138 @@
+<ResultCanvas>:
+	canvas.before:
+		Color:
+			rgba: 0, 1, 0, 1
+		Rectangle:
+			pos: self.pos
+			size: self.size
+<PieceSuggestCanvas>:
+	canvas.before:
+		Color:
+			rgba: 0, 0, 1, 1
+		Rectangle:
+			pos: self.pos
+			size: self.size
+<SolverCanvas>:
+	canvas.before:
+		Color:
+			rgba: 1, 0, 0, 1
+		Rectangle:
+			pos: self.pos
+			size: self.size
+<LoadCanvas>:
+	canvas.before:
+		Color:
+			rgba: 0, 0, 1, 1
+		Rectangle:
+			pos: self.pos
+			size: self.size
+<CodeStack>:
+	canvas.before:
+		Color:
+			rgba: 1, 1, 1, .5
+		Rectangle:
+			pos: self.pos
+			size: self.size
+
+<Base>:
+	do_default_tab: False
+
+	TabbedPanelItem:	
+		text: 'result'
+		BoxLayout:	
+			orientation: 'vertical'	
+			BoxLayout:
+				ResultCanvas:
+				PieceSuggestCanvas:
+			BoxLayout:
+				size_hint_y: .1
+				Button:
+					size_hint_y: 1
+					id: previous_piece
+					text: '<'
+					font_size: 20
+				Button:
+					size_hint_y: 1
+					id: next_piece
+					text: '>'
+					font_size: 20
+	TabbedPanelItem:
+		text: 'solver'
+		BoxLayout:
+			SolverCanvas:
+			BoxLayout:
+				size_hint_x: .2
+				orientation: 'vertical'
+				Button:
+					id: done
+					text: 'done!'
+					font_size: 15
+				Button:
+					id: finish
+					text: 'abort'
+					font_size: 15
+	TabbedPanelItem:
+		text: 'load'
+		BoxLayout:
+			BoxLayout:
+				orientation: 'vertical'
+				LoadCanvas:
+				BoxLayout:
+					size_hint_y: 0.1
+					Button:
+						size_hint_x: 0.3
+						id: export
+						text: 'export'
+					Button:
+						id: ok
+						text: 'OK'
+					Button:
+						id: reject
+						text: 'reject'
+			BoxLayout:
+				size_hint_x: .5
+				BoxLayout:
+					orientation: 'vertical'
+					Label:
+						text:'Shape'
+						size_hint_y: .1
+					CodeStack:
+						size_hint_y:.8
+					Button:
+						id: shape_add
+						size_hint_y: .1
+						text: 'add'
+					Button:
+						id: shape_clear
+						size_hint_y: .05
+						text: 'clear'
+				BoxLayout:
+					orientation: 'vertical'
+					Label:
+						text:'Place QR'
+						size_hint_y: .1
+					CodeStack:
+						size_hint_y:.8
+					Button:
+						id: place_add
+						size_hint_y: .1
+						text: 'add'
+					Button:
+						id: place_clear
+						size_hint_y: .05
+						text: 'clear'
+				BoxLayout:
+					orientation: 'vertical'
+					Label:
+						text:'Shape QR'
+						size_hint_y: .1
+					CodeStack:
+						size_hint_y:.8
+					Button:
+						id: qr_add
+						size_hint_y: .1
+						text: 'add'
+					Button:
+						id: qr_clear
+						size_hint_y: .05
+						text: 'clear'
