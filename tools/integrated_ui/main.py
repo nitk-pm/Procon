@@ -75,7 +75,7 @@ class LoadPanel(TabbedPanelItem):
     def __init__(self, **kwargs):
         super(LoadPanel, self).__init__(**kwargs)
 
-    def add_image(self):
+    def open_image_select_popup(self):
         self.popup = FilePopup(self)
         self.popup.open()
         return 0
