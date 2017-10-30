@@ -26,13 +26,106 @@
 		Rectangle:
 			pos: self.pos
 			size: self.size
-<CodeStack>:
-	canvas.before:
-		Color:
-			rgba: 1, 1, 1, .5
-		Rectangle:
-			pos: self.pos
-			size: self.size
+
+<FilePopup>:
+	BoxLayout:
+		orientation: 'vertical'
+		FileChooserIconView:
+			id: chooser
+		BoxLayout:
+			size_hint_y: 0.1
+			Button:
+				text: 'open'
+				on_press: root.send_files(chooser.files)
+			Button:
+				text: 'cancel'
+				on_press: root.cancel()
+
+<LoadPanel>:
+	id: load_panel
+	text: 'load'
+	BoxLayout:
+		BoxLayout:
+			orientation: 'vertical'
+			LoadCanvas:
+			BoxLayout:
+				size_hint_y: 0.1
+				Button:
+					size_hint_x: 0.3
+					id: export
+					text: 'export'
+				Button:
+					id: ok
+					text: 'OK'
+					disabled: True
+				Button:
+					id: reject
+					text: 'reject'
+					disabled: True
+		BoxLayout:
+			size_hint_x: .5
+			BoxLayout:
+				orientation: 'vertical'
+				CheckBox:
+					size_hint_y: .1
+					id: place_qr_check
+				Label:
+					text:'Place QR'
+					size_hint_y: .1
+				CodeStack:
+					id: place_qr_stack
+					size_hint_y:.8
+				Button:
+					size_hint_y: .1
+					text: 'add'
+					on_press: load_panel.add_place()
+				Button:
+					size_hint_y: .05
+					text: 'clear'
+					disabled: True
+					on_press: place_qr_stack.clear()
+			BoxLayout:
+				orientation: 'vertical'
+				CheckBox:
+					size_hint_y: .1
+					id: shape_qr_check
+					group: 'shape_select'
+				Label:
+					text:'Shape QR'
+					size_hint_y: .1
+				CodeStack:
+					id: shape_qr_stack
+					size_hint_y:.8
+				Button:
+					size_hint_y: .1
+					text: 'add'
+					on_press: load_panel.add_shape()
+				Button:
+					size_hint_y: .05
+					text: 'clear'
+					disabled: True
+					on_press: shape_qr_stack.clear()
+			BoxLayout:
+				orientation: 'vertical'
+				CheckBox:
+					size_hint_y: .1
+					id: shape_image_check
+					group: 'shape_select'
+				Label:
+					text:'Shape Image'
+					size_hint_y: .1
+				CodeStack:
+					id: shape_image_stack
+					size_hint_y:.8
+				Button:
+					size_hint_y: .1
+					text: 'add'
+					on_press: load_panel.add_image()
+				Button:
+					size_hint_y: .05
+					text: 'clear'
+					disabled: True
+					on_press: shape_image_stack.clear()
 
 <Base>:
 	do_default_tab: False
@@ -50,11 +143,13 @@
 					size_hint_y: 1
 					id: previous_piece
 					text: '<'
+					disabled: True
 					font_size: 20
 				Button:
 					size_hint_y: 1
 					id: next_piece
 					text: '>'
+					disabled: True
 					font_size: 20
 	TabbedPanelItem:
 		text: 'solver'
@@ -63,76 +158,22 @@
 			BoxLayout:
 				size_hint_x: .2
 				orientation: 'vertical'
+				Label:
+					id: shape_available
+					text: "shape: no"
+					size_hint_y: 0.1
+				Label:
+					id: place_available
+					text: "place: no"
+					size_hint_y: 0.1
 				Button:
 					id: done
 					text: 'done!'
 					font_size: 15
+					disabled: True
 				Button:
 					id: finish
-					text: 'abort'
+					text: 'finish'
 					font_size: 15
-	TabbedPanelItem:
-		text: 'load'
-		BoxLayout:
-			BoxLayout:
-				orientation: 'vertical'
-				LoadCanvas:
-				BoxLayout:
-					size_hint_y: 0.1
-					Button:
-						size_hint_x: 0.3
-						id: export
-						text: 'export'
-					Button:
-						id: ok
-						text: 'OK'
-					Button:
-						id: reject
-						text: 'reject'
-			BoxLayout:
-				size_hint_x: .5
-				BoxLayout:
-					orientation: 'vertical'
-					Label:
-						text:'Shape'
-						size_hint_y: .1
-					CodeStack:
-						size_hint_y:.8
-					Button:
-						id: shape_add
-						size_hint_y: .1
-						text: 'add'
-					Button:
-						id: shape_clear
-						size_hint_y: .05
-						text: 'clear'
-				BoxLayout:
-					orientation: 'vertical'
-					Label:
-						text:'Place QR'
-						size_hint_y: .1
-					CodeStack:
-						size_hint_y:.8
-					Button:
-						id: place_add
-						size_hint_y: .1
-						text: 'add'
-					Button:
-						id: place_clear
-						size_hint_y: .05
-						text: 'clear'
-				BoxLayout:
-					orientation: 'vertical'
-					Label:
-						text:'Shape QR'
-						size_hint_y: .1
-					CodeStack:
-						size_hint_y:.8
-					Button:
-						id: qr_add
-						size_hint_y: .1
-						text: 'add'
-					Button:
-						id: qr_clear
-						size_hint_y: .05
-						text: 'clear'
+					disabled: True
+	LoadPanel:
