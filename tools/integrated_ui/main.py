@@ -33,14 +33,6 @@ class Code(Label):
         self.shape = shape
         self.text = text
         self.size_hint_max_y = 50
-        self.color = [0,0,0,1]
-
-    def on_size(self, *args):
-        self.canvas.before.clear()
-        with self.canvas.before:
-            Color(1, 1, 1, 1)
-            Rectangle(pos=self.pos, size=self.size)
-        
 
 class CodeStack(BoxLayout):
     def __init__(self, **kwargs):
