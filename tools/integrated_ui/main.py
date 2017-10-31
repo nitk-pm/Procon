@@ -83,10 +83,10 @@ class LoadPanel(TabbedPanelItem):
     def conv(self, files):
         self.ids.shape_image_stack.add_code([])
     
-    def add_shape(self):
+    def add_shape_from_qr(self):
         return 0
     
-    def add_place(self):
+    def add_place_from_qr(self):
         return 0
 
 Builder.load_file('ui.kv')
