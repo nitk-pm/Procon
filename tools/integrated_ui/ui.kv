@@ -45,6 +45,8 @@
 	id: load_panel
 	text: 'load'
 	BoxLayout:
+	
+	BoxLayout:
 		BoxLayout:
 			orientation: 'vertical'
 			LoadCanvas:
@@ -66,66 +68,78 @@
 			size_hint_x: .5
 			BoxLayout:
 				orientation: 'vertical'
-				CheckBox:
+				BoxLayout:
 					size_hint_y: .1
-					id: place_qr_check
-				Label:
-					text:'Place QR'
-					size_hint_y: .1
-				CodeStack:
-					id: place_qr_stack
-					size_hint_y:.8
-				Button:
-					size_hint_y: .1
-					text: 'add'
-					on_press: load_panel.add_place_from_qr()
-				Button:
-					size_hint_y: .05
-					text: 'clear'
-					disabled: True
-					on_press: place_qr_stack.clear()
-			BoxLayout:
-				orientation: 'vertical'
-				CheckBox:
-					size_hint_y: .1
-					id: shape_qr_check
-					group: 'shape_select'
-				Label:
-					text:'Shape QR'
-					size_hint_y: .1
-				CodeStack:
-					id: shape_qr_stack
-					size_hint_y:.8
-				Button:
-					size_hint_y: .1
-					text: 'add'
-					on_press: load_panel.add_shape_from_qr()
-				Button:
-					size_hint_y: .05
-					text: 'clear'
-					disabled: True
-					on_press: shape_qr_stack.clear()
-			BoxLayout:
-				orientation: 'vertical'
-				CheckBox:
-					size_hint_y: .1
-					id: shape_image_check
-					group: 'shape_select'
-				Label:
-					text:'Shape Image'
-					size_hint_y: .1
-				CodeStack:
-					id: shape_image_stack
-					size_hint_y:.8
-				Button:
-					size_hint_y: .1
-					text: 'add'
-					on_press: load_panel.open_image_select_popup()
-				Button:
-					size_hint_y: .05
-					text: 'clear'
-					disabled: True
-					on_press: shape_image_stack.clear()
+					ToggleButton:
+						text: 'Camera1'
+						group: 'camera'
+					ToggleButton:
+						text: 'Camera2'
+						group: 'camera'
+						state: 'down'
+				BoxLayout:
+					BoxLayout:
+						orientation: 'vertical'
+						CheckBox:
+							size_hint_y: .1
+							id: place_qr_check
+						Label:
+							text:'Place QR'
+							size_hint_y: .1
+						CodeStack:
+							id: place_qr_stack
+							size_hint_y:.8
+						Button:
+							size_hint_y: .1
+							text: 'add'
+							on_press: load_panel.add_place_from_qr()
+						Button:
+							size_hint_y: .05
+							text: 'clear'
+							disabled: True
+							on_press: place_qr_stack.clear()
+					BoxLayout:
+						orientation: 'vertical'
+						CheckBox:
+							size_hint_y: .1
+							id: shape_qr_check
+							group: 'shape_select'
+						Label:
+							text:'Shape QR'
+							size_hint_y: .1
+						CodeStack:
+							id: shape_qr_stack
+							size_hint_y:.8
+						Button:
+							size_hint_y: .1
+							text: 'add'
+							on_press: load_panel.add_shape_from_qr()
+						Button:
+							size_hint_y: .05
+							text: 'clear'
+							disabled: True
+							on_press: shape_qr_stack.clear()
+					BoxLayout:
+						orientation: 'vertical'
+						CheckBox:
+							size_hint_y: .1
+							id: shape_image_check
+							group: 'shape_select'
+						Label:
+							text:'Shape Image'
+							size_hint_y: .1
+						CodeStack:
+							id: shape_image_stack
+							size_hint_y:.8
+						Button:
+							size_hint_y: .1
+							text: 'add'
+							on_press: load_panel.open_image_select_popup()
+						Button:
+							size_hint_y: .05
+							text: 'clear'
+							disabled: True
+							on_press: shape_image_stack.clear()
 
 <Base>:
 	do_default_tab: False
@@ -134,6 +148,15 @@
 		text: 'result'
 		BoxLayout:	
 			orientation: 'vertical'	
+			BoxLayout:
+				size_hint_y: .1
+				ToggleButton:
+					text: 'Camera1'
+					group: 'camera'
+				ToggleButton:
+					text: 'Camera2'
+					group: 'camera'
+					state: 'down'
 			BoxLayout:
 				ResultCanvas:
 				PieceSuggestCanvas:
