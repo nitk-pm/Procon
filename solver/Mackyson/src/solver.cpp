@@ -6,7 +6,6 @@
 #include <queue>
 #include <deque>
 #include <assert.h>
-#include <set>
 #include <unordered_set>
 #include <unordered_map>
 #include <bitset>
@@ -18,7 +17,7 @@
 #define time_point std::chrono::system_clock::time_point
 
 #define rep(i,n) for (int i=0;i<n;++i) //デバッグ専用
-
+const int PIECE_PER_DATA=8,REFERENCE_POINT_NUMBER = 3;//
 
 std::hash<std::bitset<101 * 65>> hash_fn;
 
@@ -129,9 +128,9 @@ class Solver {
 
         std::vector<bool> samePieceDisable (std::vector<bool> usableList, int i) {
                 std::vector<bool>tmp (usableList);
-                i /= 24;
-                for (int j = 0; j < 24; ++j)
-                        tmp.at (24 * i + j) = false;
+                i /= PIECE_PER_DATA*REFERENCE_POINT_NUMBER;
+                for (int j = 0; j < PIECE_PER_DATA*REFERENCE_POINT_NUMBER; ++j)
+                        tmp.at (PIECE_PER_DATA*REFERENCE_POINT_NUMBER * i + j) = false;
                 return tmp;
         }
 
@@ -139,7 +138,6 @@ class Solver {
 
                 std::vector<bool> usableList = par.usableList;
                 std::vector<Position> evalPos = par.evalPos;
-                evalPos.reserve (par.evalPos.size () + 12);
 
                 auto currentFrame = par.frame;
 
@@ -148,7 +146,7 @@ class Solver {
                 for (int currentPieceID = 0; currentPieceID < piece.size () - 1; ++currentPieceID) {//全てのusableなピースに対して探索を行う
                         if (!usableList.at (currentPieceID))
                                 continue;
-                        std::priority_queue<Evalution> mostOfPiece;
+                        std::priority_queue<Evalution> bestOfPiece;
                         for (auto posCandidate = evalPos.begin (); posCandidate != evalPos.end (); ++posCandidate) {//探索座標(i,j)を指定
                                 int i = posCandidate->x, j = posCandidate->y;
                                 Position tmpPos (i, j);
@@ -174,11 +172,11 @@ class Solver {
                                                 evalPointCnt += 5000;
 
                                         evalPointCnt += piece.at (currentPieceID).area;
-                                        mostOfPiece.push (Evalution (evalPointCnt, currentPieceID, tmpPos));
+                                        bestOfPiece.push (Evalution (evalPointCnt, currentPieceID, tmpPos));
                                 }
 
                         }
-                        if (!mostOfPiece.empty ())evalutionList.push (mostOfPiece.top ());
+                        if (!bestOfPiece.empty ())evalutionList.push (bestOfPiece.top ());
 
                 }
 
@@ -198,9 +196,11 @@ class Solver {
                         }
                         if (existingFrame.find (hash_fn (tmp.frame)) == existingFrame.end ()) {
                                 int independentAreaNumber = IndependentArea (tmp.frame), sharpPointNumber = sharpPoint (tmp.frame);
+
                                 if (!isUsingPlace)
-                                if (independentAreaNumber >= 4)
-                                        continue;
+                                        if (independentAreaNumber >= 4)
+                                                continue;
+
                                 tmp.point = match - independentAreaNumber * 3000 - sharpPointNumber * 8000;
 
                                 if (nowTurn < maxTurn / 2)
@@ -232,7 +232,7 @@ public:
                 auto tmpPieces = getPiecesShape ();
 
                 for (auto itr = tmpPieces.begin (); itr != tmpPieces.end (); ++itr) {
-                        for (int edge = 0; edge < 3; ++edge) {
+                        for (int edge = 0; edge < REFERENCE_POINT_NUMBER; ++edge) {
                                 piece.push_back (Piece (*itr, edge));
                         }
                 }
@@ -285,22 +285,20 @@ public:
         //chokudaiサーチ
         void beamSearch (int time, time_point start) {
                 int width = 1;
-                int maxTurn = (piece.size ()) / 24 - setPieceNumber;
+                int maxTurn = (piece.size ()) / PIECE_PER_DATA*REFERENCE_POINT_NUMBER - setPieceNumber;
 
                 std::vector<Position> evalPosInit;
                 std::vector<std::pair<int, Position>> logInit;
                 for (int i = 0; i < frame.size (); ++i)
                         for (int j = 0; j < frame.at (i).vertexPositionList.size (); ++j) {
-                                auto tmpPos = std::find (evalPosInit.begin (), evalPosInit.end (),frame.at (i).vertexPositionList.at (j));
+                                auto tmpPos = std::find (evalPosInit.begin (), evalPosInit.end (), frame.at (i).vertexPositionList.at (j));
                                 if (tmpPos == evalPosInit.end ())
-                                evalPosInit.push_back (frame.at (i).vertexPositionList.at (j));
+                                        evalPosInit.push_back (frame.at (i).vertexPositionList.at (j));
                         }
 
                 size_t minCount = frameStatus.count ();
                 std::vector<std::pair<int, Position>>  best;
-                bool isFirst = false;
                 std::vector<std::priority_queue<ParStruct>> parEval (maxTurn + 1);
-                //parEval[0].push (ParStruct (0, frameStatus, usableInit, evalPosInit, logInit));
 
                 while (parEval[maxTurn].empty ()) {
                         parEval[0].push (ParStruct (0, frameStatus, usableInit, evalPosInit, logInit));
@@ -313,23 +311,6 @@ public:
                                 if (parEval[cnt].empty ())
                                         continue;
 
-                                ////d
-
-                                //rep (j, 65) {
-                                //	rep (i, 101) {
-                                //		std::cout << parEval[cnt].top ().frame[j * 101 + i];
-                                //	}
-                                //	std::this_thread::sleep_for (std::chrono::milliseconds (30));
-                                //	puts ("");
-                                //}
-                                //puts ("");
-                                //rep (i, parEval[cnt].top ().log.size ()) {
-                                //	Position tmp = parEval[cnt].top ().log.at (i).second;
-                                //	std::cout << tmp.x << "," << tmp.y << std::endl;
-                                //	std::this_thread::sleep_for (std::chrono::milliseconds (100));
-                                //}
-                                //puts ("");
-                                ////d
                                 for (int i = 0; i < width; ++i) {
                                         if (!parEval[cnt].empty ()) {
 
@@ -356,7 +337,6 @@ public:
                                 }
 
                         }
-                        isFirst = true;
                 }
 
                 best = parEval[maxTurn].top ().log;
@@ -365,7 +345,7 @@ public:
                 for (auto i = best.begin (); i != best.end (); ++i) {
                         frame.push_back (piece.at (i->first).absolutePiecePosition (i->second));
                 }
-        }/**/
+        }
 };
 
 int main (int argc, char*argv[]) {
