@@ -21,8 +21,6 @@
 			size: self.size
 <LoadCanvas>:
 	canvas.before:
-		Color:
-			rgba: 0, 0, 1, 1
 		Rectangle:
 			pos: self.pos
 			size: self.size
@@ -45,11 +43,10 @@
 	id: load_panel
 	text: 'load'
 	BoxLayout:
-	
-	BoxLayout:
 		BoxLayout:
 			orientation: 'vertical'
 			LoadCanvas:
+				id: load_canvas
 			BoxLayout:
 				size_hint_y: 0.1
 				Button:
