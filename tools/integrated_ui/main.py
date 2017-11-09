@@ -14,6 +14,7 @@ from kivy.graphics import Rectangle
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 from PIL import Image
+from enum import Enum
 import cv2
 
 class ResultCanvas(Widget):
@@ -44,8 +45,8 @@ class CodeStack(BoxLayout):
         self.orientation = 'vertical'
         self.codes = []
 
-    def add_code (self, shape):
-        code = Code("l1", shape)
+    def add_code (self, name, shape):
+        code = Code(name, shape)
         self.codes.append(code)
         self.add_widget(code)
 
@@ -66,17 +67,22 @@ class FilePopup(Popup):
         self.load_panel.add_shape_from_img_file(img)
         self.dismiss()
 
-class LoadPanel(TabbedPanelItem):
+class Mode(Enum):
+    ShapeQR = 0
+    PlaceQR = 1
+    ShpaeCV = 2
+    NoWork  = 3
 
+class LoadPanel(TabbedPanelItem):
     img_rect = None
     code = None
     frame = None
+    mode = Mode.NoWork
 
     def __init__(self, **kwargs):
         super(LoadPanel, self).__init__(**kwargs)
         self.cap = cv2.VideoCapture(0)
         self.update_trigger = Clock.schedule_interval(self.update, 1 / 10.)
-        self.in_qr_mode = True
         self.camera_stop = False
 
     def open_image_select_popup(self):
@@ -89,13 +95,12 @@ class LoadPanel(TabbedPanelItem):
 
     def add_shape_from_img_file(self, img):
         self.frame = cv2.imread(img[0])
-        self.in_qr_mode = False
     
-    def add_shape_from_qr(self, code):
-        return 0
+    def add_shape_from_qr(self):
+        self.mode = Mode.ShapeQR
     
-    def add_place_from_qr(self, code):
-        return 0
+    def add_place_from_qr(self):
+        self.mode = Mode.PlaceQR
 
     def reflect_img (self, img):
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
@@ -114,23 +119,39 @@ class LoadPanel(TabbedPanelItem):
             self.img_rect.texture = texture
 
     def update(self, event):
-        if self.in_qr_mode:
-            #frame = self.get_frame()
+        if self.mode == Mode.ShapeQR or self.mode == Mode.PlaceQR:
             ret, orig = self.cap.read()
             from pyzbar.pyzbar import decode
             from pyzbar.pyzbar import ZBarSymbol
             frame = cv2.cvtColor(orig, cv2.COLOR_RGB2GRAY)
             codes = decode(Image.fromarray(frame), symbols=[ZBarSymbol.QRCODE])
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
-            print(codes)
             if len(codes) > 0 or self.code == None:
                 if len(codes) > 0:
                     self.code = codes[0]
+                    self.ids.ok.disabled = False
+                    self.ids.reject.disabled = False
                 self.frame = orig
+                print(codes)
             self.reflect_img(self.frame)
-                
 
-        
+    def ok (self):
+        def add_code(stack):
+            stack.add_code('QR{}'.format(len(stack.children)+1), self.code)
+        if self.mode == Mode.ShapeQR:
+            add_code(self.ids.shape_qr_stack)
+        if self.mode == Mode.PlaceQR:
+            add_code(self.ids.place_qr_stack)
+        self.mode = Mode.NoWork
+        self.code = None
+        self.ids.ok.disabled = True
+        self.ids.reject.disabled = True
+
+    def reject(self):
+        self.mode = Mode.NoWork
+        self.code = None
+        self.ids.ok.disabled = True
+        self.ids.reject.disabled = True
 
 Builder.load_file('ui.kv')
 

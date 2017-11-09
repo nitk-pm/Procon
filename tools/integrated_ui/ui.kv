@@ -57,10 +57,12 @@
 					id: ok
 					text: 'OK'
 					disabled: True
+					on_press: load_panel.ok()
 				Button:
 					id: reject
 					text: 'reject'
 					disabled: True
+					on_press: load_panel.reject()
 		BoxLayout:
 			size_hint_x: .5
 			BoxLayout:
