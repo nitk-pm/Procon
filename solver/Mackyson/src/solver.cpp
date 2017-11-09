@@ -17,7 +17,7 @@
 #define time_point std::chrono::system_clock::time_point
 
 #define rep(i,n) for (int i=0;i<n;++i) //デバッグ専用
-const int PIECE_PER_DATA=8,REFERENCE_POINT_NUMBER = 3;//
+const int PIECE_PER_DATA = 8, REFERENCE_POINT_NUMBER = 3;//
 
 std::hash<std::bitset<101 * 65>> hash_fn;
 
@@ -27,7 +27,6 @@ bool timeCheck (time_point start, int time) {
 }
 
 bool isInFrameBit (std::vector<Position> p, Position pos, std::bitset<101 * 65> f) {
-
         for (auto itr = p.begin (); itr != p.end (); ++itr)
                 if (!f[(itr->y + pos.y) * 101 + itr->x + pos.x])
                         return false;
@@ -134,7 +133,7 @@ class Solver {
                 return tmp;
         }
 
-        void climbForBeam (ParStruct par, std::vector< ParStruct> *chi, int width, int nowTurn, int maxTurn) {
+        void climbForBeam (ParStruct par, std::vector<ParStruct> *chi, int width, int nowTurn, int maxTurn) {
 
                 std::vector<bool> usableList = par.usableList;
                 std::vector<Position> evalPos = par.evalPos;
@@ -228,7 +227,6 @@ public:
         std::vector<bool> usableInit;
 
         void loadShapeInfomation () {
-
                 auto tmpPieces = getPiecesShape ();
 
                 for (auto itr = tmpPieces.begin (); itr != tmpPieces.end (); ++itr) {
@@ -285,7 +283,7 @@ public:
         //chokudaiサーチ
         void beamSearch (int time, time_point start) {
                 int width = 1;
-                int maxTurn = (piece.size ()) / PIECE_PER_DATA*REFERENCE_POINT_NUMBER - setPieceNumber;
+                int maxTurn = piece.size () / PIECE_PER_DATA*REFERENCE_POINT_NUMBER - setPieceNumber;
 
                 std::vector<Position> evalPosInit;
                 std::vector<std::pair<int, Position>> logInit;
@@ -324,7 +322,6 @@ public:
                                                 for (int i = 0; i < tmpEvalList.size (); ++i) {
                                                         existingFrame.emplace (hash_fn (tmpEvalList.at (i).frame));
                                                 }
-
                                         }
                                 }
 
@@ -335,7 +332,6 @@ public:
                                         parEval[cnt + 1].push (tmpEvalList.back ());
                                         tmpEvalList.pop_back ();
                                 }
-
                         }
                 }
 
