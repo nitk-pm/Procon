@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 def parse_code (str):
     splited = str.split(':')
@@ -17,3 +18,11 @@ def parse_code (str):
     frames_base = shapes[piece_num:]
     # piece, frame
     return list(map(shape_ctor, pieces_base)), list(map(shape_ctor, frames_base))
+
+def expand_piece (base_shape):
+    rotateds = []
+    for angle in [0., math.pi/2., math.pi, math.pi*3./2.]:
+        rotated = geom.rotate(base_shape, angle)
+        rotateds.append(rotated)
+        rotateds.append(geom.invert(rotated))
+    return rotateds
