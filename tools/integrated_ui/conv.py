@@ -15,4 +15,5 @@ def parse_code (str):
         return shape
     pieces_base = shapes[:piece_num]
     frames_base = shapes[piece_num:]
-    return {'pieces': list(map(shape_ctor, pieces_base)), 'frames': list(map(shape_ctor, frames_base))}
+    # piece, frame
+    return list(map(shape_ctor, pieces_base)), list(map(shape_ctor, frames_base))
