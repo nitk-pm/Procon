@@ -16,6 +16,8 @@ from kivy.clock import Clock
 from PIL import Image
 from enum import Enum
 import cv2
+import conv
+import json
 
 class ResultCanvas(Widget):
     pass
@@ -33,6 +35,8 @@ class Base(TabbedPanel):
     pass
 
 class Code(Label):
+    text = ""
+    shape = []
     def __init__(self, text, shape, **kwargs):
         super(Code, self).__init__(**kwargs)
         self.shape = shape
@@ -152,6 +156,15 @@ class LoadPanel(TabbedPanelItem):
         self.code = None
         self.ids.ok.disabled = True
         self.ids.reject.disabled = True
+
+    def export(self):
+        codes = list(map(lambda code: code.shape, seld.ids.shape_qr_stack.children))
+        if len(codes) != 0:
+            piece_dic, frame_dic = conv.compile_codes_to_dict
+            piece_file = open('piece.json')
+            frame_file = open('frame.json')
+            json.dump(piece_dic, piece_file)
+            json.dump(frame_dic, frame_file)
 
 Builder.load_file('ui.kv')
 
