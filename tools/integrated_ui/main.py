@@ -18,6 +18,10 @@ from enum import Enum
 import cv2
 import conv
 import json
+import os
+
+# カメラ(一度に複数開けないので)
+cap = cv2.VideoCapture(0)
 
 class ResultCanvas(Widget):
     pass
@@ -80,6 +84,18 @@ class Mode(Enum):
 class ResultPanel(TabbedPanelItem):
     def __init__(self, **kwargs):
         super (ResultPanel, self).__init__(**kwargs)
+
+    def camera_open(self, id):
+        cap = cv2.VideoCapture(id)
+
+    def reload(self):
+        if os.path.exists('./output.json'):
+            self.ids.previous_piece.disabled = False
+            self.ids.next_piece.disabled = False
+
+    def set_camera(self, id):
+        cap = cv2.VideoCapture(id)
+
 class LoadPanel(TabbedPanelItem):
     img_rect = None
     code = None
@@ -88,9 +104,12 @@ class LoadPanel(TabbedPanelItem):
 
     def __init__(self, **kwargs):
         super(LoadPanel, self).__init__(**kwargs)
-        self.cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(0)
         self.update_trigger = Clock.schedule_interval(self.update, 1 / 10.)
         self.camera_stop = False
+
+    def set_camera(self, id):
+        cap = cv2.VideoCapture(id)
 
     def open_image_select_popup(self):
         self.popup = FilePopup(self)
@@ -127,7 +146,7 @@ class LoadPanel(TabbedPanelItem):
 
     def update(self, event):
         if self.mode == Mode.ShapeQR or self.mode == Mode.PlaceQR:
-            ret, orig = self.cap.read()
+            ret, orig = cap.read()
             from pyzbar.pyzbar import decode
             from pyzbar.pyzbar import ZBarSymbol
             frame = cv2.cvtColor(orig, cv2.COLOR_RGB2GRAY)

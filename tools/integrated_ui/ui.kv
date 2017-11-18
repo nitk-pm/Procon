@@ -74,11 +74,13 @@
 						text: 'Camera1'
 						group: 'camera'
 						allow_no_selection: False
+						on_press: root.set_camera(0)
 					ToggleButton:
 						text: 'Camera2'
 						group: 'camera'
 						state: 'down'
 						allow_no_selection: False
+						on_press: root.set_camera(1)
 				BoxLayout:
 					BoxLayout:
 						orientation: 'vertical'
