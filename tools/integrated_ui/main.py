@@ -158,7 +158,6 @@ class LoadPanel(TabbedPanelItem):
                     self.ids.ok.disabled = False
                     self.ids.reject.disabled = False
                 self.frame = orig
-                print(codes)
             self.reflect_img(self.frame)
 
     def ok (self):
