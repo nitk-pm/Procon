@@ -16,6 +16,12 @@ from kivy.clock import Clock
 from PIL import Image
 from enum import Enum
 import cv2
+import conv
+import json
+import os
+
+# カメラ(一度に複数開けないので)
+cap = cv2.VideoCapture(0)
 
 class ResultCanvas(Widget):
     pass
@@ -33,6 +39,8 @@ class Base(TabbedPanel):
     pass
 
 class Code(Label):
+    text = ""
+    shape = []
     def __init__(self, text, shape, **kwargs):
         super(Code, self).__init__(**kwargs)
         self.shape = shape
@@ -73,6 +81,21 @@ class Mode(Enum):
     ShpaeCV = 2
     NoWork  = 3
 
+class ResultPanel(TabbedPanelItem):
+    def __init__(self, **kwargs):
+        super (ResultPanel, self).__init__(**kwargs)
+
+    def camera_open(self, id):
+        cap = cv2.VideoCapture(id)
+
+    def reload(self):
+        if os.path.exists('./output.json'):
+            self.ids.previous_piece.disabled = False
+            self.ids.next_piece.disabled = False
+
+    def set_camera(self, id):
+        cap = cv2.VideoCapture(id)
+
 class LoadPanel(TabbedPanelItem):
     img_rect = None
     code = None
@@ -81,9 +104,12 @@ class LoadPanel(TabbedPanelItem):
 
     def __init__(self, **kwargs):
         super(LoadPanel, self).__init__(**kwargs)
-        self.cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(0)
         self.update_trigger = Clock.schedule_interval(self.update, 1 / 10.)
         self.camera_stop = False
+
+    def set_camera(self, id):
+        cap = cv2.VideoCapture(id)
 
     def open_image_select_popup(self):
         self.popup = FilePopup(self)
@@ -120,7 +146,7 @@ class LoadPanel(TabbedPanelItem):
 
     def update(self, event):
         if self.mode == Mode.ShapeQR or self.mode == Mode.PlaceQR:
-            ret, orig = self.cap.read()
+            ret, orig = cap.read()
             from pyzbar.pyzbar import decode
             from pyzbar.pyzbar import ZBarSymbol
             frame = cv2.cvtColor(orig, cv2.COLOR_RGB2GRAY)
@@ -132,7 +158,6 @@ class LoadPanel(TabbedPanelItem):
                     self.ids.ok.disabled = False
                     self.ids.reject.disabled = False
                 self.frame = orig
-                print(codes)
             self.reflect_img(self.frame)
 
     def ok (self):
@@ -152,6 +177,15 @@ class LoadPanel(TabbedPanelItem):
         self.code = None
         self.ids.ok.disabled = True
         self.ids.reject.disabled = True
+
+    def export(self):
+        codes = list(map(lambda code: code.shape, seld.ids.shape_qr_stack.children))
+        if len(codes) != 0:
+            piece_dic, frame_dic = conv.compile_codes_to_dict
+            piece_file = open('piece.json')
+            frame_file = open('frame.json')
+            json.dump(piece_dic, piece_file)
+            json.dump(frame_dic, frame_file)
 
 Builder.load_file('ui.kv')
 
