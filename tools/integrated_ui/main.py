@@ -77,6 +77,9 @@ class Mode(Enum):
     ShpaeCV = 2
     NoWork  = 3
 
+class ResultPanel(TabbedPanelItem):
+    def __init__(self, **kwargs):
+        super (ResultPanel, self).__init__(**kwargs)
 class LoadPanel(TabbedPanelItem):
     img_rect = None
     code = None

@@ -142,42 +142,48 @@
 							text: 'clear'
 							disabled: True
 							on_press: shape_image_stack.clear()
+<ResultPanel>:
+	text: 'result'
+	BoxLayout:	
+		orientation: 'vertical'	
+		BoxLayout:
+			size_hint_y: .1
+			Button:
+				text: 'reload'
+				size_hint_x: .3
+				on_press: root.reload()
+			ToggleButton:
+				text: 'Camera1'
+				group: 'camera'
+				allow_no_selection: False
+				on_press: root.set_camera(0)
+			ToggleButton:
+				text: 'Camera2'
+				group: 'camera'
+				state: 'down'
+				allow_no_selection: False
+				on_press: root.set_camera(1)
+		BoxLayout:
+			ResultCanvas:
+			PieceSuggestCanvas:
+		BoxLayout:
+			size_hint_y: .1
+			Button:
+				size_hint_y: 1
+				id: previous_piece
+				text: '<'
+				disabled: True
+				font_size: 20
+			Button:
+				size_hint_y: 1
+				id: next_piece
+				text: '>'
+				disabled: True
+				font_size: 20
 
 <Base>:
 	do_default_tab: False
-
-	TabbedPanelItem:	
-		text: 'result'
-		BoxLayout:	
-			orientation: 'vertical'	
-			BoxLayout:
-				size_hint_y: .1
-				ToggleButton:
-					text: 'Camera1'
-					group: 'camera'
-					allow_no_selection: False
-				ToggleButton:
-					text: 'Camera2'
-					group: 'camera'
-					state: 'down'
-					allow_no_selection: False
-			BoxLayout:
-				ResultCanvas:
-				PieceSuggestCanvas:
-			BoxLayout:
-				size_hint_y: .1
-				Button:
-					size_hint_y: 1
-					id: previous_piece
-					text: '<'
-					disabled: True
-					font_size: 20
-				Button:
-					size_hint_y: 1
-					id: next_piece
-					text: '>'
-					disabled: True
-					font_size: 20
+	ResultPanel:	
 	TabbedPanelItem:
 		text: 'solver'
 		BoxLayout:
