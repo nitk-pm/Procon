@@ -29,14 +29,18 @@ def expand_piece (base_shape):
         rotateds.append(geom.invert(rotated))
     return rotateds
 
-def compile_codes_to_dict(codes):
+def ctor_point(p):
+    return {'x':p[0][0], 'y':p[1][0]}
+
+def ctor_shape(ps):
+    return [ctor_point(p) for p in ps]
+
+def ctor_shapes(ss):
+    return [ctor_shape(s) for s in ss]
+
+def compile_shape_codes_to_dict(codes):
     all_pieces = []
     all_frames = []
-    def ctor_shapes(shapes):
-        def ctor_points(p):
-            return {'x': p[0][0], 'y':[1][0]}
-        return list(map(lambda shape:
-            list(map(ctor_points, shape)), shapes))
     for code in codes:
         pieces, frames = parse_code(code)
         for piece in pieces:
@@ -46,3 +50,12 @@ def compile_codes_to_dict(codes):
     piece_dict = {'pieces': all_pieces}
     frame_dict = {'frames': ctor_shapes(all_frames)}
     return piece_dict, frame_dict
+
+def compile_place_codes_to_dict(codes):
+    all_pieces = []
+    for code in codes:
+        pieces, _ = parse_code(code)
+        for piece in pieces:
+            all_pieces.append(piece)
+    dict = {'pieces': ctor_shapes(all_pieces)}
+    return dict
