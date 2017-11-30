@@ -182,7 +182,7 @@ class LoadPanel(TabbedPanelItem):
         codes = [code.shape for code in self.ids.shape_qr_stack.children]
 
         if len(codes) != 0:
-            piece_dic, frame_dic = conv.compile_codes_to_dict
+            piece_dic, frame_dic = conv.compile_shape_codes_to_dict(codes)
             piece_file = open('piece.json')
             frame_file = open('frame.json')
             json.dump(piece_dic, piece_file)
