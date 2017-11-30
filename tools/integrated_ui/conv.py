@@ -2,6 +2,7 @@ import numpy as np
 import math
 
 import geom
+import json
 
 def parse_code (str):
     splited = str.split(':')
@@ -59,3 +60,15 @@ def compile_place_codes_to_dict(codes):
             all_pieces.append(piece)
     dict = {'pieces': ctor_shapes(all_pieces)}
     return dict
+
+def dump_shape_json(codes):
+    piece_dic, frame_dic = compile_shape_codes_to_dict(codes)
+    piece_file = open('piece.json', 'w')
+    frame_file = open('frame.json', 'w')
+    json.dump(piece_dic, piece_file)
+    json.dump(frame_dic, frame_file)
+
+def dump_place_json(codes):
+    dic = compile_place_codes_to_dict(codes)
+    place_file = open('place.json', 'w')
+    json.dump(dic, place_file)
