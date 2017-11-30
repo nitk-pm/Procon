@@ -179,7 +179,8 @@ class LoadPanel(TabbedPanelItem):
         self.ids.reject.disabled = True
 
     def export(self):
-        codes = list(map(lambda code: code.shape, seld.ids.shape_qr_stack.children))
+        codes = [code.shape for code in self.ids.shape_qr_stack.children]
+
         if len(codes) != 0:
             piece_dic, frame_dic = conv.compile_codes_to_dict
             piece_file = open('piece.json')
