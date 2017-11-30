@@ -179,14 +179,20 @@ class LoadPanel(TabbedPanelItem):
         self.ids.reject.disabled = True
 
     def export(self):
-        codes = [code.shape for code in self.ids.shape_qr_stack.children]
+        shape_codes = [code.shape for code in self.ids.shape_qr_stack.children]
+        place_codes = [code.shape for code in self.ids.place_qr_stack.children]
 
-        if len(codes) != 0:
-            piece_dic, frame_dic = conv.compile_shape_codes_to_dict(codes)
+        if len(shape_codes) != 0:
+            piece_dic, frame_dic = conv.compile_shape_codes_to_dict(shape_codes)
             piece_file = open('piece.json')
             frame_file = open('frame.json')
             json.dump(piece_dic, piece_file)
             json.dump(frame_dic, frame_file)
+
+        if len(place_codes) != 0:
+            dic = conv.compile_place_codes_to_dict(place_codes)
+            place_file = open('place.json')
+            json.dump(dic, place_file)
 
 Builder.load_file('ui.kv')
 
