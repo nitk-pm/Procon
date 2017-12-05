@@ -2,9 +2,6 @@
 	canvas.before:
 		Color:
 			rgba: 0, 1, 0, 1
-		Rectangle:
-			pos: self.pos
-			size: self.size
 <PieceSuggestCanvas>:
 	canvas.before:
 		Color:
@@ -167,21 +164,24 @@
 				on_press: root.set_camera(1)
 		BoxLayout:
 			ResultCanvas:
+				id: canvas
 			PieceSuggestCanvas:
 		BoxLayout:
 			size_hint_y: .1
 			Button:
 				size_hint_y: 1
-				id: previous_piece
+				id: previous_button
 				text: '<'
 				disabled: True
 				font_size: 20
+				on_press: canvas.previous()
 			Button:
 				size_hint_y: 1
-				id: next_piece
+				id: next_button
 				text: '>'
 				disabled: True
 				font_size: 20
+				on_press: canvas.next()
 
 <Base>:
 	do_default_tab: False

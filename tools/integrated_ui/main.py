@@ -11,6 +11,7 @@ from kivy.uix.popup import Popup
 from kivy.lang import Builder
 from kivy.graphics import Color
 from kivy.graphics import Rectangle
+from kivy.graphics import Line
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 from PIL import Image
@@ -24,7 +25,46 @@ import os
 cap = cv2.VideoCapture(0)
 
 class ResultCanvas(Widget):
-    pass
+    should_draw_shapes = []
+    all_shapes = []
+    draw_shape_num = 0
+
+    def __init__(self, **kwargs):
+        super(ResultCanvas, self).__init__(**kwargs)
+
+    def set_shape(self, shapes):
+        self.all_shapes = shapes
+
+    def next(self):
+        if self.draw_shape_num < len(self.all_shapes):
+            self.draw_shape_num += 1
+            self.should_draw_shapes = self.all_shapes[0:self.draw_shape_num]
+        self.update_lines()
+
+    def previous(self):
+        if self.draw_shape_num > 0:
+            self.draw_shape_num -= 1
+            self.should_draw_shapes = self.all_shapes[0:self.draw_shape_num]
+        self.update_lines()
+
+    def update_lines(self):
+        self.canvas.clear()
+        self.canvas.add(Color(1,0,0,1))
+        for line in [self.shape2line(shape) for shape in self.should_draw_shapes]:
+            self.canvas.add(line)
+
+    def shape2line(self, shape):
+        off_x = self.pos[0] + 10
+        off_y = self.pos[1] + 10
+        # 101x65 -> キャンバスへの縮尺変換
+        # 横方向の比率に合わせる
+        ratio = float(self.size[0] - 10) / 65.0
+        pts = []
+        for pt in shape:
+            pts.extend([pt[0]*ratio+off_x, pt[1]*ratio+off_y])
+        print([int(x) for x in pts])
+        return Line(points=pts, width=2, close=True)
+
 
 class PieceSuggestCanvas(Widget):
     pass
@@ -39,7 +79,6 @@ class Base(TabbedPanel):
     pass
 
 class Code(Label):
-    text = ""
     shape = []
     def __init__(self, text, shape, **kwargs):
         super(Code, self).__init__(**kwargs)
@@ -89,9 +128,10 @@ class ResultPanel(TabbedPanelItem):
         cap = cv2.VideoCapture(id)
 
     def reload(self):
-        if os.path.exists('./output.json'):
-            self.ids.previous_piece.disabled = False
-            self.ids.next_piece.disabled = False
+        if os.path.exists('./test.txt'):
+            self.ids.canvas.set_shape(conv.load_result(open('./test.txt', 'r')))
+            self.ids.previous_button.disabled = False
+            self.ids.next_button.disabled = False
 
     def set_camera(self, id):
         cap = cv2.VideoCapture(id)

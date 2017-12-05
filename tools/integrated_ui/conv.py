@@ -72,3 +72,18 @@ def dump_place_json(codes):
     dic = compile_place_codes_to_dict(codes)
     place_file = open('place.json', 'w')
     json.dump(dic, place_file)
+
+def load_result(file):
+    nums = [int(line.strip()) for line in file]
+    assert len(nums) % 2 == 0, 'result is invalid format'
+    shapes = []
+    shape = []
+    for i in range(0, len(nums), 2):
+        x = nums[i]
+        y = nums[i+1]
+        if len(shape) != 0 and shape[0][0] == x and shape[0][1] == y:
+            shapes.append(shape)
+            shape = []
+        else:
+            shape.append((x, y))
+    return shapes
