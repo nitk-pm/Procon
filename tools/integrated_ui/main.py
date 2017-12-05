@@ -89,7 +89,7 @@ class ResultPanel(TabbedPanelItem):
         cap = cv2.VideoCapture(id)
 
     def reload(self):
-        if os.path.exists('./output.json'):
+        if os.path.exists('./test.txt'):
             self.ids.previous_button.disabled = False
             self.ids.next_button.disabled = False
 
