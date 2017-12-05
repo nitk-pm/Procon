@@ -79,7 +79,6 @@ class Base(TabbedPanel):
     pass
 
 class Code(Label):
-    text = ""
     shape = []
     def __init__(self, text, shape, **kwargs):
         super(Code, self).__init__(**kwargs)
