@@ -90,8 +90,8 @@ class ResultPanel(TabbedPanelItem):
 
     def reload(self):
         if os.path.exists('./output.json'):
-            self.ids.previous_piece.disabled = False
-            self.ids.next_piece.disabled = False
+            self.ids.previous_button.disabled = False
+            self.ids.next_button.disabled = False
 
     def set_camera(self, id):
         cap = cv2.VideoCapture(id)
