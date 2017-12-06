@@ -12,6 +12,7 @@ def parse_code (bincode):
             filter (lambda num: num != '', s.split(' ')))),
         splited[1:]))
     def shape_ctor(nums):
+        nums = nums[1:]
         assert len(nums) % 2 == 0, "illegal data"
         shape = []
         for i in range(0, len(nums), 2):
