@@ -58,7 +58,7 @@ class ResultCanvas(Widget):
         off_y = self.pos[1] + 10
         # 101x65 -> キャンバスへの縮尺変換
         # 横方向の比率に合わせる
-        ratio = float(self.size[0] - 10) / 65.0
+        ratio = float(self.size[0] - 10) / 101.0
         pts = []
         for pt in shape:
             pts.extend([pt[0]*ratio+off_x, pt[1]*ratio+off_y])
