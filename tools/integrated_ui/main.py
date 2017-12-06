@@ -219,8 +219,8 @@ class LoadPanel(TabbedPanelItem):
         self.ids.reject.disabled = True
 
     def export(self):
-        shape_codes = [code.shape for code in self.ids.shape_qr_stack.children]
-        place_codes = [code.shape for code in self.ids.place_qr_stack.children]
+        shape_codes = [code.shape.data for code in self.ids.shape_qr_stack.children]
+        place_codes = [code.shape.data for code in self.ids.place_qr_stack.children]
         if len(shape_codes) != 0:
             conv.dump_shape_json(shape_codes)
         if len(place_codes) != 0:
