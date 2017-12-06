@@ -4,8 +4,8 @@ import math
 import geom
 import json
 
-def parse_code (str):
-    splited = str.split(':')
+def parse_code (bincode):
+    splited = str(bincode)[2:][:-1].split(':')
     piece_num = int(splited[0])
     shapes    = list(map(
         lambda s: list(map(lambda num: float(num),
