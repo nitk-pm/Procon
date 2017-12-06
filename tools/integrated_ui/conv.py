@@ -38,7 +38,12 @@ def ctor_shape(ps):
     return [ctor_point(p) for p in ps]
 
 def ctor_shapes(ss):
-    return [ctor_shape(s) for s in ss]
+    return {'shapes': [ctor_shape(s) for s in ss]}
+
+def round_shape(s):
+    def round_pt (pt):
+        return [[int(pt[0][0])], [int(pt[1][0])]]
+    return [round_pt(pt) for pt in s]
 
 def compile_shape_codes_to_dict(codes):
     all_pieces = []
@@ -46,11 +51,11 @@ def compile_shape_codes_to_dict(codes):
     for code in codes:
         pieces, frames = parse_code(code)
         for piece in pieces:
-            all_pieces.append(ctor_shapes(expand_piece(piece)))
+            all_pieces.append(ctor_shapes([round_shape(normalize(shape)) for shape in expand_piece(set_orig(piece))]))
         for frame in frames:
-            all_frames.append(frame)
+            all_frames.append(round_shape(normalize(frame)))
     piece_dict = {'pieces': all_pieces}
-    frame_dict = {'frames': ctor_shapes(all_frames)}
+    frame_dict = ctor_shapes(all_frames)
     return piece_dict, frame_dict
 
 def compile_place_codes_to_dict(codes):
@@ -66,8 +71,8 @@ def dump_shape_json(codes):
     piece_dic, frame_dic = compile_shape_codes_to_dict(codes)
     piece_file = open('piece.json', 'w')
     frame_file = open('frame.json', 'w')
-    json.dump(piece_dic, piece_file)
-    json.dump(frame_dic, frame_file)
+    json.dump(piece_dic, piece_file, indent=4, sort_keys=True)
+    json.dump(frame_dic, frame_file, indent=4, sort_keys=True)
 
 def dump_place_json(codes):
     dic = compile_place_codes_to_dict(codes)
@@ -88,3 +93,14 @@ def load_result(file):
         else:
             shape.append((x, y))
     return shapes
+
+# 頂点一つを原点と合わせる処理
+def set_orig(shape):
+    orig_x = shape[0][0][0]
+    orig_y = shape[0][1][0]
+    return [[[pt[0][0]-orig_x], [pt[1][0]-orig_y]] for pt in shape]
+
+def normalize(shape):
+    min_x = np.min([pt[0][0] for pt in shape])
+    min_y = np.min([pt[1][0] for pt in shape])
+    return [[[pt[0][0]-min_x], [pt[1][0]-min_y]] for pt in shape]
