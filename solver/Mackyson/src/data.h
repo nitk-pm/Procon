@@ -16,6 +16,12 @@ public:
 	Position operator-(const Position &p)const {
 		return Position (this->x - p.x, this->y - p.y);
 	}
+	Position operator/(int i) {
+		return Position (this->x / i, this->y / i);
+	}
+	void operator/=(int i) {
+		*this = *this / i;
+	}
 
 	int x, y;
 
@@ -93,24 +99,25 @@ int gridEvalution (Position p, std::vector<Position> shape) {
 	return 0;
 }
 
-Position concavePoint (std::vector<Position> p) {
-	Position center (0, 0), tmp;
+int concavePointIdx (std::vector<Position> p) {
+	Position center (0, 0);
 	for (int i = 0; i < p.size (); ++i) {
 		center = center + p.at (i);
 	}
-	center.x /= p.size (); center.y /= p.size ();
+	center /= p.size ();
+	int idx;
 	double distance = INF;
 	for (int i = 0; i < p.size (); ++i) {
 		double tmpdist = cPow (center.x - p.at (i).x, 2) + cPow (center.y - p.at (i).y, 2);
 		if (tmpdist < distance) {
 			distance = tmpdist;
-			tmp = p.at (i);
+			idx=i;
 		}
-
 	}
-	return tmp;
+	return idx;
 
 }
+
 std::vector<Position> spin (std::vector<Position> vertexPositionList) { //+pi/2 (r cos(a+pi/2)=-r sin(a) (r sin(a+pi/2)=r cos(a))
 	for (int i = 0; i < vertexPositionList.size (); ++i)
 		vertexPositionList.at (i) = Position (-vertexPositionList.at (i).y, vertexPositionList.at (i).x);
@@ -125,7 +132,6 @@ std::vector<Position> turn (std::vector<Position> vertexPositionList) {
 	return vertexPositionList;
 }
 
-
 /*Pieceクラス　頂点数と各点の座標*/
 class Piece {
 	//外積による面積の算出、
@@ -134,7 +140,7 @@ class Piece {
 		for (int i = 0; i < this->vertexPositionList.size () - 1; ++i) {
 			tmp += cross (this->vertexPositionList.at (i), this->vertexPositionList.at (i + 1)) / 2;
 		}
-		return tmp;
+		return tmp > 0 ? tmp : -tmp;
 	}
 
 public:
@@ -158,12 +164,12 @@ public:
 
 		sort (posListTmp.begin (), posListTmp.end ());
 		int idx;
-		switch (edge) {
+		switch (edge)
+		{
 		case 0: {
 			for (int i = 0; i < positionList.size (); ++i)
 				if (posListTmp.front () == positionList.at (i))
 					idx = i;
-
 			break;
 		}
 		case 1: {
@@ -173,10 +179,7 @@ public:
 			break;
 		}
 		case 2: {
-			auto tmp = concavePoint (positionList);
-			for (int i = 0; i < positionList.size (); ++i)
-				if (positionList.at (i) == tmp)
-					idx = i;
+			idx = concavePointIdx(positionList);
 			break;
 		}
 		case 3: {
@@ -203,15 +206,15 @@ public:
 		for (int i = minX; i <= maxX; ++i) {
 			for (int j = minY; j <= maxY; ++j) {
 				Position tmpPos (i, j);
-				switch (gridEvalution (tmpPos, vertexPositionList)) {
-				case 2:insidePositionList.push_back (tmpPos); break;
-				case 0:break;
-				case 1:onlinePositionList.push_back (tmpPos); break;
+				switch (gridEvalution (tmpPos, vertexPositionList))
+				{
+				case 0:break;//外部
+				case 1:onlinePositionList.push_back (tmpPos); break;//辺上
+				case 2:insidePositionList.push_back (tmpPos); break;//内部
 				}
 			}
 		}
 		area = areaCalculation ();
-		area = area < 0 ? -area : area;
 		return;
 	};
 
