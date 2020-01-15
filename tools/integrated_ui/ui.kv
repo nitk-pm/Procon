@@ -1,0 +1,214 @@
+<ResultCanvas>:
+	canvas.before:
+		Color:
+			rgba: 0, 1, 0, 1
+<PieceSuggestCanvas>:
+	canvas.before:
+		Color:
+			rgba: 0, 0, 1, 1
+		Rectangle:
+			pos: self.pos
+			size: self.size
+<SolverCanvas>:
+	canvas.before:
+		Color:
+			rgba: 1, 0, 0, 1
+		Rectangle:
+			pos: self.pos
+			size: self.size
+<LoadCanvas>:
+	canvas.before:
+		Rectangle:
+			pos: self.pos
+			size: self.size
+
+<FilePopup>:
+	BoxLayout:
+		orientation: 'vertical'
+		FileChooserIconView:
+			id: chooser
+		BoxLayout:
+			size_hint_y: 0.1
+			Button:
+				text: 'open'
+				on_press: root.send_files(chooser.selection)
+			Button:
+				text: 'cancel'
+				on_press: root.cancel()
+
+<LoadPanel>:
+	id: load_panel
+	text: 'load'
+	BoxLayout:
+		BoxLayout:
+			orientation: 'vertical'
+			LoadCanvas:
+				id: load_canvas
+			BoxLayout:
+				size_hint_y: 0.1
+				Button:
+					size_hint_x: 0.3
+					id: export
+					text: 'export'
+					on_press: load_panel.export()
+				Button:
+					id: ok
+					text: 'OK'
+					disabled: True
+					on_press: load_panel.ok()
+				Button:
+					id: reject
+					text: 'reject'
+					disabled: True
+					on_press: load_panel.reject()
+		BoxLayout:
+			size_hint_x: .5
+			BoxLayout:
+				orientation: 'vertical'
+				BoxLayout:
+					size_hint_y: .1
+					ToggleButton:
+						text: 'Camera1'
+						group: 'camera'
+						allow_no_selection: False
+						on_press: root.set_camera(0)
+					ToggleButton:
+						text: 'Camera2'
+						group: 'camera'
+						state: 'down'
+						allow_no_selection: False
+						on_press: root.set_camera(1)
+				BoxLayout:
+					BoxLayout:
+						orientation: 'vertical'
+						CheckBox:
+							size_hint_y: .1
+							id: place_qr_check
+						Label:
+							text:'Place QR'
+							size_hint_y: .1
+						CodeStack:
+							id: place_qr_stack
+							size_hint_y:.8
+						Button:
+							size_hint_y: .1
+							text: 'add'
+							on_press: load_panel.add_place_from_qr()
+						Button:
+							size_hint_y: .05
+							text: 'clear'
+							disabled: True
+							on_press: place_qr_stack.clear()
+					BoxLayout:
+						orientation: 'vertical'
+						CheckBox:
+							size_hint_y: .1
+							id: shape_qr_check
+							group: 'shape_select'
+						Label:
+							text:'Shape QR'
+							size_hint_y: .1
+						CodeStack:
+							id: shape_qr_stack
+							size_hint_y:.8
+						Button:
+							size_hint_y: .1
+							text: 'add'
+							on_press: load_panel.add_shape_from_qr()
+						Button:
+							size_hint_y: .05
+							text: 'clear'
+							disabled: True
+							on_press: shape_qr_stack.clear()
+					BoxLayout:
+						orientation: 'vertical'
+						CheckBox:
+							size_hint_y: .1
+							id: shape_image_check
+							group: 'shape_select'
+						Label:
+							text:'Shape Image'
+							size_hint_y: .1
+						CodeStack:
+							id: shape_image_stack
+							size_hint_y:.8
+						Button:
+							size_hint_y: .1
+							text: 'add'
+							on_press: load_panel.open_image_select_popup()
+						Button:
+							size_hint_y: .05
+							text: 'clear'
+							disabled: True
+							on_press: shape_image_stack.clear()
+<ResultPanel>:
+	text: 'result'
+	BoxLayout:	
+		orientation: 'vertical'	
+		BoxLayout:
+			size_hint_y: .1
+			Button:
+				text: 'reload'
+				size_hint_x: .3
+				on_press: root.reload()
+			ToggleButton:
+				text: 'Camera1'
+				group: 'camera'
+				allow_no_selection: False
+				on_press: root.set_camera(0)
+			ToggleButton:
+				text: 'Camera2'
+				group: 'camera'
+				state: 'down'
+				allow_no_selection: False
+				on_press: root.set_camera(1)
+		BoxLayout:
+			ResultCanvas:
+				id: canvas
+			PieceSuggestCanvas:
+		BoxLayout:
+			size_hint_y: .1
+			Button:
+				size_hint_y: 1
+				id: previous_button
+				text: '<'
+				disabled: True
+				font_size: 20
+				on_press: canvas.previous()
+			Button:
+				size_hint_y: 1
+				id: next_button
+				text: '>'
+				disabled: True
+				font_size: 20
+				on_press: canvas.next()
+
+<Base>:
+	do_default_tab: False
+	ResultPanel:	
+	TabbedPanelItem:
+		text: 'solver'
+		BoxLayout:
+			SolverCanvas:
+			BoxLayout:
+				size_hint_x: .2
+				orientation: 'vertical'
+				Label:
+					id: shape_available
+					text: "shape: no"
+					size_hint_y: 0.1
+				Label:
+					id: place_available
+					text: "place: no"
+					size_hint_y: 0.1
+				Button:
+					id: done
+					text: 'done!'
+					font_size: 15
+					disabled: True
+				Button:
+					id: finish
+					text: 'finish'
+					font_size: 15
+					disabled: True
+	LoadPanel:
