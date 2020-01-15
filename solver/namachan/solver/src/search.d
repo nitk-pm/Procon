@@ -1,6 +1,6 @@
 module procon28.search;
 
-import procon28.data : P, BitField, Situation, PlacedShape, Pos;
+import procon28.data : P, BitField, Situation, PlacedShape, Pos, Shapes;
 import procon28.geometry: merge, move, zoom;
 import procon28.eval;
 import procon28.accumurator : acc;
@@ -63,9 +63,9 @@ pure string show_duration (in TickDuration dur) {
 
 @trusted
 const(Situation) beam_search (alias Accumurator, alias Pruning_Level, Param...)
-	(in P[][][] small_pieces, in P[][] small_frames, in int beam_width, in int target_time, in bool parallel) {
-	auto pieces = small_pieces.map!(piece => piece.map!(shape => shape.zoom(2)).array).array;
-	auto frames = small_frames.map!(shape => shape.zoom(2)).array;
+	(in Shapes shapes, in int beam_width, in int target_time, in bool parallel) {
+	auto pieces = shapes.pieces.map!(piece => piece.map!(shape => shape.zoom(2)).array).array;
+	auto frames = shapes.frames.map!(shape => shape.zoom(2)).array;
 	import std.datetime : StopWatch;
 	import std.stdio : writefln;
 	BitField!128 mask_base;

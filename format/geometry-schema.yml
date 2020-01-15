@@ -1,9 +1,26 @@
 $schema: "http://json-schema.org/draft-4/schema#"
-title: "piece"
+title: "geom"
 type: "object"
 required:
-  - pieces
+  - piece
+  - frame
 properties:
+  frame:
+    type: array
+    minItems: 1
+    items:
+      type: array
+      minItems: 3
+      items:
+        type: object
+        required:
+          - x
+          - y
+        properties:
+          x:
+            type: integer
+          y:
+            type: integer
   pieces:
     type: array
     minItems: 1
